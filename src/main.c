@@ -46,10 +46,12 @@ void RenderData(File *file) {
   size_t lineStart = 0;
   size_t lineSize = 0;
   for (size_t i = 0; i < file->len; i++, lineSize++) {
-    if (file->data[i] == '\n' || lineSize >= LINE_BREAK_SIZE) {
+    if (file->data[i] == '\n' || file->data[i] == '\r' || lineSize >= LINE_BREAK_SIZE) {
       text.renderData[numrows] = malloc(lineSize + 1);
       for (size_t k = 0; lineStart + k < i; k++) {
         char c = file->data[lineStart + k];
+        if (c == '\r') i++; // jump to next line when \r\n
+
         if (c == '\n' || c == '\r') c = '\0';
         if (c == '\t') c = ' ';
         text.renderData[numrows][k] = c;
@@ -88,6 +90,12 @@ void InitEditor(void) {
   // DATA INIT
   File file = FileRead("notes.txt");
   RenderData(&file);
+
+  printf("LINE: %s\n", text.renderData[5]);
+  printf("LINE: %s\n", text.renderData[6]);
+  printf("LINE: %s\n", text.renderData[7]);
+  printf("LINE: %s\n", text.renderData[8]);
+  printf("LINE: %s\n", text.renderData[9]);
 
   // WINDOW INIT
   window.width = 1920;
@@ -137,8 +145,8 @@ int main(void) {
     BeginDrawing();
 
     ClearBackground(RAYWHITE);
+    // FIX IT: BREAKING AFTER REACH END OF FILE 
     for (size_t i = 0; i < MAX_LINES && i + text.rowoff <= text.numrows; i++) {
-      /* printf("DRAW LINE I: %zu, ROWOFF: %u\n", i, text.rowoff); */
       DrawTextEx(text.font.font,
                  text.renderData[i + text.rowoff],
                  (Vector2){text.renderPos.x, text.font.lineSpacing * i + 10},
