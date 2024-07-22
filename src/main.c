@@ -6,87 +6,116 @@
 #include <vcruntime_string.h>
 #include "fs.h"
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define LINE_BREAK_SIZE 80
 
-typedef struct text {
-  char* renderData;
-} Text;
+typedef struct editorFont {
+  Font font;
+  unsigned short size;
+  unsigned short lineSpacing;
+} EditorFont;
 
-static Text text = {};
+typedef struct window {
+  int width;
+  int height;
+} Window;
+
+typedef struct editorConfig {
+  int cx, cy;
+  int rowoff;
+  int screenrows;
+  int screencols;
+  unsigned int numrows;
+  EditorFont font;
+  char* renderData;
+} EditorConfig;
+
+static EditorConfig text = {0};
+static Window window = {0};
 
 void RenderData(File *file) {
   size_t renderDataSize = file->len + file->len/LINE_BREAK_SIZE + 1;
   text.renderData = malloc(renderDataSize);
 
   size_t counter = 0;
+  unsigned int numrows = 0;
   for (size_t i = 0, j = 0; i < file->len; i++, j++) {
     counter++;
     if (counter <= LINE_BREAK_SIZE) {
-      if (file->data[i] == '\n')
+      if (file->data[i] == '\n') {
         counter = 0;
+        numrows++;
+      }
 
       text.renderData[j] = file->data[i];
     } else {
       counter = 0;
-      j++;
+      j++; numrows++;
       text.renderData[j] = '\n';
     }
   }
+  text.numrows = numrows;
 }
 
-int main(void) {
+void LoadCustomFont(void) {
+  printf("FONT SIZE %d\n", text.font.size);
+  Font customFont = LoadFontEx("resources/cmunsl.ttf", text.font.size, NULL, 250); 
+  text.font.lineSpacing = text.font.size * 1.15;
+  SetTextLineSpacing(text.font.lineSpacing);
+  GenTextureMipmaps(&customFont.texture); 
+  SetTextureFilter(customFont.texture, TEXTURE_FILTER_BILINEAR);
+  text.font.font = customFont;
+}
+
+void InitEditor(void) {
+  // DATA INIT
   File file = FileRead("notes.txt");
   RenderData(&file);
 
-  int screenWidth = 768;
-  int screenHeight = 432;
+  // WINDOW INIT
+  window.width = 1920;
+  window.height = 1080;
 
-  InitWindow(screenWidth, screenHeight, "Olive");
+  InitWindow(window.width, window.height, "Olive");
   SetWindowState(FLAG_WINDOW_RESIZABLE);
-  RenderTexture2D target = LoadRenderTexture(screenWidth, screenHeight);
-  Font customFont = LoadFont("resources/cmunsl.ttf"); 
-  GenTextureMipmaps(&customFont.texture); 
-  SetTextureFilter(customFont.texture, TEXTURE_FILTER_BILINEAR);
-  int baseFontSize = customFont.baseSize;
 
   SetTargetFPS(60);
+
+  // FONT INIT
+  text.font.size = 35;
+  LoadCustomFont();
+}
+
+int main(void) {
+  InitEditor();
 
   while (!WindowShouldClose()) {
 
     // RELOAD FONT IF SCREEN SIZE CHANGES
-    if (GetScreenWidth() != screenWidth || GetScreenHeight() != screenHeight) {
-      float scale = MIN((float)GetScreenWidth()/screenWidth, (float)GetScreenHeight()/screenHeight);
-      baseFontSize *= scale;
+    if (GetScreenWidth() != window.width || GetScreenHeight() != window.height) {
+      float scale = (float)GetScreenWidth() / window.width;
+      text.font.size *= scale;
 
-      // Unload previous font
-      UnloadFont(customFont);
+      UnloadFont(text.font.font);
+      LoadCustomFont();
 
-      // Load new font with updated size
-      customFont = LoadFontEx("resources/cmunsl.ttf", baseFontSize, NULL, 250);
-      GenTextureMipmaps(&customFont.texture); 
-      SetTextureFilter(customFont.texture, TEXTURE_FILTER_BILINEAR);
-
-      // Update previous window size
-      screenWidth = GetScreenWidth();
-      screenHeight = GetScreenHeight();
+      window.width = GetScreenWidth();
+      window.height = GetScreenHeight();
     }
 
-    float lineSpacing = customFont.baseSize * 1.5f;
 
-
-
+    // === BEGIN DRAWING ===
     BeginDrawing();
+
     ClearBackground(RAYWHITE);
-    DrawTextEx(customFont, text.renderData, (Vector2){ 10, 10 }, baseFontSize, 0, DARKGRAY);
+    DrawTextEx(text.font.font, text.renderData, (Vector2){ 10, 10 }, text.font.size, 0, DARKGRAY);
 
     EndDrawing();
+    // === END DRAWING ===
   }
 
-  // De-Initialization
-  //--------------------------------------------------------------------------------------
+  // == BEGIN De-Initialization ===
   CloseWindow();        // Close window and OpenGL context
-  //--------------------------------------------------------------------------------------
+  // === END DE-INITIALIZATION ===
 
   return 0;
 }
