@@ -6,7 +6,8 @@
 #include <vcruntime_string.h>
 #include "fs.h"
 
-#define LINE_BREAK_SIZE 80
+#define LINE_BREAK_SIZE 66
+#define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 typedef struct editorFont {
   Font font;
@@ -24,6 +25,7 @@ typedef struct editorConfig {
   int rowoff;
   int screenrows;
   int screencols;
+  Vector2 renderPos;
   unsigned int numrows;
   EditorFont font;
   char* renderData;
@@ -64,6 +66,14 @@ void LoadCustomFont(void) {
   GenTextureMipmaps(&customFont.texture); 
   SetTextureFilter(customFont.texture, TEXTURE_FILTER_BILINEAR);
   text.font.font = customFont;
+
+  Vector2 lineSize = 
+    MeasureTextEx(customFont,
+                  DUMMY_LINE,
+                  text.font.size,
+                  0);
+  text.renderPos.x = (window.width - lineSize.x) / 2;
+  text.renderPos.y = 10;
 }
 
 void InitEditor(void) {
@@ -93,21 +103,20 @@ int main(void) {
     // RELOAD FONT IF SCREEN SIZE CHANGES
     if (GetScreenWidth() != window.width || GetScreenHeight() != window.height) {
       float scale = (float)GetScreenWidth() / window.width;
-      text.font.size *= scale;
-
-      UnloadFont(text.font.font);
-      LoadCustomFont();
-
       window.width = GetScreenWidth();
       window.height = GetScreenHeight();
-    }
 
+      UnloadFont(text.font.font);
+
+      text.font.size *= scale;
+      LoadCustomFont();
+    }
 
     // === BEGIN DRAWING ===
     BeginDrawing();
 
     ClearBackground(RAYWHITE);
-    DrawTextEx(text.font.font, text.renderData, (Vector2){ 10, 10 }, text.font.size, 0, DARKGRAY);
+    DrawTextEx(text.font.font, text.renderData, text.renderPos, text.font.size, 0, DARKGRAY);
 
     EndDrawing();
     // === END DRAWING ===
