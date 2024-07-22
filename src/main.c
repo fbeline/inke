@@ -6,6 +6,7 @@
 #include <vcruntime_string.h>
 #include "fs.h"
 
+#define MAX_LINES 25
 #define LINE_BREAK_SIZE 66
 #define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
@@ -28,7 +29,7 @@ typedef struct editorConfig {
   Vector2 renderPos;
   unsigned int numrows;
   EditorFont font;
-  char* renderData;
+  char** renderData;
 } EditorConfig;
 
 static EditorConfig text = {0};
@@ -36,23 +37,29 @@ static Window window = {0};
 
 void RenderData(File *file) {
   size_t renderDataSize = file->len + file->len/LINE_BREAK_SIZE + 1;
-  text.renderData = malloc(renderDataSize);
+  text.renderData = malloc(250);
 
-  size_t counter = 0;
   unsigned int numrows = 0;
+  size_t lineStart = 0;
   for (size_t i = 0, j = 0; i < file->len; i++, j++) {
-    counter++;
-    if (counter <= LINE_BREAK_SIZE) {
+    if (file->data[i] == '\n' || j  >= LINE_BREAK_SIZE) {
+      size_t lineSize = i - lineStart + 1; // ADD ONE FOR \0
+
       if (file->data[i] == '\n') {
-        counter = 0;
-        numrows++;
+        lineSize -= 2; // DO NOT RENDER \n
       }
 
-      text.renderData[j] = file->data[i];
-    } else {
-      counter = 0;
-      j++; numrows++;
-      text.renderData[j] = '\n';
+      text.renderData[numrows] = malloc(lineSize + 1);
+      memcpy(text.renderData[numrows], (file->data + lineStart), lineSize);
+
+      if (file->data[i] != '\n') {
+        text.renderData[numrows][lineSize-1] = '-';
+      }
+
+      text.renderData[numrows][lineSize] = '\0';
+
+      j = 0; numrows++;
+      lineStart = i + 1;
     }
   }
   text.numrows = numrows;
@@ -116,7 +123,14 @@ int main(void) {
     BeginDrawing();
 
     ClearBackground(RAYWHITE);
-    DrawTextEx(text.font.font, text.renderData, text.renderPos, text.font.size, 0, DARKGRAY);
+    for (size_t i = 0; i < MAX_LINES && i < text.numrows; i++) {
+      DrawTextEx(text.font.font,
+                 text.renderData[i],
+                 (Vector2){text.renderPos.x, text.font.lineSpacing * i + 10},
+                 text.font.size,
+                 0,
+                 DARKGRAY);
+    }
 
     EndDrawing();
     // === END DRAWING ===
