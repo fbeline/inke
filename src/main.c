@@ -6,6 +6,9 @@
 #include <vcruntime_string.h>
 #include "fs.h"
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 #define MAX_LINES 25
 #define LINE_BREAK_SIZE 66
 #define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -37,29 +40,27 @@ static Window window = {0};
 
 void RenderData(File *file) {
   size_t renderDataSize = file->len + file->len/LINE_BREAK_SIZE + 1;
-  text.renderData = malloc(250);
+  text.renderData = malloc(renderDataSize);
 
   unsigned int numrows = 0;
   size_t lineStart = 0;
-  for (size_t i = 0, j = 0; i < file->len; i++, j++) {
-    if (file->data[i] == '\n' || j  >= LINE_BREAK_SIZE) {
-      size_t lineSize = i - lineStart + 1; // ADD ONE FOR \0
-
-      if (file->data[i] == '\n') {
-        lineSize -= 2; // DO NOT RENDER \n
-      }
-
+  size_t lineSize = 0;
+  for (size_t i = 0; i < file->len; i++, lineSize++) {
+    if (file->data[i] == '\n' || lineSize >= LINE_BREAK_SIZE) {
       text.renderData[numrows] = malloc(lineSize + 1);
-      memcpy(text.renderData[numrows], (file->data + lineStart), lineSize);
-
-      if (file->data[i] != '\n') {
-        text.renderData[numrows][lineSize-1] = '-';
+      for (size_t k = 0; lineStart + k < i; k++) {
+        char c = file->data[lineStart + k];
+        if (c == '\n' || c == '\r') c = '\0';
+        if (c == '\t') c = ' ';
+        text.renderData[numrows][k] = c;
+        if (numrows == 6)
+          printf("LINE SIZE: %zu, K: %zu\n", lineSize, k);
       }
-
       text.renderData[numrows][lineSize] = '\0';
 
-      j = 0; numrows++;
-      lineStart = i + 1;
+      numrows++;
+      lineStart = i;
+      lineSize = 0;
     }
   }
   text.numrows = numrows;
@@ -100,12 +101,25 @@ void InitEditor(void) {
   // FONT INIT
   text.font.size = 35;
   LoadCustomFont();
+
+  /* printf(">> %s\n", text.renderData[33]); */
+}
+
+void MouseWheelHandler(void) {
+  float mouseWheelMove = GetMouseWheelMove();
+  if (mouseWheelMove > 0) {
+    text.rowoff = MAX(text.rowoff - 1, 0);
+  }
+  else if (mouseWheelMove < 0) {
+    text.rowoff = MIN(text.rowoff + 1, text.numrows - 1);  // Mouse wheel down
+  }
 }
 
 int main(void) {
   InitEditor();
 
   while (!WindowShouldClose()) {
+    MouseWheelHandler();
 
     // RELOAD FONT IF SCREEN SIZE CHANGES
     if (GetScreenWidth() != window.width || GetScreenHeight() != window.height) {
@@ -123,9 +137,10 @@ int main(void) {
     BeginDrawing();
 
     ClearBackground(RAYWHITE);
-    for (size_t i = 0; i < MAX_LINES && i < text.numrows; i++) {
+    for (size_t i = 0; i < MAX_LINES && i + text.rowoff <= text.numrows; i++) {
+      /* printf("DRAW LINE I: %zu, ROWOFF: %u\n", i, text.rowoff); */
       DrawTextEx(text.font.font,
-                 text.renderData[i],
+                 text.renderData[i + text.rowoff],
                  (Vector2){text.renderPos.x, text.font.lineSpacing * i + 10},
                  text.font.size,
                  0,
