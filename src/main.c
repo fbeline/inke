@@ -50,7 +50,7 @@ void RenderData(File *file) {
       text.renderData[numrows] = malloc(lineSize + 1);
       for (size_t k = 0; lineStart + k < i; k++) {
         char c = file->data[lineStart + k];
-        if (c == '\r') i++; // jump to next line when \r\n
+        if (c == '\r' && file->data[lineStart + k + 1] == '\n') i++; // jump to next line when \r\n
 
         if (c == '\n' || c == '\r') c = '\0';
         if (c == '\t') c = ' ';
