@@ -29,8 +29,8 @@ typedef struct config {
   int screenrows;
   int screencols;
   Vector2 renderPos;
-  unsigned int numrows;
   EditorFont font;
+  unsigned int rowslen;
   char** rows;
   Window window;
 } Config;
@@ -44,37 +44,41 @@ char Next(File* file, size_t i) {
   return file->data[i + 1];
 }
 
-void RenderData(File *file) {
+void CpyRow(File* file, char* row, size_t offset, size_t eol) {
+  for (size_t k = 0, i = offset; i <= eol && i < file->len; k++) {
+    i = offset + k;
+    char c = file->data[i];
+    if (c == '\n' || c == '\r') c = '\0';
+    if (c == '\t') c = ' ';
+    row[k] = c;
+  }
+  row[eol - offset] = '\0';
+}
+
+void BuildRows(File *file) {
   size_t rlen = 10;
   C.rows = (char**)malloc(rlen * sizeof(char*));
 
-  unsigned int numrows = 0;
+  unsigned int currentRow = 0;
   size_t lineStart = 0;
-  size_t lineSize = 0;
-  for (size_t i = 0; i < file->len; i++, lineSize++) {
-    if (file->data[i] == '\n' || file->data[i] == '\r' || lineSize >= LINE_BREAK_SIZE) {
-      C.rows[numrows] = (char*)malloc(lineSize + 1);
-      for (size_t k = 0; lineStart + k < i; k++) {
-        size_t fileIdx = lineStart + k;
-        char c = file->data[fileIdx];
-        if (c == '\r' && Next(file, fileIdx) == '\n') i++; // jump to next line when \r\n
-        if (c == '\n' || c == '\r') c = '\0';
-        if (c == '\t') c = ' ';
-        C.rows[numrows][k] = c;
-      }
-      C.rows[numrows][lineSize] = '\0';
+  for (size_t i = 0; i < file->len; i++) {
 
-      numrows++;
-      lineStart = i;
-      lineSize = 0;
-      if (numrows >= rlen) {
+    if (file->data[i] == '\n' || file->data[i] == '\r' || i - lineStart >= LINE_BREAK_SIZE) {
+      if (file->data[i] == '\r' && Next(file, i) == '\n') i++;
+      C.rows[currentRow] = (char*)malloc(i - lineStart + 1);
+      CpyRow(file, C.rows[currentRow], lineStart, i);
+
+      currentRow++;
+      lineStart = i + 1;
+      if (currentRow >= rlen) {
         rlen *= 2;
         char **tmp = realloc(C.rows, rlen * sizeof(char*));
         C.rows = tmp;
       }
     }
   }
-  C.numrows = numrows;
+
+  C.rowslen = currentRow;
 }
 
 void LoadCustomFont(void) {
@@ -98,7 +102,7 @@ void LoadCustomFont(void) {
 void Init(void) {
   // DATA INIT
   File file = FileRead("notes.txt");
-  RenderData(&file);
+  BuildRows(&file);
 
   // WINDOW INIT
   C.window = (Window){1280, 720};
@@ -118,7 +122,7 @@ void MouseWheelHandler(void) {
     C.rowoff = MAX(C.rowoff - 1, 0);
   }
   else if (mouseWheelMove < 0) {
-    C.rowoff = MIN(C.rowoff + 1, C.numrows - 1);  // Mouse wheel down
+    C.rowoff = MIN(C.rowoff + 1, C.rowslen - 1);  // Mouse wheel down
   }
 }
 
@@ -144,7 +148,7 @@ int main(void) {
 
     ClearBackground(RAYWHITE);
 
-    for (size_t i = 0; i < MAX_LINES && i + C.rowoff < C.numrows; i++) {
+    for (size_t i = 0; i < MAX_LINES && i + C.rowoff < C.rowslen; i++) {
       DrawTextEx(C.font.font,
                  C.rows[i + C.rowoff],
                  (Vector2){C.renderPos.x, C.font.lineSpacing * i + 10},
