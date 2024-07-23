@@ -31,7 +31,7 @@ typedef struct config {
   Vector2 renderPos;
   unsigned int numrows;
   EditorFont font;
-  char** buffer;
+  char** rows;
   Window window;
 } Config;
 
@@ -45,32 +45,32 @@ char Next(File* file, size_t i) {
 }
 
 void RenderData(File *file) {
-  size_t lsize = 10;
-  C.buffer = (char**)malloc(lsize * sizeof(char*));
+  size_t rlen = 10;
+  C.rows = (char**)malloc(rlen * sizeof(char*));
 
   unsigned int numrows = 0;
   size_t lineStart = 0;
   size_t lineSize = 0;
   for (size_t i = 0; i < file->len; i++, lineSize++) {
     if (file->data[i] == '\n' || file->data[i] == '\r' || lineSize >= LINE_BREAK_SIZE) {
-      C.buffer[numrows] = (char*)malloc(lineSize + 1);
+      C.rows[numrows] = (char*)malloc(lineSize + 1);
       for (size_t k = 0; lineStart + k < i; k++) {
         size_t fileIdx = lineStart + k;
         char c = file->data[fileIdx];
         if (c == '\r' && Next(file, fileIdx) == '\n') i++; // jump to next line when \r\n
         if (c == '\n' || c == '\r') c = '\0';
         if (c == '\t') c = ' ';
-        C.buffer[numrows][k] = c;
+        C.rows[numrows][k] = c;
       }
-      C.buffer[numrows][lineSize] = '\0';
+      C.rows[numrows][lineSize] = '\0';
 
       numrows++;
       lineStart = i;
       lineSize = 0;
-      if (numrows >= lsize) {
-        lsize *= 2;
-        char **tmp = realloc(C.buffer, lsize * sizeof(char*));
-        C.buffer = tmp;
+      if (numrows >= rlen) {
+        rlen *= 2;
+        char **tmp = realloc(C.rows, rlen * sizeof(char*));
+        C.rows = tmp;
       }
     }
   }
@@ -146,7 +146,7 @@ int main(void) {
 
     for (size_t i = 0; i < MAX_LINES && i + C.rowoff < C.numrows; i++) {
       DrawTextEx(C.font.font,
-                 C.buffer[i + C.rowoff],
+                 C.rows[i + C.rowoff],
                  (Vector2){C.renderPos.x, C.font.lineSpacing * i + 10},
                  C.font.size,
                  0,
