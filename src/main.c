@@ -31,40 +31,46 @@ typedef struct config {
   Vector2 renderPos;
   unsigned int numrows;
   EditorFont font;
-  char** renderData;
+  char** buffer;
   Window window;
 } Config;
 
 static Config C = {0};
 
+char Next(File* file, size_t i) {
+  if (i + 1 >= file->len)
+    return '\0';
+
+  return file->data[i + 1];
+}
+
 void RenderData(File *file) {
   size_t lsize = 10;
-  C.renderData = (char**)malloc(lsize * sizeof(char*));
+  C.buffer = (char**)malloc(lsize * sizeof(char*));
 
   unsigned int numrows = 0;
   size_t lineStart = 0;
   size_t lineSize = 0;
   for (size_t i = 0; i < file->len; i++, lineSize++) {
     if (file->data[i] == '\n' || file->data[i] == '\r' || lineSize >= LINE_BREAK_SIZE) {
-      C.renderData[numrows] = (char*)malloc(lineSize + 1);
+      C.buffer[numrows] = (char*)malloc(lineSize + 1);
       for (size_t k = 0; lineStart + k < i; k++) {
         size_t fileIdx = lineStart + k;
         char c = file->data[fileIdx];
-        if (c == '\r' && fileIdx + 1 < file->len && file->data[fileIdx + 1] == '\n') i++; // jump to next line when \r\n
-
+        if (c == '\r' && Next(file, fileIdx) == '\n') i++; // jump to next line when \r\n
         if (c == '\n' || c == '\r') c = '\0';
         if (c == '\t') c = ' ';
-        C.renderData[numrows][k] = c;
+        C.buffer[numrows][k] = c;
       }
-      C.renderData[numrows][lineSize] = '\0';
+      C.buffer[numrows][lineSize] = '\0';
 
       numrows++;
       lineStart = i;
       lineSize = 0;
       if (numrows >= lsize) {
         lsize *= 2;
-        char **tmp = realloc(C.renderData, lsize * sizeof(char*));
-        C.renderData = tmp;
+        char **tmp = realloc(C.buffer, lsize * sizeof(char*));
+        C.buffer = tmp;
       }
     }
   }
@@ -140,7 +146,7 @@ int main(void) {
 
     for (size_t i = 0; i < MAX_LINES && i + C.rowoff < C.numrows; i++) {
       DrawTextEx(C.font.font,
-                 C.renderData[i + C.rowoff],
+                 C.buffer[i + C.rowoff],
                  (Vector2){C.renderPos.x, C.font.lineSpacing * i + 10},
                  C.font.size,
                  0,
