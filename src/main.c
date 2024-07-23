@@ -39,30 +39,34 @@ static EditorConfig text = {0};
 static Window window = {0};
 
 void RenderData(File *file) {
-  size_t renderDataSize = file->len + file->len/LINE_BREAK_SIZE + 1;
-  text.renderData = malloc(renderDataSize);
+  size_t lsize = 10;
+  text.renderData = (char**)malloc(lsize * sizeof(char*));
 
   unsigned int numrows = 0;
   size_t lineStart = 0;
   size_t lineSize = 0;
   for (size_t i = 0; i < file->len; i++, lineSize++) {
     if (file->data[i] == '\n' || file->data[i] == '\r' || lineSize >= LINE_BREAK_SIZE) {
-      text.renderData[numrows] = malloc(lineSize + 1);
+      text.renderData[numrows] = (char*)malloc(lineSize + 1);
       for (size_t k = 0; lineStart + k < i; k++) {
-        char c = file->data[lineStart + k];
-        if (c == '\r' && file->data[lineStart + k + 1] == '\n') i++; // jump to next line when \r\n
+        size_t fileIdx = lineStart + k;
+        char c = file->data[fileIdx];
+        if (c == '\r' && fileIdx + 1 < file->len && file->data[fileIdx + 1] == '\n') i++; // jump to next line when \r\n
 
         if (c == '\n' || c == '\r') c = '\0';
         if (c == '\t') c = ' ';
         text.renderData[numrows][k] = c;
-        if (numrows == 6)
-          printf("LINE SIZE: %zu, K: %zu\n", lineSize, k);
       }
       text.renderData[numrows][lineSize] = '\0';
 
       numrows++;
       lineStart = i;
       lineSize = 0;
+      if (numrows >= lsize) {
+        lsize *= 2;
+        char **tmp = realloc(text.renderData, lsize * sizeof(char*));
+        text.renderData = tmp;
+      }
     }
   }
   text.numrows = numrows;
@@ -90,12 +94,6 @@ void InitEditor(void) {
   // DATA INIT
   File file = FileRead("notes.txt");
   RenderData(&file);
-
-  printf("LINE: %s\n", text.renderData[5]);
-  printf("LINE: %s\n", text.renderData[6]);
-  printf("LINE: %s\n", text.renderData[7]);
-  printf("LINE: %s\n", text.renderData[8]);
-  printf("LINE: %s\n", text.renderData[9]);
 
   // WINDOW INIT
   window.width = 1920;
@@ -146,7 +144,7 @@ int main(void) {
 
     ClearBackground(RAYWHITE);
     // FIX IT: BREAKING AFTER REACH END OF FILE 
-    for (size_t i = 0; i < MAX_LINES && i + text.rowoff <= text.numrows; i++) {
+    for (size_t i = 0; i < MAX_LINES && i + text.rowoff < text.numrows; i++) {
       DrawTextEx(text.font.font,
                  text.renderData[i + text.rowoff],
                  (Vector2){text.renderPos.x, text.font.lineSpacing * i + 10},
