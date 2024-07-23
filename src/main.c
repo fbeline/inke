@@ -1,5 +1,4 @@
 #include <raylib.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,8 +9,8 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 #define MAX_LINES 25
-#define LINE_BREAK_SIZE 66
-#define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+#define LINE_BREAK_SIZE 75
+#define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 typedef struct editorFont {
   Font font;
@@ -24,7 +23,7 @@ typedef struct window {
   int height;
 } Window;
 
-typedef struct editorConfig {
+typedef struct config {
   int cx, cy;
   int rowoff;
   int screenrows;
@@ -33,21 +32,21 @@ typedef struct editorConfig {
   unsigned int numrows;
   EditorFont font;
   char** renderData;
-} EditorConfig;
+  Window window;
+} Config;
 
-static EditorConfig text = {0};
-static Window window = {0};
+static Config C = {0};
 
 void RenderData(File *file) {
   size_t lsize = 10;
-  text.renderData = (char**)malloc(lsize * sizeof(char*));
+  C.renderData = (char**)malloc(lsize * sizeof(char*));
 
   unsigned int numrows = 0;
   size_t lineStart = 0;
   size_t lineSize = 0;
   for (size_t i = 0; i < file->len; i++, lineSize++) {
     if (file->data[i] == '\n' || file->data[i] == '\r' || lineSize >= LINE_BREAK_SIZE) {
-      text.renderData[numrows] = (char*)malloc(lineSize + 1);
+      C.renderData[numrows] = (char*)malloc(lineSize + 1);
       for (size_t k = 0; lineStart + k < i; k++) {
         size_t fileIdx = lineStart + k;
         char c = file->data[fileIdx];
@@ -55,87 +54,82 @@ void RenderData(File *file) {
 
         if (c == '\n' || c == '\r') c = '\0';
         if (c == '\t') c = ' ';
-        text.renderData[numrows][k] = c;
+        C.renderData[numrows][k] = c;
       }
-      text.renderData[numrows][lineSize] = '\0';
+      C.renderData[numrows][lineSize] = '\0';
 
       numrows++;
       lineStart = i;
       lineSize = 0;
       if (numrows >= lsize) {
         lsize *= 2;
-        char **tmp = realloc(text.renderData, lsize * sizeof(char*));
-        text.renderData = tmp;
+        char **tmp = realloc(C.renderData, lsize * sizeof(char*));
+        C.renderData = tmp;
       }
     }
   }
-  text.numrows = numrows;
+  C.numrows = numrows;
 }
 
 void LoadCustomFont(void) {
-  printf("FONT SIZE %d\n", text.font.size);
-  Font customFont = LoadFontEx("resources/cmunsl.ttf", text.font.size, NULL, 250); 
-  text.font.lineSpacing = text.font.size * 1.15;
-  SetTextLineSpacing(text.font.lineSpacing);
+  printf("FONT SIZE %d\n", C.font.size);
+  Font customFont = LoadFontEx("resources/cmunsl.ttf", C.font.size, NULL, 250); 
+  C.font.lineSpacing = C.font.size * 1.15;
+  SetTextLineSpacing(C.font.lineSpacing);
   GenTextureMipmaps(&customFont.texture); 
   SetTextureFilter(customFont.texture, TEXTURE_FILTER_BILINEAR);
-  text.font.font = customFont;
+  C.font.font = customFont;
 
   Vector2 lineSize = 
     MeasureTextEx(customFont,
                   DUMMY_LINE,
-                  text.font.size,
+                  C.font.size,
                   0);
-  text.renderPos.x = (window.width - lineSize.x) / 2;
-  text.renderPos.y = 10;
+  C.renderPos.x = (C.window.width - lineSize.x) / 2;
+  C.renderPos.y = 10;
 }
 
-void InitEditor(void) {
+void Init(void) {
   // DATA INIT
   File file = FileRead("notes.txt");
   RenderData(&file);
 
   // WINDOW INIT
-  window.width = 1920;
-  window.height = 1080;
-
-  InitWindow(window.width, window.height, "Olive");
+  C.window = (Window){1280, 720};
+  InitWindow(C.window.width, C.window.height, "Olive");
   SetWindowState(FLAG_WINDOW_RESIZABLE);
 
   SetTargetFPS(60);
 
   // FONT INIT
-  text.font.size = 35;
+  C.font.size = 30;
   LoadCustomFont();
-
-  /* printf(">> %s\n", text.renderData[33]); */
 }
 
 void MouseWheelHandler(void) {
   float mouseWheelMove = GetMouseWheelMove();
   if (mouseWheelMove > 0) {
-    text.rowoff = MAX(text.rowoff - 1, 0);
+    C.rowoff = MAX(C.rowoff - 1, 0);
   }
   else if (mouseWheelMove < 0) {
-    text.rowoff = MIN(text.rowoff + 1, text.numrows - 1);  // Mouse wheel down
+    C.rowoff = MIN(C.rowoff + 1, C.numrows - 1);  // Mouse wheel down
   }
 }
 
 int main(void) {
-  InitEditor();
+  Init();
 
   while (!WindowShouldClose()) {
     MouseWheelHandler();
 
     // RELOAD FONT IF SCREEN SIZE CHANGES
-    if (GetScreenWidth() != window.width || GetScreenHeight() != window.height) {
-      float scale = (float)GetScreenWidth() / window.width;
-      window.width = GetScreenWidth();
-      window.height = GetScreenHeight();
+    if (GetScreenWidth() != C.window.width || GetScreenHeight() != C.window.height) {
+      float scale = (float)GetScreenWidth() / C.window.width;
+      C.window = (Window) { GetScreenWidth(), GetScreenHeight() };
 
-      UnloadFont(text.font.font);
+      UnloadFont(C.font.font);
 
-      text.font.size *= scale;
+      C.font.size *= scale;
       LoadCustomFont();
     }
 
@@ -143,12 +137,12 @@ int main(void) {
     BeginDrawing();
 
     ClearBackground(RAYWHITE);
-    // FIX IT: BREAKING AFTER REACH END OF FILE 
-    for (size_t i = 0; i < MAX_LINES && i + text.rowoff < text.numrows; i++) {
-      DrawTextEx(text.font.font,
-                 text.renderData[i + text.rowoff],
-                 (Vector2){text.renderPos.x, text.font.lineSpacing * i + 10},
-                 text.font.size,
+
+    for (size_t i = 0; i < MAX_LINES && i + C.rowoff < C.numrows; i++) {
+      DrawTextEx(C.font.font,
+                 C.renderData[i + C.rowoff],
+                 (Vector2){C.renderPos.x, C.font.lineSpacing * i + 10},
+                 C.font.size,
                  0,
                  DARKGRAY);
     }
