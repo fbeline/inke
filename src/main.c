@@ -55,6 +55,10 @@ void CpyRow(File* file, char* row, size_t offset, size_t eol) {
   row[eol - offset] = '\0';
 }
 
+bool IsCharBetween(char c, int a, int b) {
+  return c >= a && c <=b;
+}
+
 void BuildRows(File *file) {
   size_t rlen = 10;
   C.rows = (char**)malloc(rlen * sizeof(char*));
@@ -63,7 +67,14 @@ void BuildRows(File *file) {
   size_t lineStart = 0;
   for (size_t i = 0; i < file->len; i++) {
 
-    if (file->data[i] == '\n' || file->data[i] == '\r' || i - lineStart >= LINE_BREAK_SIZE) {
+    size_t j = i;
+    while (j - lineStart >= LINE_BREAK_SIZE &&
+      IsCharBetween(file->data[i], 33, 125) &&
+      IsCharBetween(Next(file, i), 33, 125)) {
+      i--;
+    }
+
+    if (file->data[i] == '\n' || file->data[i] == '\r' || j - lineStart >= LINE_BREAK_SIZE) {
       if (file->data[i] == '\r' && Next(file, i) == '\n') i++;
       C.rows[currentRow] = (char*)malloc(i - lineStart + 1);
       CpyRow(file, C.rows[currentRow], lineStart, i);
