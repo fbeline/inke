@@ -137,6 +137,10 @@ void MouseWheelHandler(void) {
   }
 }
 
+void DrawCursor(int x, int y) {
+  DrawRectangleV((Vector2){x, y}, (Vector2){1, C.font.size}, DARKGRAY);
+}
+
 int main(int argc, char **argv) {
 
   if (argc < 2) {
@@ -177,6 +181,8 @@ int main(int argc, char **argv) {
                  0,
                  DARKGRAY);
     }
+
+    DrawCursor(C.cx, C.cy);
 
     EndDrawing();
     // === END DRAWING ===
