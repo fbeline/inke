@@ -120,7 +120,7 @@ void Init(char* filepath) {
   InitWindow(C.window.width, C.window.height, "Olive");
   SetWindowState(FLAG_WINDOW_RESIZABLE);
 
-  SetTargetFPS(60);
+  SetTargetFPS(30);
 
   // FONT INIT
   C.font.size = 30;
@@ -165,10 +165,14 @@ int main(int argc, char **argv) {
 
     ClearBackground(RAYWHITE);
 
-    for (size_t i = 0; i < MAX_LINES && i + C.rowoff < C.rowslen; i++) {
+    float marginTop = C.window.height * 0.07;
+    for (size_t i = 0; i + C.rowoff < C.rowslen; i++) {
+      float y = C.font.lineSpacing * i + marginTop;
+      if (y + C.font.size >= C.window.height) break;
+
       DrawTextEx(C.font.font,
                  C.rows[i + C.rowoff],
-                 (Vector2){C.renderPos.x, C.font.lineSpacing * i + 10},
+                 (Vector2){C.renderPos.x, y},
                  C.font.size,
                  0,
                  DARKGRAY);
