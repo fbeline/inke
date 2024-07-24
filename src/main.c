@@ -45,6 +45,8 @@ char Next(File* file, size_t i) {
 }
 
 void CpyRow(File* file, char* row, size_t offset, size_t eol) {
+  if (file->data[offset] == ' ') offset++; // do not render empty space as row first char
+
   for (size_t k = 0, i = offset; i <= eol && i < file->len; k++) {
     i = offset + k;
     char c = file->data[i];
