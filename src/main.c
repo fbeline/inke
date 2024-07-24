@@ -8,9 +8,8 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-#define MAX_LINES 25
-#define LINE_BREAK_SIZE 75
-#define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+#define LINE_BREAK_SIZE 66
+#define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 typedef struct editorFont {
   Font font;
@@ -95,8 +94,7 @@ void BuildRows(File *file) {
 }
 
 void LoadCustomFont(void) {
-  printf("FONT SIZE %d\n", C.font.size);
-  Font customFont = LoadFontEx("resources/cmunsl.ttf", C.font.size, NULL, 250); 
+  Font customFont = LoadFontEx("resources/FiraCode-Regular.ttf", C.font.size, NULL, 250); 
   C.font.lineSpacing = C.font.size * 1.15;
   SetTextLineSpacing(C.font.lineSpacing);
   GenTextureMipmaps(&customFont.texture); 
