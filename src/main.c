@@ -110,9 +110,9 @@ void LoadCustomFont(void) {
   C.renderPos.y = 10;
 }
 
-void Init(void) {
+void Init(char* filepath) {
   // DATA INIT
-  File file = FileRead("notes.txt");
+  File file = FileRead(filepath);
   BuildRows(&file);
 
   // WINDOW INIT
@@ -137,8 +137,14 @@ void MouseWheelHandler(void) {
   }
 }
 
-int main(void) {
-  Init();
+int main(int argc, char **argv) {
+
+  if (argc < 2) {
+    printf("usage: olive [file path]\n");
+    exit(1);
+  }
+
+  Init(argv[1]);
 
   while (!WindowShouldClose()) {
     MouseWheelHandler();
