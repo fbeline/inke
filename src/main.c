@@ -140,21 +140,27 @@ void MouseWheelHandler(void) {
   }
 }
 
+static char lastKey = 0;
+static int repeatTime = 0;
 void KeyboardHandler(void) {
-  if (IsKeyDown(KEY_RIGHT)) {
+  if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {
      C.cx++;
      if (C.cx > strlen(C.rows[C.cy])) {
       C.cx = 0;
       C.cy++;
     }
   }
-  else if (IsKeyDown(KEY_DOWN)) {
+  if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN)) {
     C.cy = MIN(C.cy+1, C.rowslen);
     if (C.cy - C.rowoff >= C.screenrows) {
       C.rowoff = MIN(C.rowoff+1, C.rowslen);
     }
+
+    if (C.cx > strlen(C.rows[C.cy])) {
+      C.cx = strlen(C.rows[C.cy]);
+    }
   }
-  else if (IsKeyDown(KEY_LEFT)) {
+  if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) {
     C.cx--;
     if (C.cx < 0) {
       if (C.cy == 0) {
@@ -165,7 +171,7 @@ void KeyboardHandler(void) {
       C.cy = MAX(C.cy - 1, 0);
     } 
   }
-  else if (IsKeyDown(KEY_UP)) {
+  if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP)) {
     C.cy = MAX(C.cy-1, 0);
     if (C.cy - C.rowoff <= 0)
       C.rowoff = MAX(C.rowoff-1, 0);
