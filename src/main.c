@@ -150,8 +150,9 @@ void KeyboardHandler(void) {
   }
   else if (IsKeyDown(KEY_DOWN)) {
     C.cy = MIN(C.cy+1, C.rowslen);
-    if (C.cy + C.rowoff >= C.screenrows)
-      C.rowoff++;
+    if (C.cy - C.rowoff >= C.screenrows) {
+      C.rowoff = MIN(C.rowoff+1, C.rowslen);
+    }
   }
   else if (IsKeyDown(KEY_LEFT)) {
     C.cx--;
@@ -162,6 +163,8 @@ void KeyboardHandler(void) {
   }
   else if (IsKeyDown(KEY_UP)) {
     C.cy = MAX(C.cy-1, 0);
+    if (C.cy - C.rowoff <= 0)
+      C.rowoff = MAX(C.rowoff-1, 0);
   }
 }
 
