@@ -123,7 +123,7 @@ void Init(char* filepath) {
   InitWindow(C.window.width, C.window.height, "Olive");
   SetWindowState(FLAG_WINDOW_RESIZABLE);
 
-  SetTargetFPS(30);
+  SetTargetFPS(20);
 
   // FONT INIT
   C.font.size = 30;
@@ -140,6 +140,31 @@ void MouseWheelHandler(void) {
   }
 }
 
+void KeyboardHandler(void) {
+  if (IsKeyDown(KEY_RIGHT)) {
+     C.cx++;
+     if (C.cx > LINE_BREAK_SIZE) {
+      C.cx = 0;
+      C.cy++;
+    }
+  }
+  else if (IsKeyDown(KEY_DOWN)) {
+    C.cy = MIN(C.cy+1, C.rowslen);
+    if (C.cy + C.rowoff >= C.screenrows)
+      C.rowoff++;
+  }
+  else if (IsKeyDown(KEY_LEFT)) {
+    C.cx--;
+    if (C.cx < 0) {
+      C.cx = LINE_BREAK_SIZE;
+      C.cy = MAX(C.cy - 1, 0);
+    } 
+  }
+  else if (IsKeyDown(KEY_UP)) {
+    C.cy = MAX(C.cy-1, 0);
+  }
+}
+
 static float blinkT;
 static bool cVisible = true;
 void DrawCursor() {
@@ -153,7 +178,7 @@ void DrawCursor() {
   if (!cVisible) return;
 
   float x = C.cx * C.font.font.recs->width + C.eMargin.x;
-  float y = C.font.lineSpacing * C.cy + C.eMargin.y;
+  float y = C.font.lineSpacing * (C.cy - C.rowoff) + C.eMargin.y;
   DrawRectangleV((Vector2){x, y}, (Vector2){1, C.font.size}, DARKGRAY);
 }
 
@@ -168,6 +193,7 @@ int main(int argc, char **argv) {
 
   while (!WindowShouldClose()) {
     MouseWheelHandler();
+    KeyboardHandler();
 
     // RELOAD FONT IF SCREEN SIZE CHANGES
     if (GetScreenWidth() != C.window.width || GetScreenHeight() != C.window.height) {
@@ -185,6 +211,7 @@ int main(int argc, char **argv) {
 
     ClearBackground(RAYWHITE);
 
+    C.screenrows = 0;
     for (size_t i = 0; i + C.rowoff < C.rowslen; i++) {
       float y = C.font.lineSpacing * i + C.eMargin.y;
       if (y + C.font.size >= C.window.height) break;
@@ -195,6 +222,7 @@ int main(int argc, char **argv) {
                  C.font.size,
                  0,
                  DARKGRAY);
+      C.screenrows++;
     }
 
     DrawCursor();
