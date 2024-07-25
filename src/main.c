@@ -22,6 +22,11 @@ typedef struct window {
   int height;
 } Window;
 
+typedef struct row {
+  size_t size;
+  char* chars;
+} Row;
+
 typedef struct config {
   int cx, cy;
   int rowoff;
@@ -30,7 +35,7 @@ typedef struct config {
   Vector2 eMargin;
   EditorFont font;
   unsigned int rowslen;
-  char** rows;
+  Row* rows;
   Window window;
 } Config;
 
@@ -43,7 +48,10 @@ char Next(File* file, size_t i) {
   return file->data[i + 1];
 }
 
-void CpyRow(File* file, char* row, size_t offset, size_t eol) {
+void CpyRow(File* file, Row* row, size_t offset, size_t eol) {
+  row->size = eol - offset + 2;
+  row->chars = (char*)malloc(row->size);
+
   if (file->data[offset] == ' ') offset++; // do not render empty space as row first char
 
   for (size_t k = 0, i = offset; i <= eol && i < file->len; k++) {
@@ -51,9 +59,9 @@ void CpyRow(File* file, char* row, size_t offset, size_t eol) {
     char c = file->data[i];
     if (c == '\n' || c == '\r') c = '\0';
     if (c == '\t') c = ' ';
-    row[k] = c;
+    row->chars[k] = c;
   }
-  row[eol - offset] = '\0';
+  row->chars[row->size - 1] = '\0';
 }
 
 bool IsCharBetween(char c, int a, int b) {
@@ -62,7 +70,7 @@ bool IsCharBetween(char c, int a, int b) {
 
 void BuildRows(File *file) {
   size_t rlen = 10;
-  C.rows = (char**)malloc(rlen * sizeof(char*));
+  C.rows = (Row*)malloc(rlen * sizeof(Row));
 
   unsigned int currentRow = 0;
   size_t lineStart = 0;
@@ -77,14 +85,13 @@ void BuildRows(File *file) {
 
     if (file->data[i] == '\n' || file->data[i] == '\r' || j - lineStart >= LINE_BREAK_SIZE) {
       if (file->data[i] == '\r' && Next(file, i) == '\n') i++;
-      C.rows[currentRow] = (char*)malloc(i - lineStart + 1);
-      CpyRow(file, C.rows[currentRow], lineStart, i);
+      CpyRow(file, &C.rows[currentRow], lineStart, i);
 
       currentRow++;
       lineStart = i + 1;
       if (currentRow >= rlen) {
         rlen *= 2;
-        char **tmp = realloc(C.rows, rlen * sizeof(char*));
+        Row *tmp = realloc(C.rows, rlen * sizeof(Row));
         C.rows = tmp;
       }
     }
@@ -144,8 +151,8 @@ static char lastKey = 0;
 static int repeatTime = 0;
 void KeyboardHandler(void) {
   if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {
-     C.cx++;
-     if (C.cx > strlen(C.rows[C.cy])) {
+    C.cx++;
+    if (C.cx > strlen(C.rows[C.cy].chars)) {
       C.cx = 0;
       C.cy++;
     }
@@ -156,8 +163,8 @@ void KeyboardHandler(void) {
       C.rowoff = MIN(C.rowoff+1, C.rowslen);
     }
 
-    if (C.cx > strlen(C.rows[C.cy])) {
-      C.cx = strlen(C.rows[C.cy]);
+    if (C.cx > strlen(C.rows[C.cy].chars)) {
+      C.cx = strlen(C.rows[C.cy].chars);
     }
   }
   if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) {
@@ -167,7 +174,7 @@ void KeyboardHandler(void) {
         C.cx = 0;
         return;
       }
-      C.cx = strlen(C.rows[MAX(0, C.cy-1)]);
+      C.cx = strlen(C.rows[MAX(0, C.cy-1)].chars);
       C.cy = MAX(C.cy - 1, 0);
     } 
   }
@@ -176,8 +183,8 @@ void KeyboardHandler(void) {
     if (C.cy - C.rowoff <= 0)
       C.rowoff = MAX(C.rowoff-1, 0);
 
-    if (C.cx > strlen(C.rows[C.cy])) {
-      C.cx = strlen(C.rows[C.cy]);
+    if (C.cx > strlen(C.rows[C.cy].chars)) {
+      C.cx = strlen(C.rows[C.cy].chars);
     }
   }
 }
@@ -234,7 +241,7 @@ int main(int argc, char **argv) {
       if (y + C.font.size >= C.window.height) break;
 
       DrawTextEx(C.font.font,
-                 C.rows[i + C.rowoff],
+                 C.rows[i + C.rowoff].chars,
                  (Vector2){C.eMargin.x, y},
                  C.font.size,
                  0,
