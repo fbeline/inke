@@ -27,7 +27,7 @@ typedef struct config {
   int rowoff;
   int screenrows;
   int screencols;
-  Vector2 renderPos;
+  Vector2 eMargin;
   EditorFont font;
   unsigned int rowslen;
   char** rows;
@@ -106,8 +106,11 @@ void LoadCustomFont(void) {
                   DUMMY_LINE,
                   C.font.size,
                   0);
-  C.renderPos.x = (C.window.width - lineSize.x) / 2;
-  C.renderPos.y = 10;
+
+  C.eMargin = (Vector2) {
+    (C.window.width - lineSize.x) / 2,
+    C.window.height * 0.07
+  };
 }
 
 void Init(char* filepath) {
@@ -137,7 +140,20 @@ void MouseWheelHandler(void) {
   }
 }
 
-void DrawCursor(int x, int y) {
+static float blinkT;
+static bool cVisible = true;
+void DrawCursor() {
+  blinkT += GetFrameTime();
+
+  if (blinkT >= 0.5) {
+    blinkT = 0.f;
+    cVisible = !cVisible;
+  }
+
+  if (!cVisible) return;
+
+  float x = C.cx * C.font.font.recs->width + C.eMargin.x;
+  float y = C.font.lineSpacing * C.cy + C.eMargin.y;
   DrawRectangleV((Vector2){x, y}, (Vector2){1, C.font.size}, DARKGRAY);
 }
 
@@ -169,20 +185,19 @@ int main(int argc, char **argv) {
 
     ClearBackground(RAYWHITE);
 
-    float marginTop = C.window.height * 0.07;
     for (size_t i = 0; i + C.rowoff < C.rowslen; i++) {
-      float y = C.font.lineSpacing * i + marginTop;
+      float y = C.font.lineSpacing * i + C.eMargin.y;
       if (y + C.font.size >= C.window.height) break;
 
       DrawTextEx(C.font.font,
                  C.rows[i + C.rowoff],
-                 (Vector2){C.renderPos.x, y},
+                 (Vector2){C.eMargin.x, y},
                  C.font.size,
                  0,
                  DARKGRAY);
     }
 
-    DrawCursor(C.cx, C.cy);
+    DrawCursor();
 
     EndDrawing();
     // === END DRAWING ===
