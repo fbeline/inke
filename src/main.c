@@ -151,7 +151,7 @@ void KeyboardHandler(void) {
     }
   }
   if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN)) {
-    C.cy = MIN(C.cy+1, C.rowslen);
+    C.cy = MIN(C.cy+1, C.rowslen-1);
     if (C.cy - C.rowoff >= C.screenrows) {
       C.rowoff = MIN(C.rowoff+1, C.rowslen);
     }
@@ -175,6 +175,10 @@ void KeyboardHandler(void) {
     C.cy = MAX(C.cy-1, 0);
     if (C.cy - C.rowoff <= 0)
       C.rowoff = MAX(C.rowoff-1, 0);
+
+    if (C.cx > strlen(C.rows[C.cy])) {
+      C.cx = strlen(C.rows[C.cy]);
+    }
   }
 }
 
