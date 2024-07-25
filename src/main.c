@@ -143,7 +143,7 @@ void MouseWheelHandler(void) {
 void KeyboardHandler(void) {
   if (IsKeyDown(KEY_RIGHT)) {
      C.cx++;
-     if (C.cx > LINE_BREAK_SIZE) {
+     if (C.cx > strlen(C.rows[C.cy])) {
       C.cx = 0;
       C.cy++;
     }
@@ -157,7 +157,11 @@ void KeyboardHandler(void) {
   else if (IsKeyDown(KEY_LEFT)) {
     C.cx--;
     if (C.cx < 0) {
-      C.cx = LINE_BREAK_SIZE;
+      if (C.cy == 0) {
+        C.cx = 0;
+        return;
+      }
+      C.cx = strlen(C.rows[MAX(0, C.cy-1)]);
       C.cy = MAX(C.cy - 1, 0);
     } 
   }
