@@ -126,7 +126,7 @@ void InsertCharAt(char* str, int c, int i) {
     printf("Invalid position\n");
     return;
   }
-
+  
   char* tmp = malloc(len - i + 1);
   if (!tmp) return;
 
@@ -140,15 +140,16 @@ void InsertCharAt(char* str, int c, int i) {
 }
 
 void InsertChar(int c) {
-  Row row = C.rows[C.cy];
-
-  if (row.size <=  strlen(row.chars) + 1) {
-    char* tmp = realloc(row.chars, row.size + 8);
-    if (tmp == NULL) return;
-    row.chars = tmp;
-    row.size += 8;
+  if (C.rows[C.cy].size <= strlen(C.rows[C.cy].chars) + 1) {
+    C.rows[C.cy].size += 8;
+    char* tmp = realloc(C.rows[C.cy].chars, C.rows[C.cy].size);
+    if (tmp == NULL) {
+      printf("MEM ALLOC FAILED\n");
+      return;
+    }
+    C.rows[C.cy].chars = tmp;
   }
-  InsertCharAt(row.chars, c, C.cx);
+  InsertCharAt(C.rows[C.cy].chars, c, C.cx);
   C.cx++;
 }
 
@@ -221,8 +222,7 @@ void KeyboardHandler(void) {
   }  
 
   int ch = GetCharPressed();
-  if (IsCharBetween(ch, 32, 127))
-    InsertChar(ch);
+  if (IsCharBetween(ch, 32, 127)) InsertChar(ch);
 }
 
 static float blinkT;
@@ -274,6 +274,7 @@ int main(int argc, char **argv) {
     for (size_t i = 0; i + C.rowoff < C.rowslen; i++) {
       float y = C.font.lineSpacing * i + C.eMargin.y;
       if (y + C.font.size >= C.window.height) break;
+
 
       DrawTextEx(C.font.font,
                  C.rows[i + C.rowoff].chars,
