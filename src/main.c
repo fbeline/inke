@@ -39,7 +39,7 @@ typedef struct config {
   Window window;
 } Config;
 
-static Config C = {0};
+static Config E = {0};
 
 char Next(File* file, size_t i) {
   if (i + 1 >= file->len)
@@ -70,7 +70,7 @@ bool IsCharBetween(char c, int a, int b) {
 
 void BuildRows(File *file) {
   size_t rlen = 10;
-  C.rows = (Row*)malloc(rlen * sizeof(Row));
+  E.rows = (Row*)malloc(rlen * sizeof(Row));
 
   unsigned int currentRow = 0;
   size_t lineStart = 0;
@@ -85,38 +85,38 @@ void BuildRows(File *file) {
 
     if (file->data[i] == '\n' || file->data[i] == '\r' || j - lineStart >= LINE_BREAK_SIZE) {
       if (file->data[i] == '\r' && Next(file, i) == '\n') i++;
-      CpyRow(file, &C.rows[currentRow], lineStart, i);
+      CpyRow(file, &E.rows[currentRow], lineStart, i);
 
       currentRow++;
       lineStart = i + 1;
       if (currentRow >= rlen) {
         rlen *= 2;
-        Row *tmp = realloc(C.rows, rlen * sizeof(Row));
-        C.rows = tmp;
+        Row *tmp = realloc(E.rows, rlen * sizeof(Row));
+        E.rows = tmp;
       }
     }
   }
 
-  C.rowslen = currentRow;
+  E.rowslen = currentRow;
 }
 
 void LoadCustomFont(void) {
-  Font customFont = LoadFontEx("resources/FiraCode-Regular.ttf", C.font.size, NULL, 250); 
-  C.font.lineSpacing = C.font.size * 1.15;
-  SetTextLineSpacing(C.font.lineSpacing);
+  Font customFont = LoadFontEx("resources/FiraCode-Regular.ttf", E.font.size, NULL, 250); 
+  E.font.lineSpacing = E.font.size * 1.15;
+  SetTextLineSpacing(E.font.lineSpacing);
   GenTextureMipmaps(&customFont.texture); 
   SetTextureFilter(customFont.texture, TEXTURE_FILTER_BILINEAR);
-  C.font.font = customFont;
+  E.font.font = customFont;
 
   Vector2 lineSize = 
     MeasureTextEx(customFont,
                   DUMMY_LINE,
-                  C.font.size,
+                  E.font.size,
                   0);
 
-  C.eMargin = (Vector2) {
-    (C.window.width - lineSize.x) / 2,
-    C.window.height * 0.07
+  E.eMargin = (Vector2) {
+    (E.window.width - lineSize.x) / 2,
+    E.window.height * 0.07
   };
 }
 
@@ -140,29 +140,29 @@ void InsertCharAt(char* str, int c, int i) {
 }
 
 void InsertChar(int c) {
-  if (C.rows[C.cy].size <= strlen(C.rows[C.cy].chars) + 1) {
-    C.rows[C.cy].size += 8;
-    char* tmp = realloc(C.rows[C.cy].chars, C.rows[C.cy].size);
+  if (E.rows[E.cy].size <= strlen(E.rows[E.cy].chars) + 1) {
+    E.rows[E.cy].size += 8;
+    char* tmp = realloc(E.rows[E.cy].chars, E.rows[E.cy].size);
     if (tmp == NULL) {
       printf("MEM ALLOC FAILED\n");
       return;
     }
-    C.rows[C.cy].chars = tmp;
+    E.rows[E.cy].chars = tmp;
   }
-  InsertCharAt(C.rows[C.cy].chars, c, C.cx);
-  C.cx++;
+  InsertCharAt(E.rows[E.cy].chars, c, E.cx);
+  E.cx++;
 }
 
 void RemoveCharAtCursor(void) {
-  if (C.cx == 0) return;
+  if (E.cx == 0) return;
 
-  size_t len = strlen(C.rows[C.cy].chars);
-  for (int i = C.cx-1; i < len-1; i++) {
-    C.rows[C.cy].chars[i] = C.rows[C.cy].chars[i + 1];
+  size_t len = strlen(E.rows[E.cy].chars);
+  for (int i = E.cx-1; i < len-1; i++) {
+    E.rows[E.cy].chars[i] = E.rows[E.cy].chars[i + 1];
   }
-  C.rows[C.cy].chars[len-1] = '\0';
+  E.rows[E.cy].chars[len-1] = '\0';
 
-  C.cx = C.cx - 1;
+  E.cx = E.cx - 1;
 }
 
 void Init(char* filepath) {
@@ -171,24 +171,24 @@ void Init(char* filepath) {
   BuildRows(&file);
 
   // WINDOW INIT
-  C.window = (Window){1280, 720};
-  InitWindow(C.window.width, C.window.height, "Olive");
+  E.window = (Window){1280, 720};
+  InitWindow(E.window.width, E.window.height, "Olive");
   SetWindowState(FLAG_WINDOW_RESIZABLE);
 
   SetTargetFPS(20);
 
   // FONT INIT
-  C.font.size = 30;
+  E.font.size = 30;
   LoadCustomFont();
 }
 
 void MouseWheelHandler(void) {
   float mouseWheelMove = GetMouseWheelMove();
   if (mouseWheelMove > 0) {
-    C.rowoff = MAX(C.rowoff - 1, 0);
+    E.rowoff = MAX(E.rowoff - 1, 0);
   }
   else if (mouseWheelMove < 0) {
-    C.rowoff = MIN(C.rowoff + 1, C.rowslen - 1);  // Mouse wheel down
+    E.rowoff = MIN(E.rowoff + 1, E.rowslen - 1);  // Mouse wheel down
   }
 }
 
@@ -196,40 +196,40 @@ static char lastKey = 0;
 static int repeatTime = 0;
 void KeyboardHandler(void) {
   if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {
-    C.cx++;
-    if (C.cx > strlen(C.rows[C.cy].chars)) {
-      C.cx = 0;
-      C.cy++;
+    E.cx++;
+    if (E.cx > strlen(E.rows[E.cy].chars)) {
+      E.cx = 0;
+      E.cy++;
     }
   }
   if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN)) {
-    C.cy = MIN(C.cy+1, C.rowslen-1);
-    if (C.cy - C.rowoff >= C.screenrows) {
-      C.rowoff = MIN(C.rowoff+1, C.rowslen);
+    E.cy = MIN(E.cy+1, E.rowslen-1);
+    if (E.cy - E.rowoff >= E.screenrows) {
+      E.rowoff = MIN(E.rowoff+1, E.rowslen);
     }
 
-    if (C.cx > strlen(C.rows[C.cy].chars)) {
-      C.cx = strlen(C.rows[C.cy].chars);
+    if (E.cx > strlen(E.rows[E.cy].chars)) {
+      E.cx = strlen(E.rows[E.cy].chars);
     }
   }
   if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) {
-    C.cx--;
-    if (C.cx < 0) {
-      if (C.cy == 0) {
-        C.cx = 0;
+    E.cx--;
+    if (E.cx < 0) {
+      if (E.cy == 0) {
+        E.cx = 0;
         return;
       }
-      C.cx = strlen(C.rows[MAX(0, C.cy-1)].chars);
-      C.cy = MAX(C.cy - 1, 0);
+      E.cx = strlen(E.rows[MAX(0, E.cy-1)].chars);
+      E.cy = MAX(E.cy - 1, 0);
     } 
   }
   if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP)) {
-    C.cy = MAX(C.cy-1, 0);
-    if (C.cy - C.rowoff <= 0)
-      C.rowoff = MAX(C.rowoff-1, 0);
+    E.cy = MAX(E.cy-1, 0);
+    if (E.cy - E.rowoff <= 0)
+      E.rowoff = MAX(E.rowoff-1, 0);
 
-    if (C.cx > strlen(C.rows[C.cy].chars)) {
-      C.cx = strlen(C.rows[C.cy].chars);
+    if (E.cx > strlen(E.rows[E.cy].chars)) {
+      E.cx = strlen(E.rows[E.cy].chars);
     }
   }
   if (IsKeyPressed(KEY_BACKSPACE)) {
@@ -252,9 +252,9 @@ void DrawCursor() {
 
   if (!cVisible) return;
 
-  float x = C.cx * C.font.font.recs->width + C.eMargin.x;
-  float y = C.font.lineSpacing * (C.cy - C.rowoff) + C.eMargin.y;
-  DrawRectangleV((Vector2){x, y}, (Vector2){1, C.font.size}, DARKGRAY);
+  float x = E.cx * E.font.font.recs->width + E.eMargin.x;
+  float y = E.font.lineSpacing * (E.cy - E.rowoff) + E.eMargin.y;
+  DrawRectangleV((Vector2){x, y}, (Vector2){1, E.font.size}, DARKGRAY);
 }
 
 int main(int argc, char **argv) {
@@ -270,13 +270,13 @@ int main(int argc, char **argv) {
     KeyboardHandler();
 
     // RELOAD FONT IF SCREEN SIZE CHANGES
-    if (GetScreenWidth() != C.window.width || GetScreenHeight() != C.window.height) {
-      float scale = (float)GetScreenWidth() / C.window.width;
-      C.window = (Window) { GetScreenWidth(), GetScreenHeight() };
+    if (GetScreenWidth() != E.window.width || GetScreenHeight() != E.window.height) {
+      float scale = (float)GetScreenWidth() / E.window.width;
+      E.window = (Window) { GetScreenWidth(), GetScreenHeight() };
 
-      UnloadFont(C.font.font);
+      UnloadFont(E.font.font);
 
-      C.font.size *= scale;
+      E.font.size *= scale;
       LoadCustomFont();
     }
 
@@ -285,18 +285,18 @@ int main(int argc, char **argv) {
 
     ClearBackground(RAYWHITE);
 
-    C.screenrows = 0;
-    for (size_t i = 0; i + C.rowoff < C.rowslen; i++) {
-      float y = C.font.lineSpacing * i + C.eMargin.y;
-      if (y + C.font.size >= C.window.height) break;
+    E.screenrows = 0;
+    for (size_t i = 0; i + E.rowoff < E.rowslen; i++) {
+      float y = E.font.lineSpacing * i + E.eMargin.y;
+      if (y + E.font.size >= E.window.height) break;
 
-      DrawTextEx(C.font.font,
-                 C.rows[i + C.rowoff].chars,
-                 (Vector2){C.eMargin.x, y},
-                 C.font.size,
+      DrawTextEx(E.font.font,
+                 E.rows[i + E.rowoff].chars,
+                 (Vector2){E.eMargin.x, y},
+                 E.font.size,
                  0,
                  DARKGRAY);
-      C.screenrows++;
+      E.screenrows++;
     }
 
     DrawCursor();
