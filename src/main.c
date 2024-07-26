@@ -120,6 +120,38 @@ void LoadCustomFont(void) {
   };
 }
 
+void InsertCharAt(char* str, int c, int i) {
+  int len = strlen(str);
+  if (i < 0 || i > len) {
+    printf("Invalid position\n");
+    return;
+  }
+
+  char* tmp = malloc(len - i + 1);
+  if (!tmp) return;
+
+  memcpy(tmp, str + i, len - i);
+
+  str[i] = c;
+  memcpy(str + i + 1, tmp, len - i);
+  str[len + 1] = '\0';
+
+  free(tmp);
+}
+
+void InsertChar(int c) {
+  Row row = C.rows[C.cy];
+
+  if (row.size <=  strlen(row.chars) + 1) {
+    char* tmp = realloc(row.chars, row.size + 8);
+    if (tmp == NULL) return;
+    row.chars = tmp;
+    row.size += 8;
+  }
+  InsertCharAt(row.chars, c, C.cx);
+  C.cx++;
+}
+
 void Init(char* filepath) {
   // DATA INIT
   File file = FileRead(filepath);
@@ -186,7 +218,11 @@ void KeyboardHandler(void) {
     if (C.cx > strlen(C.rows[C.cy].chars)) {
       C.cx = strlen(C.rows[C.cy].chars);
     }
-  }
+  }  
+
+  int ch = GetCharPressed();
+  if (IsCharBetween(ch, 32, 127))
+    InsertChar(ch);
 }
 
 static float blinkT;
@@ -207,7 +243,6 @@ void DrawCursor() {
 }
 
 int main(int argc, char **argv) {
-
   if (argc < 2) {
     printf("usage: olive [file path]\n");
     exit(1);
