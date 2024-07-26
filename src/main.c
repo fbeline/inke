@@ -153,6 +153,18 @@ void InsertChar(int c) {
   C.cx++;
 }
 
+void RemoveCharAtCursor(void) {
+  if (C.cx == 0) return;
+
+  size_t len = strlen(C.rows[C.cy].chars);
+  for (int i = C.cx-1; i < len-1; i++) {
+    C.rows[C.cy].chars[i] = C.rows[C.cy].chars[i + 1];
+  }
+  C.rows[C.cy].chars[len-1] = '\0';
+
+  C.cx = C.cx - 1;
+}
+
 void Init(char* filepath) {
   // DATA INIT
   File file = FileRead(filepath);
@@ -219,7 +231,10 @@ void KeyboardHandler(void) {
     if (C.cx > strlen(C.rows[C.cy].chars)) {
       C.cx = strlen(C.rows[C.cy].chars);
     }
-  }  
+  }
+  if (IsKeyPressed(KEY_BACKSPACE)) {
+    RemoveCharAtCursor();
+  }
 
   int ch = GetCharPressed();
   if (IsCharBetween(ch, 32, 127)) InsertChar(ch);
@@ -274,7 +289,6 @@ int main(int argc, char **argv) {
     for (size_t i = 0; i + C.rowoff < C.rowslen; i++) {
       float y = C.font.lineSpacing * i + C.eMargin.y;
       if (y + C.font.size >= C.window.height) break;
-
 
       DrawTextEx(C.font.font,
                  C.rows[i + C.rowoff].chars,
