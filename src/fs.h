@@ -9,4 +9,4 @@ typedef struct {
 } File;
 
 File FileRead(const char* filename);
-int FileWrite(const char* buffer, size_t size, const char* filename);
+int FileWrite(const char* filename, const char* buffer);

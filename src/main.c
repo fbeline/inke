@@ -27,7 +27,8 @@ typedef struct row {
   char* chars;
 } Row;
 
-typedef struct config {
+typedef struct editor {
+  char filename[255];
   int cx, cy;
   int rowoff;
   int screenrows;
@@ -37,15 +38,37 @@ typedef struct config {
   unsigned int rowslen;
   Row* rows;
   Window window;
-} Config;
+} Editor;
 
-static Config E = {0};
+static Editor E = {0};
 
 char Next(File* file, size_t i) {
   if (i + 1 >= file->len)
     return '\0';
 
   return file->data[i + 1];
+}
+
+char* RowsToString(Row* rows, unsigned int size) {
+  size_t strsize = 1;
+  size_t strl = 0;
+  char* str = malloc(strsize);
+  str[0] = '\0';
+
+  for (int i = 0; i < size; i++) {
+    strsize += rows[i].size + 1;
+    char* tmp = realloc(str, strsize);
+    if (tmp == NULL) return NULL;
+    str = tmp;
+
+    memcpy(str + strl, rows[i].chars, strlen(rows[i].chars));
+    strl += strlen(rows[i].chars);
+    str[strl] = '\n';
+    strl++;
+  }
+  str[strl] = '\0';
+
+  return str;
 }
 
 void CpyRow(File* file, Row* row, size_t offset, size_t eol) {
@@ -76,15 +99,12 @@ void BuildRows(File *file) {
   size_t lineStart = 0;
   for (size_t i = 0; i < file->len; i++) {
 
-    size_t j = i;
-    while (j - lineStart >= LINE_BREAK_SIZE &&
-      IsCharBetween(file->data[i], 33, 125) &&
-      IsCharBetween(Next(file, i), 33, 125)) {
-      i--;
-    }
-
-    if (file->data[i] == '\n' || file->data[i] == '\r' || j - lineStart >= LINE_BREAK_SIZE) {
-      if (file->data[i] == '\r' && Next(file, i) == '\n') i++;
+    if (file->data[i] == '\n' || file->data[i] == '\r') {
+      size_t eol = i - 1;
+      if (file->data[i] == '\r' && Next(file, i) == '\n') {
+        i++;
+        eol--;
+      }
       CpyRow(file, &E.rows[currentRow], lineStart, i);
 
       currentRow++;
@@ -165,9 +185,11 @@ void RemoveCharAtCursor(void) {
   E.cx = E.cx - 1;
 }
 
-void Init(char* filepath) {
+void Init(char* filename) {
   // DATA INIT
-  File file = FileRead(filepath);
+  memcpy(E.filename, filename, strlen(filename));
+  E.filename[strlen(filename)] = '\0';
+  File file = FileRead(filename);
   BuildRows(&file);
 
   // WINDOW INIT
@@ -234,6 +256,11 @@ void KeyboardHandler(void) {
   }
   if (IsKeyPressed(KEY_BACKSPACE)) {
     RemoveCharAtCursor();
+  }
+  if (IsKeyPressed(KEY_F10)) {
+    char *buf = RowsToString(E.rows, E.rowslen);
+    FileWrite(E.filename, buf);
+    free(buf);
   }
 
   int ch = GetCharPressed();

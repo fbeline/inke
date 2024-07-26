@@ -58,20 +58,17 @@ File FileRead(const char *filename) {
   return file;
 }
 
-int FileWrite(const char *buffer, size_t size, const char *filename) {
-  FILE *fp = fopen(filename, "wb");
-  if (!fp || ferror(fp)) {
-    ERROR_RETURN(-1, "Failed to open file: %s", filename, errno);
-  }
+int FileWrite(const char* filename, const char* buf) {
+  int len;
+  FILE *file = fopen(filename, "w");
 
-  size_t written = fwrite(buffer, size, 1, fp);
+  if (file == NULL) {
+    printf("Error opening file\n");
+    return 1;
+  } 
+  fprintf(file, "%s", buf);
+  fclose(file);
 
-  fclose(fp);
-
-  if (written != 1) {
-    ERROR_RETURN(1, "Failed to write file: %s", filename, errno);
-  }
-
-  return 1;
+  return 0;
 }
 
