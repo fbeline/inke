@@ -8,7 +8,7 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-#define LINE_BREAK_SIZE 66
+#define MAX_COL 66
 #define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 typedef struct editorFont {
@@ -31,6 +31,7 @@ typedef struct editor {
   char filename[255];
   int cx, cy;
   int rowoff;
+  int coloff;
   int screenrows;
   int screencols;
   Vector2 eMargin;
@@ -219,7 +220,12 @@ static int repeatTime = 0;
 void KeyboardHandler(void) {
   if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {
     E.cx++;
-    if (E.cx > strlen(E.rows[E.cy].chars)) {
+    if (E.cx + E.coloff > MAX_COL) {
+      E.cx = MAX_COL;
+      E.coloff++;
+    }
+    if (E.cx + E.coloff > strlen(E.rows[E.cy].chars)) {
+      E.coloff = 0;
       E.cx = 0;
       E.cy++;
     }
@@ -236,13 +242,21 @@ void KeyboardHandler(void) {
   }
   if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) {
     E.cx--;
+  
     if (E.cx < 0) {
       if (E.cy == 0) {
         E.cx = 0;
         return;
       }
-      E.cx = strlen(E.rows[MAX(0, E.cy-1)].chars);
-      E.cy = MAX(E.cy - 1, 0);
+      int rowlen = strlen(E.rows[MAX(0, E.cy-1)].chars);
+      if (E.coloff == 0) {
+        E.cx = MIN(rowlen, MAX_COL);
+        E.cy = MAX(E.cy - 1, 0);
+        if (rowlen > MAX_COL) E.coloff = rowlen - MAX_COL;
+      } else {
+        E.coloff--;
+        E.cx = 0;
+      }
     } 
   }
   if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP)) {
@@ -312,19 +326,31 @@ int main(int argc, char **argv) {
 
     ClearBackground(RAYWHITE);
 
+
     E.screenrows = 0;
     for (size_t i = 0; i + E.rowoff < E.rowslen; i++) {
       float y = E.font.lineSpacing * i + E.eMargin.y;
       if (y + E.font.size >= E.window.height) break;
 
+      char vrow[MAX_COL + 1];
+      Row row = E.rows[i + E.rowoff];
+      memcpy(vrow, row.chars + E.coloff, MIN(strlen(row.chars) - E.rowoff, MAX_COL));
+      vrow[strlen(row.chars) - E.rowoff] = '\0';
+
       DrawTextEx(E.font.font,
-                 E.rows[i + E.rowoff].chars,
+                 vrow,
                  (Vector2){E.eMargin.x, y},
                  E.font.size,
                  0,
                  DARKGRAY);
       E.screenrows++;
     }
+
+    DrawRectangleV(
+      (Vector2){E.eMargin.x + MAX_COL * E.font.font.recs->width, E.eMargin.y},
+      (Vector2){3, E.window.height - E.eMargin.y},
+      (Color){ 238, 238, 238, 255 }
+    );
 
     DrawCursor();
 
