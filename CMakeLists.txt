@@ -16,5 +16,5 @@ endif()
 
 
 if(UNIX)
-  target_link_libraries(olive PRIVATE raylib)
+  target_link_libraries(olive PRIVATE raylib -fsanitize=undefined -fsanitize=address)
 endif()
