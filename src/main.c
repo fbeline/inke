@@ -145,8 +145,8 @@ void LoadCustomFont(void) {
   };
 }
 
-void InsertCharAt(char* str, int c, int i) {
-  int len = strlen(str);
+void InsertCharAt(Row* row, int c, int i) {
+  u32 len = strlen(row->chars);
   if (i < 0 || i > len) {
     printf("Invalid position\n");
     return;
@@ -155,17 +155,17 @@ void InsertCharAt(char* str, int c, int i) {
   char* tmp = malloc(len - i + 1);
   if (!tmp) return;
 
-  memcpy(tmp, str + i, len - i);
+  memcpy(tmp, row->chars + i, len - i);
 
-  str[i] = c;
-  memcpy(str + i + 1, tmp, len - i);
-  str[len + 1] = '\0';
+  row->chars[i] = c;
+  memcpy(row->chars + i + 1, tmp, len - i);
+  row->chars[len + 1] = '\0';
 
   free(tmp);
 }
 
 void InsertChar(int c) {
-  if (E.rows[E.cy].size <= strlen(E.rows[E.cy].chars) + 1) {
+  if (strlen(E.rows[E.cy].chars) + 1 >= E.rows[E.cy].size) {
     E.rows[E.cy].size += 8;
     char* tmp = realloc(E.rows[E.cy].chars, E.rows[E.cy].size);
     if (tmp == NULL) {
@@ -174,7 +174,7 @@ void InsertChar(int c) {
     }
     E.rows[E.cy].chars = tmp;
   }
-  InsertCharAt(E.rows[E.cy].chars, c, E.cx);
+  InsertCharAt(&E.rows[E.cy], c, E.cx);
   E.cx++;
 }
 
@@ -223,22 +223,24 @@ bool InsertRowAt(usize n) {
   usize newLen = E.rowslen + 1;
   if (newLen >= E.rowSize) {
     usize newSize = E.rowSize + 10;
-    Row* tmp = (Row*)realloc(E.rows, E.rowSize);
+    Row* tmp = (Row*)realloc(E.rows, newSize * sizeof(Row));
     if (tmp == NULL) return false;
 
     E.rowSize = newSize;
   }
 
-  // warning: checkout this memmmove in the future
   memmove(E.rows + n + 1, E.rows + n, sizeof(Row) * (E.rowslen - n));
   E.rowslen = newLen;
+
+  E.rows[n] = (Row){0, NULL};
   return true;
 }
 
 void ReturnHandler(void) {
   if (!InsertRowAt(E.cy + 1)) return;
 
-  E.rows[E.cy + 1].chars = malloc(strlen(E.rows[E.cy].chars) - E.cx + 1);
+  E.rows[E.cy + 1].size = strlen(E.rows[E.cy].chars) - E.cx + 2;
+  E.rows[E.cy + 1].chars = malloc(E.rows[E.cy + 1].size);
   memcpy(E.rows[E.cy + 1].chars,
          E.rows[E.cy].chars + E.cx,
          strlen(E.rows[E.cy].chars) - E.cx + 1);

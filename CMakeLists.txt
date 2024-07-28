@@ -8,6 +8,7 @@ find_package(raylib CONFIG REQUIRED)
 
 add_executable(olive
   src/main.c
+  src/types.h
   src/fs.h src/fs.c)
 
 if(WIN32)
