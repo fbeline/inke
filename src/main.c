@@ -37,6 +37,7 @@ typedef struct editor {
   Vector2 eMargin;
   EditorFont font;
   unsigned int rowslen;
+  unsigned int rowSize;
   Row* rows;
   Window window;
 } Editor;
@@ -93,8 +94,8 @@ bool IsCharBetween(char c, int a, int b) {
 }
 
 void BuildRows(File *file) {
-  size_t rlen = 10;
-  E.rows = (Row*)malloc(rlen * sizeof(Row));
+  size_t rowSize = 10;
+  E.rows = (Row*)malloc(rowSize * sizeof(Row));
 
   unsigned int currentRow = 0;
   size_t lineStart = 0;
@@ -110,14 +111,15 @@ void BuildRows(File *file) {
 
       currentRow++;
       lineStart = i + 1;
-      if (currentRow >= rlen) {
-        rlen *= 2;
-        Row *tmp = realloc(E.rows, rlen * sizeof(Row));
+      if (currentRow >= rowSize) {
+        rowSize *= 2;
+        Row *tmp = realloc(E.rows, rowSize * sizeof(Row));
         E.rows = tmp;
       }
     }
   }
 
+  E.rowSize = rowSize;
   E.rowslen = currentRow;
 }
 
@@ -215,9 +217,43 @@ void MouseWheelHandler(void) {
   }
 }
 
+bool InsertRowAt(size_t n) {
+  size_t newLen = E.rowslen + 1;
+  if (newLen >= E.rowSize) {
+    size_t newSize = E.rowSize + 10;
+    Row* tmp = (Row*)realloc(E.rows, E.rowSize);
+    if (tmp == NULL) return false;
+
+    E.rowSize = newSize;
+  }
+
+  // warning: checkout this memmmove in the future
+  memmove(E.rows + n + 1, E.rows + n, sizeof(Row) * (E.rowslen - n));
+  E.rowslen = newLen;
+  return true;
+}
+
+void ReturnHandler(void) {
+  if (!InsertRowAt(E.cy + 1)) return;
+
+  E.rows[E.cy + 1].chars = malloc(strlen(E.rows[E.cy].chars) - E.cx + 2);
+  memcpy(E.rows[E.cy + 1].chars,
+         E.rows[E.cy].chars + E.cx,
+         strlen(E.rows[E.cy].chars) - E.cx + 1);
+
+  E.rows[E.cy].chars[E.cx] = '\0';
+
+  E.cy++;
+  E.cx = 0;
+}
+
 static char lastKey = 0;
 static int repeatTime = 0;
 void KeyboardHandler(void) {
+  if (IsKeyPressed(KEY_ENTER)) {
+    ReturnHandler();
+    return;
+  }
   if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {
     E.cx++;
     if (E.cx + E.coloff > MAX_COL) {
@@ -325,7 +361,6 @@ int main(int argc, char **argv) {
     BeginDrawing();
 
     ClearBackground(RAYWHITE);
-
 
     E.screenrows = 0;
     for (size_t i = 0; i + E.rowoff < E.rowslen; i++) {
