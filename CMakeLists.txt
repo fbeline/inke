@@ -10,4 +10,11 @@ add_executable(olive
   src/main.c
   src/fs.h src/fs.c)
 
-target_link_libraries(olive PRIVATE raylib winmm)
+if(WIN32)
+  target_link_libraries(olive PRIVATE raylib winmm)
+endif()
+
+
+if(UNIX)
+  target_link_libraries(olive PRIVATE raylib)
+endif()

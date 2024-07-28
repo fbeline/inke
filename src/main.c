@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <vcruntime_string.h>
+#include <stddef.h>
+
+#include "types.h"
 #include "fs.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -23,7 +25,7 @@ typedef struct window {
 } Window;
 
 typedef struct row {
-  size_t size;
+  usize size;
   char* chars;
 } Row;
 
@@ -44,7 +46,7 @@ typedef struct editor {
 
 static Editor E = {0};
 
-char Next(File* file, size_t i) {
+char Next(File* file, usize i) {
   if (i + 1 >= file->len)
     return '\0';
 
@@ -52,8 +54,8 @@ char Next(File* file, size_t i) {
 }
 
 char* RowsToString(Row* rows, unsigned int size) {
-  size_t strsize = 1;
-  size_t strl = 0;
+  usize strsize = 1;
+  usize strl = 0;
   char* str = malloc(strsize);
   str[0] = '\0';
 
@@ -73,13 +75,13 @@ char* RowsToString(Row* rows, unsigned int size) {
   return str;
 }
 
-void CpyRow(File* file, Row* row, size_t offset, size_t eol) {
+void CpyRow(File* file, Row* row, usize offset, usize eol) {
   row->size = eol - offset + 2;
   row->chars = (char*)malloc(row->size);
 
   if (file->data[offset] == ' ') offset++; // do not render empty space as row first char
 
-  for (size_t k = 0, i = offset; i <= eol && i < file->len; k++) {
+  for (usize k = 0, i = offset; i <= eol && i < file->len; k++) {
     i = offset + k;
     char c = file->data[i];
     if (c == '\n' || c == '\r') c = '\0';
@@ -94,15 +96,15 @@ bool IsCharBetween(char c, int a, int b) {
 }
 
 void BuildRows(File *file) {
-  size_t rowSize = 10;
+  usize rowSize = 10;
   E.rows = (Row*)malloc(rowSize * sizeof(Row));
 
   unsigned int currentRow = 0;
-  size_t lineStart = 0;
-  for (size_t i = 0; i < file->len; i++) {
+  usize lineStart = 0;
+  for (usize i = 0; i < file->len; i++) {
 
     if (file->data[i] == '\n' || file->data[i] == '\r') {
-      size_t eol = i - 1;
+      usize eol = i - 1;
       if (file->data[i] == '\r' && Next(file, i) == '\n') {
         i++;
         eol--;
@@ -179,7 +181,7 @@ void InsertChar(int c) {
 void RemoveCharAtCursor(void) {
   if (E.cx == 0) return;
 
-  size_t len = strlen(E.rows[E.cy].chars);
+  usize len = strlen(E.rows[E.cy].chars);
   for (int i = E.cx-1; i < len-1; i++) {
     E.rows[E.cy].chars[i] = E.rows[E.cy].chars[i + 1];
   }
@@ -217,10 +219,10 @@ void MouseWheelHandler(void) {
   }
 }
 
-bool InsertRowAt(size_t n) {
-  size_t newLen = E.rowslen + 1;
+bool InsertRowAt(usize n) {
+  usize newLen = E.rowslen + 1;
   if (newLen >= E.rowSize) {
-    size_t newSize = E.rowSize + 10;
+    usize newSize = E.rowSize + 10;
     Row* tmp = (Row*)realloc(E.rows, E.rowSize);
     if (tmp == NULL) return false;
 
@@ -363,7 +365,7 @@ int main(int argc, char **argv) {
     ClearBackground(RAYWHITE);
 
     E.screenrows = 0;
-    for (size_t i = 0; i + E.rowoff < E.rowslen; i++) {
+    for (usize i = 0; i + E.rowoff < E.rowslen; i++) {
       float y = E.font.lineSpacing * i + E.eMargin.y;
       if (y + E.font.size >= E.window.height) break;
 

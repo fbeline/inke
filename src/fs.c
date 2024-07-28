@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 
 #define ERROR_RETURN(R, ...) { fprintf(stderr, __VA_ARGS__); return R; }
 #define IO_READ_CHUNK_SIZE 2097152
@@ -15,9 +16,9 @@ File FileRead(const char *filename) {
 
   char *data = NULL;
   char *tmp;
-  size_t used = 0;
-  size_t size = 0;
-  size_t n;
+  usize used = 0;
+  usize size = 0;
+  usize n;
 
   while (true) {
     if (used + IO_READ_CHUNK_SIZE + 1 > size) {

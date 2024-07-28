@@ -1,10 +1,11 @@
 #pragma once
 
 #include <stdbool.h>
+#include "types.h"
 
 typedef struct {
     char* data;
-    size_t len;
+    usize len;
     bool is_valid;
 } File;
 
