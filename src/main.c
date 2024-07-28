@@ -236,7 +236,7 @@ bool InsertRowAt(size_t n) {
 void ReturnHandler(void) {
   if (!InsertRowAt(E.cy + 1)) return;
 
-  E.rows[E.cy + 1].chars = malloc(strlen(E.rows[E.cy].chars) - E.cx + 2);
+  E.rows[E.cy + 1].chars = malloc(strlen(E.rows[E.cy].chars) - E.cx + 1);
   memcpy(E.rows[E.cy + 1].chars,
          E.rows[E.cy].chars + E.cx,
          strlen(E.rows[E.cy].chars) - E.cx + 1);
