@@ -202,7 +202,7 @@ void Init(char* filename) {
   InitWindow(E.window.width, E.window.height, "Olive");
   SetWindowState(FLAG_WINDOW_RESIZABLE);
 
-  SetTargetFPS(20);
+  SetTargetFPS(60);
 
   // FONT INIT
   E.font.size = 30;
@@ -371,10 +371,14 @@ int main(int argc, char **argv) {
       float y = E.font.lineSpacing * i + E.eMargin.y;
       if (y + E.font.size >= E.window.height) break;
 
-      char vrow[MAX_COL + 1];
+      char vrow[MAX_COL + 1] = "";
       Row row = E.rows[i + E.rowoff];
-      memcpy(vrow, row.chars + E.coloff, MIN(strlen(row.chars) - E.rowoff, MAX_COL));
-      vrow[strlen(row.chars) - E.rowoff] = '\0';
+      usize row_len = strlen(row.chars);
+      row_len = row_len > E.coloff ? row_len - E.coloff : 0;
+      usize vrow_len = MIN(row_len, MAX_COL);
+
+      if (vrow_len > E.coloff)
+        memcpy(vrow, row.chars + E.coloff, vrow_len);
 
       DrawTextEx(E.font.font,
                  vrow,
@@ -382,6 +386,7 @@ int main(int argc, char **argv) {
                  E.font.size,
                  0,
                  DARKGRAY);
+
       E.screenrows++;
     }
 
