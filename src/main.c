@@ -179,10 +179,34 @@ void InsertChar(int c) {
 }
 
 void RemoveCharAtCursor(void) {
-  if (E.cx == 0) return;
+  if (E.cx == 0) {
+    if (E.cy == 0) return;
+    usize crow_len = strlen(E.rows[E.cy].chars);
+    usize prow_len = strlen(E.rows[E.cy-1].chars);
+
+    // realloc previous row if necessary
+    if (crow_len + prow_len >= E.rows[E.cy-1].size) {
+      char* tmp = realloc(E.rows[E.cy-1].chars, E.rows[E.cy-1].size + crow_len);
+      if (tmp == NULL) return;
+      E.rows[E.cy-1].chars = tmp;
+      E.rows[E.cy-1].size += crow_len;
+    }
+
+    // cpy current row to the end of previous row
+    memcpy(E.rows[E.cy-1].chars + prow_len, E.rows[E.cy].chars, crow_len);
+    E.rows[E.cy-1].chars[crow_len + prow_len] = '\0';
+
+    free(E.rows[E.cy].chars);
+    memcpy(E.rows + E.cy , E.rows + E.cy + 1, (E.rowslen - E.cy) * sizeof(Row));
+
+    E.rowslen--;
+    E.cy--;
+    E.cx = prow_len;
+    return;
+  }
 
   usize len = strlen(E.rows[E.cy].chars);
-  for (int i = E.cx-1; i < len-1; i++) {
+  for (usize i = E.cx-1; i < len-1; i++) {
     E.rows[E.cy].chars[i] = E.rows[E.cy].chars[i + 1];
   }
   E.rows[E.cy].chars[len-1] = '\0';
