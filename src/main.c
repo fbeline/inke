@@ -197,7 +197,7 @@ void RemoveCharAtCursor(void) {
     E.rows[E.cy-1].chars[crow_len + prow_len] = '\0';
 
     free(E.rows[E.cy].chars);
-    memcpy(E.rows + E.cy , E.rows + E.cy + 1, (E.rowslen - E.cy) * sizeof(Row));
+    memmove(E.rows + E.cy, E.rows + (E.cy + 1), (E.rowslen - E.cy - 1) * sizeof(Row));
 
     E.rowslen--;
     E.cy--;
