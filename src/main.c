@@ -1,8 +1,6 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stddef.h>
 
 #include "fs.h"
 #include "editor.h"
@@ -10,26 +8,6 @@
 #include "render.h"
 
 static Editor E = {0};
-
-void LoadCustomFont(void) {
-  Font customFont = LoadFontEx("resources/FiraCode-Regular.ttf", E.font.size, NULL, 250); 
-  E.font.lineSpacing = E.font.size * 1.15;
-  SetTextLineSpacing(E.font.lineSpacing);
-  GenTextureMipmaps(&customFont.texture); 
-  SetTextureFilter(customFont.texture, TEXTURE_FILTER_BILINEAR);
-  E.font.font = customFont;
-
-  Vector2 lineSize = 
-    MeasureTextEx(customFont,
-                  DUMMY_LINE,
-                  E.font.size,
-                  0);
-
-  E.eMargin = (Vector2) {
-    (E.window.width - lineSize.x) / 2,
-    E.window.height * 0.07
-  };
-}
 
 void Init(char* filename) {
   File file = FileRead(filename);
@@ -44,7 +22,7 @@ void Init(char* filename) {
 
   // FONT INIT
   E.font.size = 30;
-  LoadCustomFont();
+  render_load_font(&E);
 }
 
 int main(int argc, char **argv) {
@@ -61,13 +39,7 @@ int main(int argc, char **argv) {
 
     // RELOAD FONT IF SCREEN SIZE CHANGES
     if (GetScreenWidth() != E.window.width || GetScreenHeight() != E.window.height) {
-      float scale = (float)GetScreenWidth() / E.window.width;
-      E.window = (Window) { GetScreenWidth(), GetScreenHeight() };
-
-      UnloadFont(E.font.font);
-
-      E.font.size *= scale;
-      LoadCustomFont();
+      render_reload_font(&E); 
     }
 
     render_draw(&E);
