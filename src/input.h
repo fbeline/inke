@@ -2,6 +2,6 @@
 
 #include "editor.h"
 
-void MouseWheelHandler(Editor *E);
+void input_mousewheel_handler(Editor *E);
 
-void KeyboardHandler(Editor *E);
+void input_keyboard_handler(Editor *E);

@@ -5,14 +5,14 @@
 #include <string.h>
 #include <memory.h>
 
-char Next(File* file, usize i) {
+char next(File* file, usize i) {
   if (i + 1 >= file->len)
     return '\0';
 
   return file->data[i + 1];
 }
 
-char* RowsToString(Row* rows, unsigned int size) {
+char* editor_rows_to_string(Row* rows, unsigned int size) {
   usize strsize = 1;
   usize strl = 0;
   char* str = malloc(strsize);
@@ -34,7 +34,7 @@ char* RowsToString(Row* rows, unsigned int size) {
   return str;
 }
 
-void CpyRow(File* file, Row* row, usize offset, usize eol) {
+void editor_rowcpy(File* file, Row* row, usize offset, usize eol) {
   row->size = eol - offset + 2;
   row->chars = (char*)malloc(row->size);
 
@@ -50,7 +50,7 @@ void CpyRow(File* file, Row* row, usize offset, usize eol) {
   row->chars[row->size - 1] = '\0';
 }
 
-void BuildRows(Editor *E, File *file) {
+void editor_build_rows(Editor *E, File *file) {
   usize rowSize = 10;
   E->rows = (Row*)malloc(rowSize * sizeof(Row));
 
@@ -60,11 +60,11 @@ void BuildRows(Editor *E, File *file) {
 
     if (file->data[i] == '\n' || file->data[i] == '\r') {
       usize eol = i - 1;
-      if (file->data[i] == '\r' && Next(file, i) == '\n') {
+      if (file->data[i] == '\r' && next(file, i) == '\n') {
         i++;
         eol--;
       }
-      CpyRow(file, &E->rows[currentRow], lineStart, i);
+      editor_rowcpy(file, &E->rows[currentRow], lineStart, i);
 
       currentRow++;
       lineStart = i + 1;
@@ -80,7 +80,7 @@ void BuildRows(Editor *E, File *file) {
   E->rowslen = currentRow;
 }
 
-bool InsertRowAt(Editor* E, usize n) {
+bool editor_insert_row_at(Editor* E, usize n) {
   usize newLen = E->rowslen + 1;
   if (newLen >= E->rowSize) {
     usize newSize = E->rowSize + 10;
@@ -97,7 +97,7 @@ bool InsertRowAt(Editor* E, usize n) {
   return true;
 }
 
-void RemoveCharAtCursor(Editor *E) {
+void editor_remove_char_at_cursor(Editor *E) {
   if (E->cx == 0) {
     if (E->cy == 0) return;
     usize crow_len = strlen(E->rows[E->cy].chars);
@@ -133,7 +133,7 @@ void RemoveCharAtCursor(Editor *E) {
   E->cx = E->cx - 1;
 }
 
-void InsertCharAt(Row* row, int c, int i) {
+void editor_insert_char_at(Row* row, int c, int i) {
   u32 len = strlen(row->chars);
   if (i < 0 || i > len) {
     printf("Invalid position\n");
@@ -152,7 +152,7 @@ void InsertCharAt(Row* row, int c, int i) {
   free(tmp);
 }
 
-void InsertChar(Editor* E, int c) {
+void editor_insert_char_at_cursor(Editor* E, int c) {
   if (strlen(E->rows[E->cy].chars) + 1 >= E->rows[E->cy].size) {
     E->rows[E->cy].size += 8;
     char* tmp = realloc(E->rows[E->cy].chars, E->rows[E->cy].size);
@@ -162,7 +162,7 @@ void InsertChar(Editor* E, int c) {
     }
     E->rows[E->cy].chars = tmp;
   }
-  InsertCharAt(&E->rows[E->cy], c, E->cx);
+  editor_insert_char_at(&E->rows[E->cy], c, E->cx);
   E->cx++;
 }
 
@@ -170,7 +170,7 @@ Editor editor_init(File* file) {
   Editor E = { 0 };
   memcpy(E.filename, file->name, strlen(file->name));
 
-  BuildRows(&E, file);
+  editor_build_rows(&E, file);
 
   return E;
 }

@@ -56,8 +56,8 @@ int main(int argc, char **argv) {
   Init(argv[1]);
 
   while (!WindowShouldClose()) {
-    MouseWheelHandler(&E);
-    KeyboardHandler(&E);
+    input_mousewheel_handler(&E);
+    input_keyboard_handler(&E);
 
     // RELOAD FONT IF SCREEN SIZE CHANGES
     if (GetScreenWidth() != E.window.width || GetScreenHeight() != E.window.height) {

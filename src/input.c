@@ -5,18 +5,8 @@
 #include <raylib.h>
 #include "utils.h"
 
-void MouseWheelHandler(Editor *E) {
-  float mouseWheelMove = GetMouseWheelMove();
-  if (mouseWheelMove > 0) {
-    E->rowoff = MAX(E->rowoff - 1, 0);
-  }
-  else if (mouseWheelMove < 0) {
-    E->rowoff = MIN(E->rowoff + 1, E->rowslen - 1);  // Mouse wheel down
-  }
-}
-
-void ReturnHandler(Editor *E) {
-  if (!InsertRowAt(E, E->cy + 1)) return;
+void input_return(Editor *E) {
+  if (!editor_insert_row_at(E, E->cy + 1)) return;
 
   E->rows[E->cy + 1].size = strlen(E->rows[E->cy].chars) - E->cx + 2;
   E->rows[E->cy + 1].chars = malloc(E->rows[E->cy + 1].size);
@@ -30,11 +20,19 @@ void ReturnHandler(Editor *E) {
   E->cx = 0;
 }
 
-static char lastKey = 0;
-static int repeatTime = 0;
-void KeyboardHandler(Editor *E) {
+void input_mousewheel_handler(Editor *E) {
+  float mouseWheelMove = GetMouseWheelMove();
+  if (mouseWheelMove > 0) {
+    E->rowoff = MAX(E->rowoff - 1, 0);
+  }
+  else if (mouseWheelMove < 0) {
+    E->rowoff = MIN(E->rowoff + 1, E->rowslen - 1);  // Mouse wheel down
+  }
+}
+
+void input_keyboard_handler(Editor *E) {
   if (IsKeyPressed(KEY_ENTER)) {
-    ReturnHandler(E);
+    input_return(E);
     return;
   }
   if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {
@@ -88,14 +86,15 @@ void KeyboardHandler(Editor *E) {
     }
   }
   if (IsKeyPressed(KEY_BACKSPACE)) {
-    RemoveCharAtCursor(E);
+    editor_remove_char_at_cursor(E);
   }
   if (IsKeyPressed(KEY_F10)) {
-    char *buf = RowsToString(E->rows, E->rowslen);
+    char *buf = editor_rows_to_string(E->rows, E->rowslen);
     FileWrite(E->filename, buf);
     free(buf);
   }
 
   int ch = GetCharPressed();
-  if (IsCharBetween(ch, 32, 127)) InsertChar(E, ch);
+  if (IsCharBetween(ch, 32, 127))
+    editor_insert_char_at_cursor(E, ch);
 }

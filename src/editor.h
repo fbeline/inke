@@ -38,15 +38,12 @@ typedef struct editor {
   Window window;
 } Editor;
 
-
-char* RowsToString(Row* rows, unsigned int size);
-
-bool InsertRowAt(Editor* E, usize n);
-
-void RemoveCharAtCursor(Editor *E);
-
-void InsertCharAt(Row* row, int c, int i);
-
-void InsertChar(Editor* E, int c);
-
 Editor editor_init(File *file);
+
+void editor_remove_char_at_cursor(Editor *E);
+
+void editor_insert_char_at_cursor(Editor* E, int c);
+
+char* editor_rows_to_string(Row* rows, unsigned int size);
+
+bool editor_insert_row_at(Editor* E, usize n);
