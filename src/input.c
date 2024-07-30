@@ -20,6 +20,17 @@ void input_return(Editor *E) {
   E->cx = 0;
 }
 
+void input_eol(Editor *E) {
+  i64 len = strlen(E->rows[E->cy].chars);
+  E->cx = MIN(len, MAX_COL);
+  E->coloff = MAX(0, len - MAX_COL);
+}
+
+void input_bol(Editor* E) {
+  E->cx = 0;
+  E->coloff = 0;
+}
+
 void input_mousewheel_handler(Editor *E) {
   float mouseWheelMove = GetMouseWheelMove();
   if (mouseWheelMove > 0) {
@@ -31,6 +42,14 @@ void input_mousewheel_handler(Editor *E) {
 }
 
 void input_keyboard_handler(Editor *E) {
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_A)) {
+    input_bol(E);
+    return;
+  }
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_E)) {
+    input_eol(E);
+    return;
+  }
   if (IsKeyPressed(KEY_ENTER)) {
     input_return(E);
     return;
