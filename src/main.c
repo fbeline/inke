@@ -9,6 +9,8 @@
 #include "input.h"
 #include "render.h"
 
+static Editor E = {0};
+
 void LoadCustomFont(void) {
   Font customFont = LoadFontEx("resources/FiraCode-Regular.ttf", E.font.size, NULL, 250); 
   E.font.lineSpacing = E.font.size * 1.15;
@@ -30,11 +32,8 @@ void LoadCustomFont(void) {
 }
 
 void Init(char* filename) {
-  // DATA INIT
-  memcpy(E.filename, filename, strlen(filename));
-  E.filename[strlen(filename)] = '\0';
   File file = FileRead(filename);
-  BuildRows(&file);
+  E = editor_init(&file);
 
   // WINDOW INIT
   E.window = (Window){1280, 720};
@@ -57,8 +56,8 @@ int main(int argc, char **argv) {
   Init(argv[1]);
 
   while (!WindowShouldClose()) {
-    MouseWheelHandler();
-    KeyboardHandler();
+    MouseWheelHandler(&E);
+    KeyboardHandler(&E);
 
     // RELOAD FONT IF SCREEN SIZE CHANGES
     if (GetScreenWidth() != E.window.width || GetScreenHeight() != E.window.height) {
@@ -71,7 +70,7 @@ int main(int argc, char **argv) {
       LoadCustomFont();
     }
 
-    render_draw();
+    render_draw(&E);
   }
 
   // == BEGIN De-Initialization ===

@@ -2,9 +2,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <memory.h>
-
-Editor E = {0};
 
 char Next(File* file, usize i) {
   if (i + 1 >= file->len)
@@ -51,9 +50,9 @@ void CpyRow(File* file, Row* row, usize offset, usize eol) {
   row->chars[row->size - 1] = '\0';
 }
 
-void BuildRows(File *file) {
+void BuildRows(Editor *E, File *file) {
   usize rowSize = 10;
-  E.rows = (Row*)malloc(rowSize * sizeof(Row));
+  E->rows = (Row*)malloc(rowSize * sizeof(Row));
 
   unsigned int currentRow = 0;
   usize lineStart = 0;
@@ -65,73 +64,73 @@ void BuildRows(File *file) {
         i++;
         eol--;
       }
-      CpyRow(file, &E.rows[currentRow], lineStart, i);
+      CpyRow(file, &E->rows[currentRow], lineStart, i);
 
       currentRow++;
       lineStart = i + 1;
       if (currentRow >= rowSize) {
         rowSize *= 2;
-        Row *tmp = realloc(E.rows, rowSize * sizeof(Row));
-        E.rows = tmp;
+        Row *tmp = realloc(E->rows, rowSize * sizeof(Row));
+        E->rows = tmp;
       }
     }
   }
 
-  E.rowSize = rowSize;
-  E.rowslen = currentRow;
+  E->rowSize = rowSize;
+  E->rowslen = currentRow;
 }
 
-bool InsertRowAt(usize n) {
-  usize newLen = E.rowslen + 1;
-  if (newLen >= E.rowSize) {
-    usize newSize = E.rowSize + 10;
-    Row* tmp = (Row*)realloc(E.rows, newSize * sizeof(Row));
+bool InsertRowAt(Editor* E, usize n) {
+  usize newLen = E->rowslen + 1;
+  if (newLen >= E->rowSize) {
+    usize newSize = E->rowSize + 10;
+    Row* tmp = (Row*)realloc(E->rows, newSize * sizeof(Row));
     if (tmp == NULL) return false;
 
-    E.rowSize = newSize;
+    E->rowSize = newSize;
   }
 
-  memmove(E.rows + n + 1, E.rows + n, sizeof(Row) * (E.rowslen - n));
-  E.rowslen = newLen;
+  memmove(E->rows + n + 1, E->rows + n, sizeof(Row) * (E->rowslen - n));
+  E->rowslen = newLen;
 
-  E.rows[n] = (Row){0, NULL};
+  E->rows[n] = (Row){0, NULL};
   return true;
 }
 
-void RemoveCharAtCursor(void) {
-  if (E.cx == 0) {
-    if (E.cy == 0) return;
-    usize crow_len = strlen(E.rows[E.cy].chars);
-    usize prow_len = strlen(E.rows[E.cy-1].chars);
+void RemoveCharAtCursor(Editor *E) {
+  if (E->cx == 0) {
+    if (E->cy == 0) return;
+    usize crow_len = strlen(E->rows[E->cy].chars);
+    usize prow_len = strlen(E->rows[E->cy-1].chars);
 
     // realloc previous row if necessary
-    if (crow_len + prow_len >= E.rows[E.cy-1].size) {
-      char* tmp = realloc(E.rows[E.cy-1].chars, E.rows[E.cy-1].size + crow_len);
+    if (crow_len + prow_len >= E->rows[E->cy-1].size) {
+      char* tmp = realloc(E->rows[E->cy-1].chars, E->rows[E->cy-1].size + crow_len);
       if (tmp == NULL) return;
-      E.rows[E.cy-1].chars = tmp;
-      E.rows[E.cy-1].size += crow_len;
+      E->rows[E->cy-1].chars = tmp;
+      E->rows[E->cy-1].size += crow_len;
     }
 
     // cpy current row to the end of previous row
-    memcpy(E.rows[E.cy-1].chars + prow_len, E.rows[E.cy].chars, crow_len);
-    E.rows[E.cy-1].chars[crow_len + prow_len] = '\0';
+    memcpy(E->rows[E->cy-1].chars + prow_len, E->rows[E->cy].chars, crow_len);
+    E->rows[E->cy-1].chars[crow_len + prow_len] = '\0';
 
-    free(E.rows[E.cy].chars);
-    memmove(E.rows + E.cy, E.rows + (E.cy + 1), (E.rowslen - E.cy - 1) * sizeof(Row));
+    free(E->rows[E->cy].chars);
+    memmove(E->rows + E->cy, E->rows + (E->cy + 1), (E->rowslen - E->cy - 1) * sizeof(Row));
 
-    E.rowslen--;
-    E.cy--;
-    E.cx = prow_len;
+    E->rowslen--;
+    E->cy--;
+    E->cx = prow_len;
     return;
   }
 
-  usize len = strlen(E.rows[E.cy].chars);
-  for (usize i = E.cx-1; i < len-1; i++) {
-    E.rows[E.cy].chars[i] = E.rows[E.cy].chars[i + 1];
+  usize len = strlen(E->rows[E->cy].chars);
+  for (usize i = E->cx-1; i < len-1; i++) {
+    E->rows[E->cy].chars[i] = E->rows[E->cy].chars[i + 1];
   }
-  E.rows[E.cy].chars[len-1] = '\0';
+  E->rows[E->cy].chars[len-1] = '\0';
 
-  E.cx = E.cx - 1;
+  E->cx = E->cx - 1;
 }
 
 void InsertCharAt(Row* row, int c, int i) {
@@ -153,16 +152,25 @@ void InsertCharAt(Row* row, int c, int i) {
   free(tmp);
 }
 
-void InsertChar(int c) {
-  if (strlen(E.rows[E.cy].chars) + 1 >= E.rows[E.cy].size) {
-    E.rows[E.cy].size += 8;
-    char* tmp = realloc(E.rows[E.cy].chars, E.rows[E.cy].size);
+void InsertChar(Editor* E, int c) {
+  if (strlen(E->rows[E->cy].chars) + 1 >= E->rows[E->cy].size) {
+    E->rows[E->cy].size += 8;
+    char* tmp = realloc(E->rows[E->cy].chars, E->rows[E->cy].size);
     if (tmp == NULL) {
       printf("MEM ALLOC FAILED\n");
       return;
     }
-    E.rows[E.cy].chars = tmp;
+    E->rows[E->cy].chars = tmp;
   }
-  InsertCharAt(&E.rows[E.cy], c, E.cx);
-  E.cx++;
+  InsertCharAt(&E->rows[E->cy], c, E->cx);
+  E->cx++;
+}
+
+Editor editor_init(File* file) {
+  Editor E = { 0 };
+  memcpy(E.filename, file->name, strlen(file->name));
+
+  BuildRows(&E, file);
+
+  return E;
 }

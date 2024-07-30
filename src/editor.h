@@ -41,15 +41,12 @@ typedef struct editor {
 
 char* RowsToString(Row* rows, unsigned int size);
 
-void BuildRows(File *file);
+bool InsertRowAt(Editor* E, usize n);
 
-bool InsertRowAt(usize n);
-
-void RemoveCharAtCursor(void);
+void RemoveCharAtCursor(Editor *E);
 
 void InsertCharAt(Row* row, int c, int i);
 
-void InsertChar(int c);
+void InsertChar(Editor* E, int c);
 
-
-extern Editor E;
+Editor editor_init(File *file);

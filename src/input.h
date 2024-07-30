@@ -1,5 +1,7 @@
 #pragma once
 
-void MouseWheelHandler(void);
+#include "editor.h"
 
-void KeyboardHandler(void);
+void MouseWheelHandler(Editor *E);
+
+void KeyboardHandler(Editor *E);

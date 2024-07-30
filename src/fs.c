@@ -1,5 +1,6 @@
 #include "fs.h"
 
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -52,6 +53,7 @@ File FileRead(const char *filename) {
   data = tmp;
   data[used] = 0;
 
+  memcpy(file.name, filename, strlen(filename));
   file.data = data;
   file.len = used;
   file.is_valid = true;

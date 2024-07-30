@@ -3,4 +3,4 @@
 #include "types.h"
 #include "editor.h"
 
-void render_draw(void);
+void render_draw(Editor *E);

@@ -4,6 +4,7 @@
 #include "types.h"
 
 typedef struct {
+    char name[255];
     char* data;
     usize len;
     bool is_valid;
