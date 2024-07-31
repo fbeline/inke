@@ -6,12 +6,12 @@
 #define MAX_COL 66
 #define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
-typedef struct row {
+typedef struct row_s {
   usize size;
   char* chars;
 } row_t;
 
-typedef struct editor {
+typedef struct editor_s {
   char filename[255];
   i32 cx, cy;
   i32 rowoff, coloff;

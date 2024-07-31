@@ -5,7 +5,7 @@
 #include "types.h"
 #include "editor.h"
 
-typedef struct {
+typedef struct render_state_s {
   i32 margin_top, margin_left;
   u16 font_size, font_line_spacing;
   u16 window_height, window_width;
