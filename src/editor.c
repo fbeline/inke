@@ -164,7 +164,7 @@ void editor_insert_char_at_cursor(editor_t* E, int c) {
     }
     E->rows[E->cy].chars = tmp;
   }
-  editor_insert_char_at(&E->rows[E->cy], c, E->cx);
+  editor_insert_char_at(&E->rows[E->cy], c, E->cx + E->coloff);
   E->cx++;
 
   if (E->cx > MAX_COL) {
