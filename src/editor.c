@@ -166,6 +166,11 @@ void editor_insert_char_at_cursor(editor_t* E, int c) {
   }
   editor_insert_char_at(&E->rows[E->cy], c, E->cx);
   E->cx++;
+
+  if (E->cx > MAX_COL) {
+    E->coloff++;
+    E->cx = MAX_COL;
+  }
 }
 
 editor_t editor_init(File* file) {
