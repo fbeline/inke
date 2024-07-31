@@ -5,7 +5,7 @@
 #include <raylib.h>
 #include "utils.h"
 
-void input_return(Editor *E) {
+void input_return(editor_t* E) {
   if (!editor_insert_row_at(E, E->cy + 1)) return;
 
   E->rows[E->cy + 1].size = strlen(E->rows[E->cy].chars) - E->cx + 2;
@@ -20,18 +20,18 @@ void input_return(Editor *E) {
   E->cx = 0;
 }
 
-void input_eol(Editor *E) {
+void input_eol(editor_t* E) {
   i64 len = strlen(E->rows[E->cy].chars);
   E->cx = MIN(len, MAX_COL);
   E->coloff = MAX(0, len - MAX_COL);
 }
 
-void input_bol(Editor* E) {
+void input_bol(editor_t* E) {
   E->cx = 0;
   E->coloff = 0;
 }
 
-void input_mousewheel_handler(Editor *E) {
+void input_mousewheel_handler(editor_t* E) {
   float mouseWheelMove = GetMouseWheelMove();
   if (mouseWheelMove > 0) {
     E->rowoff = MAX(E->rowoff - 1, 0);
@@ -41,7 +41,7 @@ void input_mousewheel_handler(Editor *E) {
   }
 }
 
-void input_keyboard_handler(Editor *E) {
+void input_keyboard_handler(editor_t* E) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_A)) {
     input_bol(E);
     return;

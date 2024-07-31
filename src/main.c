@@ -7,7 +7,7 @@
 #include "input.h"
 #include "render.h"
 
-static Editor E = {0};
+static editor_t E = {0};
 
 void Init(char* filename) {
   File file = FileRead(filename);

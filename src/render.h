@@ -12,7 +12,7 @@ typedef struct {
   Font font;
 } render_state_t;
 
-void render_draw(Editor *E);
+void render_draw(editor_t *E);
 
 void render_load_font(u16 font_size);
 

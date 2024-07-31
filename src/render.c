@@ -7,7 +7,7 @@ static render_state_t rs = { 0 };
 
 static f32 blinkT;
 static bool cVisible = true;
-static void DrawCursor(Editor* E) {
+static void DrawCursor(editor_t* E) {
   blinkT += GetFrameTime();
 
   if (blinkT >= 0.5) {
@@ -48,7 +48,7 @@ void render_reload_font(void) {
   render_load_font(rs.font_size * scale);
 }
 
-void render_draw(Editor* E) {
+void render_draw(editor_t* E) {
   BeginDrawing();
 
   ClearBackground(RAYWHITE);
@@ -59,7 +59,7 @@ void render_draw(Editor* E) {
     if (y + rs.font_size >= rs.window_height) break;
 
     char vrow[MAX_COL + 1] = "";
-    Row row = E->rows[i + E->rowoff];
+    row_t row = E->rows[i + E->rowoff];
     usize row_len = strlen(row.chars);
     row_len = row_len > E->coloff ? row_len - E->coloff : 0;
     usize vrow_len = MIN(row_len, MAX_COL);

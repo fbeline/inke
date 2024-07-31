@@ -9,26 +9,23 @@
 typedef struct row {
   usize size;
   char* chars;
-} Row;
+} row_t;
 
 typedef struct editor {
   char filename[255];
-  int cx, cy;
-  int rowoff;
-  int coloff;
-  int screenrows;
-  int screencols;
-  unsigned int rowslen;
-  unsigned int rowSize;
-  Row* rows;
-} Editor;
+  i32 cx, cy;
+  i32 rowoff, coloff;
+  i32 screenrows, screencols;
+  u32 rowslen, rowSize;
+  row_t* rows;
+} editor_t;
 
-Editor editor_init(File *file);
+editor_t editor_init(File *file);
 
-void editor_remove_char_at_cursor(Editor *E);
+void editor_remove_char_at_cursor(editor_t* E);
 
-void editor_insert_char_at_cursor(Editor* E, int c);
+void editor_insert_char_at_cursor(editor_t* E, int c);
 
-char* editor_rows_to_string(Row* rows, unsigned int size);
+char* editor_rows_to_string(row_t* rows, unsigned int size);
 
-bool editor_insert_row_at(Editor* E, usize n);
+bool editor_insert_row_at(editor_t* E, usize n);
