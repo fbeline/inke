@@ -13,16 +13,7 @@ void Init(char* filename) {
   File file = FileRead(filename);
   E = editor_init(&file);
 
-  // WINDOW INIT
-  E.window = (Window){1280, 720};
-  InitWindow(E.window.width, E.window.height, "Olive");
-  SetWindowState(FLAG_WINDOW_RESIZABLE);
-
-  SetTargetFPS(60);
-
-  // FONT INIT
-  E.font.size = 30;
-  render_load_font(&E);
+  render_init(1280, 720, 30);
 }
 
 int main(int argc, char **argv) {
@@ -37,17 +28,12 @@ int main(int argc, char **argv) {
     input_mousewheel_handler(&E);
     input_keyboard_handler(&E);
 
-    // RELOAD FONT IF SCREEN SIZE CHANGES
-    if (GetScreenWidth() != E.window.width || GetScreenHeight() != E.window.height) {
-      render_reload_font(&E); 
-    }
+    render_reload_font();
 
     render_draw(&E);
   }
 
-  // == BEGIN De-Initialization ===
   CloseWindow();        // Close window and OpenGL context
-  // === END DE-INITIALIZATION ===
 
   return 0;
 }
