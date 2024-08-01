@@ -111,7 +111,7 @@ bool editor_insert_row_at(editor_t* E, usize n) {
 }
 
 void editor_remove_char_at_cursor(editor_t *E) {
-  if (E->cx == 0) {
+  if (E->cx == 0 && E->coloff == 0) {
     if (E->cy == 0) return;
     usize crow_len = strlen(E->rows[E->cy].chars);
     usize prow_len = strlen(E->rows[E->cy-1].chars);
@@ -140,12 +140,14 @@ void editor_remove_char_at_cursor(editor_t *E) {
   }
 
   usize len = strlen(E->rows[E->cy].chars);
-  for (usize i = E->cx-1; i < len-1; i++) {
-    E->rows[E->cy].chars[i] = E->rows[E->cy].chars[i + 1];
-  }
-  E->rows[E->cy].chars[len-1] = '\0';
+  memmove(E->rows[E->cy].chars + E->cx + E->coloff - 1, 
+          E->rows[E->cy].chars + E->cx + E->coloff,
+          len - E->cx - E->coloff + 1);
 
-  E->cx = E->cx - 1;
+  if (E->cx == 0 && E->coloff > 0)
+    E->coloff--;
+  else
+    E->cx--;
 }
 
 void editor_insert_char_at(row_t* row, int c, int i) {
