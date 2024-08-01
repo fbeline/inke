@@ -5,11 +5,24 @@
 #include <string.h>
 #include <memory.h>
 
+#include "utils.h"
+
 char next(File* file, usize i) {
   if (i + 1 >= file->len)
     return '\0';
 
   return file->data[i + 1];
+}
+
+void editor_eol(editor_t* E) {
+  i64 len = strlen(E->rows[E->cy].chars);
+  E->cx = MIN(len, MAX_COL);
+  E->coloff = MAX(0, len - MAX_COL);
+}
+
+void editor_bol(editor_t* E) {
+  E->cx = 0;
+  E->coloff = 0;
 }
 
 char* editor_rows_to_string(row_t* rows, unsigned int size) {

@@ -20,15 +20,26 @@ void input_return(editor_t* E) {
   E->cx = 0;
 }
 
-void input_eol(editor_t* E) {
-  i64 len = strlen(E->rows[E->cy].chars);
-  E->cx = MIN(len, MAX_COL);
-  E->coloff = MAX(0, len - MAX_COL);
+void input_key_down(editor_t* E) {
+  E->cy = MIN(E->cy+1, E->rowslen-1);
+  if (E->cy - E->rowoff >= E->screenrows) {
+    E->rowoff = MIN(E->rowoff+1, E->rowslen);
+  }
+
+  usize row_len = strlen(E->rows[E->cy].chars);
+  if (E->cx > row_len) {
+    editor_eol(E);
+  }
 }
 
-void input_bol(editor_t* E) {
-  E->cx = 0;
-  E->coloff = 0;
+void input_key_up(editor_t* E) {
+  E->cy = MAX(E->cy-1, 0);
+  if (E->cy - E->rowoff <= 0)
+    E->rowoff = MAX(E->rowoff-1, 0);
+
+  if (E->cx > strlen(E->rows[E->cy].chars)) {
+    editor_eol(E);
+  }
 }
 
 void input_mousewheel_handler(editor_t* E) {
@@ -43,11 +54,11 @@ void input_mousewheel_handler(editor_t* E) {
 
 void input_keyboard_handler(editor_t* E) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_A)) {
-    input_bol(E);
+    editor_bol(E);
     return;
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_E)) {
-    input_eol(E);
+    editor_eol(E);
     return;
   }
   if (IsKeyPressed(KEY_ENTER)) {
@@ -67,14 +78,7 @@ void input_keyboard_handler(editor_t* E) {
     }
   }
   if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN)) {
-    E->cy = MIN(E->cy+1, E->rowslen-1);
-    if (E->cy - E->rowoff >= E->screenrows) {
-      E->rowoff = MIN(E->rowoff+1, E->rowslen);
-    }
-
-    if (E->cx > strlen(E->rows[E->cy].chars)) {
-      E->cx = strlen(E->rows[E->cy].chars);
-    }
+    input_key_down(E); 
   }
   if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) {
     E->cx--;
@@ -96,13 +100,7 @@ void input_keyboard_handler(editor_t* E) {
     } 
   }
   if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP)) {
-    E->cy = MAX(E->cy-1, 0);
-    if (E->cy - E->rowoff <= 0)
-      E->rowoff = MAX(E->rowoff-1, 0);
-
-    if (E->cx > strlen(E->rows[E->cy].chars)) {
-      E->cx = strlen(E->rows[E->cy].chars);
-    }
+    input_key_up(E);
   }
   if (IsKeyPressed(KEY_BACKSPACE)) {
     editor_remove_char_at_cursor(E);

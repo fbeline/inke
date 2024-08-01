@@ -22,6 +22,10 @@ typedef struct editor_s {
 
 editor_t editor_init(File *file);
 
+void editor_bol(editor_t* E);
+
+void editor_eol(editor_t* E);
+
 void editor_remove_char_at_cursor(editor_t* E);
 
 void editor_insert_char_at_cursor(editor_t* E, int c);
