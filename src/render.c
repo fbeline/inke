@@ -58,15 +58,13 @@ void render_draw(editor_t* E) {
     f32 y = rs.font_line_spacing * i + rs.margin_top;
     if (y + rs.font_size >= rs.window_height) break;
 
-    char vrow[MAX_COL + 1] = "";
+    char vrow[MAX_COL + 1] = {0};
     row_t row = E->rows[i + E->rowoff];
-    usize row_len = strlen(row.chars);
-    row_len = row_len > E->coloff ? row_len - E->coloff : 0;
-    usize vrow_len = MIN(row_len, MAX_COL);
+    i64 row_len = strlen(row.chars);
+    i64 vrow_len = MIN(row_len - E->coloff, MAX_COL);
+    if (vrow_len <= 0) continue;
 
-    if (vrow_len > E->coloff)
-      memcpy(vrow, row.chars + E->coloff, vrow_len);
-
+    memcpy(vrow, row.chars + E->coloff, vrow_len);
     DrawTextEx(rs.font,
                vrow,
                (Vector2){rs.margin_left, y},

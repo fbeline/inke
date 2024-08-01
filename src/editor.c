@@ -191,15 +191,12 @@ void editor_insert_char_at_cursor(editor_t* E, int c) {
   if (strlen(E->rows[E->cy].chars) + 1 >= E->rows[E->cy].size) {
     E->rows[E->cy].size += 8;
     char* tmp = realloc(E->rows[E->cy].chars, E->rows[E->cy].size);
-    if (tmp == NULL) {
-      printf("MEM ALLOC FAILED\n");
-      return;
-    }
+    if (tmp == NULL) return;
     E->rows[E->cy].chars = tmp;
   }
   editor_insert_char_at(&E->rows[E->cy], c, E->cx + E->coloff);
-  E->cx++;
 
+  E->cx++;
   if (E->cx > MAX_COL) {
     E->coloff++;
     E->cx = MAX_COL;
