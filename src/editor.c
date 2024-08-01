@@ -188,6 +188,22 @@ void editor_insert_char_at_cursor(editor_t* E, int c) {
   }
 }
 
+void editor_return(editor_t* E) {
+  if (!editor_insert_row_at(E, E->cy + 1)) return;
+
+  E->rows[E->cy + 1].size = strlen(E->rows[E->cy].chars) - E->cx + 2;
+  E->rows[E->cy + 1].chars = malloc(E->rows[E->cy + 1].size);
+  memcpy(E->rows[E->cy + 1].chars,
+         E->rows[E->cy].chars + E->cx + E->coloff,
+         strlen(E->rows[E->cy].chars) - E->cx - E->coloff + 1);
+
+  E->rows[E->cy].chars[E->cx] = '\0';
+
+  E->cy++;
+  E->cx = 0;
+  E->coloff = 0;
+}
+
 editor_t editor_init(File* file) {
   editor_t E = { 0 };
   memcpy(E.filename, file->name, strlen(file->name));

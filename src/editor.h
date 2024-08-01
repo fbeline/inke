@@ -33,3 +33,5 @@ void editor_insert_char_at_cursor(editor_t* E, int c);
 char* editor_rows_to_string(row_t* rows, unsigned int size);
 
 bool editor_insert_row_at(editor_t* E, usize n);
+
+void editor_return(editor_t* E);

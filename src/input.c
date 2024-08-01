@@ -5,21 +5,6 @@
 #include <raylib.h>
 #include "utils.h"
 
-void input_return(editor_t* E) {
-  if (!editor_insert_row_at(E, E->cy + 1)) return;
-
-  E->rows[E->cy + 1].size = strlen(E->rows[E->cy].chars) - E->cx + 2;
-  E->rows[E->cy + 1].chars = malloc(E->rows[E->cy + 1].size);
-  memcpy(E->rows[E->cy + 1].chars,
-         E->rows[E->cy].chars + E->cx,
-         strlen(E->rows[E->cy].chars) - E->cx + 1);
-
-  E->rows[E->cy].chars[E->cx] = '\0';
-
-  E->cy++;
-  E->cx = 0;
-}
-
 void input_key_down(editor_t* E) {
   E->cy = MIN(E->cy+1, E->rowslen-1);
   if (E->cy - E->rowoff >= E->screenrows) {
@@ -42,16 +27,6 @@ void input_key_up(editor_t* E) {
   }
 }
 
-void input_mousewheel_handler(editor_t* E) {
-  float mouseWheelMove = GetMouseWheelMove();
-  if (mouseWheelMove > 0) {
-    E->rowoff = MAX(E->rowoff - 1, 0);
-  }
-  else if (mouseWheelMove < 0) {
-    E->rowoff = MIN(E->rowoff + 1, E->rowslen - 1);  // Mouse wheel down
-  }
-}
-
 void input_keyboard_handler(editor_t* E) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_A)) {
     editor_bol(E);
@@ -62,7 +37,7 @@ void input_keyboard_handler(editor_t* E) {
     return;
   }
   if (IsKeyPressed(KEY_ENTER)) {
-    input_return(E);
+    editor_return(E);
     return;
   }
   if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {

@@ -25,7 +25,6 @@ int main(int argc, char **argv) {
   Init(argv[1]);
 
   while (!WindowShouldClose()) {
-    input_mousewheel_handler(&E);
     input_keyboard_handler(&E);
 
     render_reload_font();
