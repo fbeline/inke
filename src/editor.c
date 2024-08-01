@@ -110,8 +110,22 @@ bool editor_insert_row_at(editor_t* E, usize n) {
   return true;
 }
 
-void editor_remove_char_at_cursor(editor_t *E) {
-  if (E->cx == 0 && E->coloff == 0) {
+void editor_move_cursor(editor_t* E, i32 x, i32 y) {
+  usize len = strlen(E->rows[y].chars);
+  if (x < len && x > MAX_COL) {
+    const i32 offset = 10;
+    E->coloff = x - MAX_COL + offset;
+    E->cx = MAX_COL - offset;
+  } else if (E->cx > len) {
+    E->cx = len;
+  } else {
+    E->cx = x;
+  }
+
+  E->cy = y;
+}
+
+void editor_move_line_up(editor_t* E) {
     if (E->cy == 0) return;
     usize crow_len = strlen(E->rows[E->cy].chars);
     usize prow_len = strlen(E->rows[E->cy-1].chars);
@@ -128,15 +142,19 @@ void editor_remove_char_at_cursor(editor_t *E) {
     memcpy(E->rows[E->cy-1].chars + prow_len, E->rows[E->cy].chars, crow_len);
     E->rows[E->cy-1].chars[crow_len + prow_len] = '\0';
 
+    // remove row
     free(E->rows[E->cy].chars);
     memmove(E->rows + E->cy,
             E->rows + (E->cy + 1),
             (E->rowslen - E->cy - 1) * sizeof(row_t));
 
     E->rowslen--;
-    E->cy--;
-    E->cx = prow_len;
-    return;
+    editor_move_cursor(E, prow_len, E->cy-1);
+}
+
+void editor_remove_char_at_cursor(editor_t *E) {
+  if (E->cx == 0 && E->coloff == 0) {
+    return editor_move_line_up(E);
   }
 
   usize len = strlen(E->rows[E->cy].chars);
