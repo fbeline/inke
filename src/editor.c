@@ -25,6 +25,39 @@ void editor_bol(editor_t* E) {
   E->coloff = 0;
 }
 
+void editor_move_cursor_right(editor_t *E) {
+    E->cx++;
+    if (E->cx + E->coloff > MAX_COL) {
+      E->cx = MAX_COL;
+      E->coloff++;
+    }
+    if (E->cx + E->coloff > strlen(E->rows[E->cy].chars)) {
+      E->coloff = 0;
+      E->cx = 0;
+      E->cy++;
+    }
+}
+
+void editor_move_cursor_left(editor_t *E) {
+  E->cx--;
+
+  if (E->cx < 0) {
+    if (E->cy == 0) {
+      E->cx = 0;
+      return;
+    }
+    int rowlen = strlen(E->rows[MAX(0, E->cy-1)].chars);
+    if (E->coloff == 0) {
+      E->cx = MIN(rowlen, MAX_COL);
+      E->cy = MAX(E->cy - 1, 0);
+      if (rowlen > MAX_COL) E->coloff = rowlen - MAX_COL;
+    } else {
+      E->coloff--;
+      E->cx = 0;
+    }
+  }
+}
+
 char* editor_rows_to_string(row_t* rows, unsigned int size) {
   usize strsize = 1;
   usize strl = 0;

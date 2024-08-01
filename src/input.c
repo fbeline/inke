@@ -41,38 +41,13 @@ void input_keyboard_handler(editor_t* E) {
     return;
   }
   if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {
-    E->cx++;
-    if (E->cx + E->coloff > MAX_COL) {
-      E->cx = MAX_COL;
-      E->coloff++;
-    }
-    if (E->cx + E->coloff > strlen(E->rows[E->cy].chars)) {
-      E->coloff = 0;
-      E->cx = 0;
-      E->cy++;
-    }
+    editor_move_cursor_right(E);
   }
   if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN)) {
     input_key_down(E); 
   }
   if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) {
-    E->cx--;
-  
-    if (E->cx < 0) {
-      if (E->cy == 0) {
-        E->cx = 0;
-        return;
-      }
-      int rowlen = strlen(E->rows[MAX(0, E->cy-1)].chars);
-      if (E->coloff == 0) {
-        E->cx = MIN(rowlen, MAX_COL);
-        E->cy = MAX(E->cy - 1, 0);
-        if (rowlen > MAX_COL) E->coloff = rowlen - MAX_COL;
-      } else {
-        E->coloff--;
-        E->cx = 0;
-      }
-    } 
+    editor_move_cursor_left(E); 
   }
   if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP)) {
     input_key_up(E);
