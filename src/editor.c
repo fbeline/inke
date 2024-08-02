@@ -58,6 +58,20 @@ void editor_move_cursor_left(editor_t *E) {
   }
 }
 
+void editor_move_cursor_word_forward(editor_t* E) {
+  do {
+    if (E->cy >= E->rowslen - 1 && strlen(E->rows[E->cy].chars) >= E->cx) break;
+    editor_move_cursor_right(E);
+  } while(E->rows[E->cy].chars[E->cx] !=  ' ');
+}
+
+void editor_move_cursor_word_backward(editor_t* E) {
+  do {
+    if (E->cy == 0 && E->cx == 0) break;
+    editor_move_cursor_left(E);
+  } while(E->rows[E->cy].chars[E->cx] !=  ' ');
+}
+
 char* editor_rows_to_string(row_t* rows, unsigned int size) {
   usize strsize = 1;
   usize strl = 0;

@@ -30,6 +30,10 @@ void editor_move_cursor_right(editor_t *E);
 
 void editor_move_cursor_left(editor_t *E);
 
+void editor_move_cursor_word_forward(editor_t* E);
+
+void editor_move_cursor_word_backward(editor_t* E);
+
 void editor_remove_char_at_cursor(editor_t* E);
 
 void editor_insert_char_at_cursor(editor_t* E, int c);

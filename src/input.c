@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <raylib.h>
+#include "editor.h"
 #include "utils.h"
 
 void input_key_down(editor_t* E) {
@@ -28,15 +29,20 @@ void input_key_up(editor_t* E) {
 }
 
 void input_keyboard_handler(editor_t* E) {
-  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_A)) {
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_A)) {
     return editor_bol(E);
   }
-  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_E)) {
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_E)) {
     return editor_eol(E);
   }
+  if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {
+    return editor_move_cursor_word_forward(E);
+  }
+  if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_B)) {
+    return editor_move_cursor_word_backward(E);
+  }
   if (IsKeyPressed(KEY_ENTER)) {
-    editor_return(E);
-    return;
+    return editor_return(E);
   }
   if (IsKeyPressed(KEY_RIGHT) || 
     IsKeyPressedRepeat(KEY_RIGHT) ||
