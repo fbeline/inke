@@ -145,7 +145,7 @@ bool editor_insert_row_at(editor_t* E, usize n) {
 
 void editor_move_cursor(editor_t* E, i32 x, i32 y) {
   usize len = strlen(E->rows[y].chars);
-  if (x < len && x > MAX_COL) {
+  if (x <= len && x > MAX_COL) {
     const i32 offset = 10;
     E->coloff = x - MAX_COL + offset;
     E->cx = MAX_COL - offset;
@@ -172,8 +172,10 @@ void editor_move_line_up(editor_t* E) {
     }
 
     // cpy current row to the end of previous row
-    memcpy(E->rows[E->cy-1].chars + prow_len, E->rows[E->cy].chars, crow_len);
-    E->rows[E->cy-1].chars[crow_len + prow_len] = '\0';
+    if (crow_len > 0) {
+      memcpy(E->rows[E->cy-1].chars + prow_len, E->rows[E->cy].chars, crow_len);
+      E->rows[E->cy-1].chars[crow_len + prow_len] = '\0';
+    }
 
     // remove row
     free(E->rows[E->cy].chars);
@@ -181,8 +183,8 @@ void editor_move_line_up(editor_t* E) {
             E->rows + (E->cy + 1),
             (E->rowslen - E->cy - 1) * sizeof(row_t));
 
-    E->rowslen--;
     editor_move_cursor(E, prow_len, E->cy-1);
+    E->rowslen--;
 }
 
 void editor_remove_char_at_cursor(editor_t *E) {
