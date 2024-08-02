@@ -29,27 +29,33 @@ void input_key_up(editor_t* E) {
 
 void input_keyboard_handler(editor_t* E) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_A)) {
-    editor_bol(E);
-    return;
+    return editor_bol(E);
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_E)) {
-    editor_eol(E);
-    return;
+    return editor_eol(E);
   }
   if (IsKeyPressed(KEY_ENTER)) {
     editor_return(E);
     return;
   }
-  if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {
+  if (IsKeyPressed(KEY_RIGHT) || 
+    IsKeyPressedRepeat(KEY_RIGHT) ||
+    (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_F))) {
     editor_move_cursor_right(E);
   }
-  if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN)) {
+  if (IsKeyPressed(KEY_DOWN) ||
+    IsKeyPressedRepeat(KEY_DOWN) ||
+    (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_N))) {
     input_key_down(E); 
   }
-  if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) {
+  if (IsKeyPressed(KEY_LEFT) ||
+    IsKeyPressedRepeat(KEY_LEFT) ||
+    (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_B))) {
     editor_move_cursor_left(E); 
   }
-  if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP)) {
+  if (IsKeyPressed(KEY_UP) ||
+    IsKeyPressedRepeat(KEY_UP) ||
+    (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_P))) {
     input_key_up(E);
   }
   if (IsKeyPressed(KEY_BACKSPACE)) {
