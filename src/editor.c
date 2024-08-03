@@ -25,17 +25,22 @@ void editor_bol(editor_t* E) {
   E->coloff = 0;
 }
 
-void editor_move_cursor_right(editor_t *E) {
-    E->cx++;
-    if (E->cx + E->coloff > MAX_COL) {
-      E->cx = MAX_COL;
-      E->coloff++;
-    }
-    if (E->cx + E->coloff > strlen(E->rows[E->cy].chars)) {
-      E->coloff = 0;
-      E->cx = 0;
-      E->cy++;
-    }
+void editor_move_cursor(editor_t* E, i32 x, i32 y) {
+  usize len = strlen(E->rows[y].chars);
+  printf("len=%zu;cx=%d;coloff=%d\n", len, x, E->coloff);
+  if (x < len && x > MAX_COL) {
+    const i32 offset = 10;
+    E->coloff = x - MAX_COL + offset;
+    E->cx = MAX_COL - offset;
+  } else if (x + E->coloff >= len) {
+    E->coloff = 0;
+    E->cx = 0;
+    y++;
+  } else {
+    E->cx = x;
+  }
+
+  E->cy = y;
 }
 
 void editor_move_cursor_left(editor_t *E) {
@@ -60,8 +65,9 @@ void editor_move_cursor_left(editor_t *E) {
 
 void editor_move_cursor_word_forward(editor_t* E) {
   do {
-    if (E->cy >= E->rowslen - 1 && strlen(E->rows[E->cy].chars) >= E->cx) break;
-    editor_move_cursor_right(E);
+    if (E->cy >= E->rowslen - 1 &&
+        strlen(E->rows[E->cy].chars) >= E->cx) break;
+    editor_move_cursor(E, E->cx+1, E->cy);
   } while(E->rows[E->cy].chars[E->cx] !=  ' ');
 }
 
@@ -155,21 +161,6 @@ bool editor_insert_row_at(editor_t* E, usize n) {
 
   E->rows[n] = (row_t){0, NULL};
   return true;
-}
-
-void editor_move_cursor(editor_t* E, i32 x, i32 y) {
-  usize len = strlen(E->rows[y].chars);
-  if (x <= len && x > MAX_COL) {
-    const i32 offset = 10;
-    E->coloff = x - MAX_COL + offset;
-    E->cx = MAX_COL - offset;
-  } else if (x > len) {
-    E->cx = len;
-  } else {
-    E->cx = x;
-  }
-
-  E->cy = y;
 }
 
 void editor_move_line_up(editor_t* E) {
