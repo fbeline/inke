@@ -14,6 +14,14 @@ char next(File* file, usize i) {
   return file->data[i + 1];
 }
 
+char editor_char_at_cursor(editor_t* E) {
+  char* chars = E->rows[E->cy].chars;
+  usize index = E->cx + E->coloff;
+  if (index > strlen(chars)) return '\0';
+
+  return chars[index];
+}
+
 void editor_eol(editor_t* E) {
   i64 len = strlen(E->rows[E->cy].chars);
   E->cx = MIN(len, MAX_COL);
@@ -25,25 +33,25 @@ void editor_bol(editor_t* E) {
   E->coloff = 0;
 }
 
-// TODO: refactor this .. considerate x equal raw x position as collof does not exists
 void editor_move_cursor(editor_t* E, i32 x, i32 y) {
+  if (x < 0 && y == 0) return;
+
   i32 len = (i32)strlen(E->rows[y].chars);
-  if (x <= len && x > MAX_COL) {
-    const i32 offset = 10;
-    E->coloff = x - MAX_COL + offset;
-    E->cx = MAX_COL - offset;
-  } else if (x + E->coloff >= len) {
-    E->coloff = 0;
-    E->cx = 0;
-    y++;
-  } else if (x < 0 && y == 0) {
-    return;
-  } else if (x < 0 && E->coloff > 0) {
+
+  if (x < 0 && E->coloff > 0) {
     E->coloff--;
   } else if (x < 0 && E->coloff == 0) {
     y = MAX(0, y - 1);
+    x = (i32)strlen(E->rows[y].chars);
     E->coloff = 0;
-    editor_move_cursor(E, (i32)strlen(E->rows[y].chars)-1, y);
+    editor_move_cursor(E, x, y);
+  } else if (x <= len && x >= MAX_COL) {
+    E->coloff = x - MAX_COL;
+    E->cx = x - E->coloff;
+  } else if (x > len) {
+    E->coloff = 0;
+    E->cx = 0;
+    y++;
   } else {
     E->cx = x;
   }
@@ -52,18 +60,20 @@ void editor_move_cursor(editor_t* E, i32 x, i32 y) {
 }
 
 void editor_move_cursor_word_forward(editor_t* E) {
+  char ch;
   do {
     if (E->cy >= E->rowslen - 1 &&
         strlen(E->rows[E->cy].chars) >= E->cx) break;
-    editor_move_cursor(E, E->cx+E->coloff+1, E->cy);
-  } while(E->rows[E->cy].chars[E->cx] !=  ' ');
+    editor_move_cursor(E, E->cx + E->coloff + 1, E->cy);
+  } while((ch = editor_char_at_cursor(E)), ch  !=  ' ' && ch != '\0');
 }
 
 void editor_move_cursor_word_backward(editor_t* E) {
+  char ch;
   do {
     if (E->cy == 0 && E->cx == 0) break;
     editor_move_cursor(E, E->cx + E->coloff - 1, E->cy);
-  } while(E->rows[E->cy].chars[E->cx] !=  ' ');
+  } while((ch = editor_char_at_cursor(E)), ch  !=  ' ' && ch != '\0');
 }
 
 char* editor_rows_to_string(row_t* rows, unsigned int size) {
