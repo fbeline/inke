@@ -47,7 +47,7 @@ void input_keyboard_handler(editor_t* E) {
   if (IsKeyPressed(KEY_RIGHT) || 
     IsKeyPressedRepeat(KEY_RIGHT) ||
     (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_F))) {
-    editor_move_cursor(E, E->cx + 1, E->cy);
+    editor_move_cursor(E, E->cx + E->coloff + 1, E->cy);
   }
   if (IsKeyPressed(KEY_DOWN) ||
     IsKeyPressedRepeat(KEY_DOWN) ||
@@ -57,7 +57,7 @@ void input_keyboard_handler(editor_t* E) {
   if (IsKeyPressed(KEY_LEFT) ||
     IsKeyPressedRepeat(KEY_LEFT) ||
     (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_B))) {
-    editor_move_cursor(E, E->cx - 1, E->cy);
+    editor_move_cursor(E, E->cx + E->coloff - 1, E->cy);
   }
   if (IsKeyPressed(KEY_UP) ||
     IsKeyPressedRepeat(KEY_UP) ||
