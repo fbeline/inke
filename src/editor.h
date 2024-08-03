@@ -28,8 +28,6 @@ void editor_eol(editor_t* E);
 
 void editor_move_cursor(editor_t* E, i32 x, i32 y);
 
-void editor_move_cursor_left(editor_t *E);
-
 void editor_move_cursor_word_forward(editor_t* E);
 
 void editor_move_cursor_word_backward(editor_t* E);
