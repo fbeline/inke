@@ -36,6 +36,8 @@ void editor_remove_char_at_cursor(editor_t* E);
 
 void editor_insert_char_at_cursor(editor_t* E, int c);
 
+void editor_delete_forward(editor_t* E);
+
 char* editor_rows_to_string(row_t* rows, unsigned int size);
 
 bool editor_insert_row_at(editor_t* E, usize n);

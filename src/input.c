@@ -35,6 +35,9 @@ void input_keyboard_handler(editor_t* E) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_E)) {
     return editor_eol(E);
   }
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_K)) {
+    return editor_delete_forward(E);
+  }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {
     return editor_move_cursor_word_forward(E);
   }

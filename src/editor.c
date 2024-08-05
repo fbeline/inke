@@ -256,6 +256,14 @@ void editor_return(editor_t* E) {
   E->coloff = 0;
 }
 
+void editor_delete_forward(editor_t* E) {
+  i32 index = E->coloff + E->cx;
+  row_t row = E->rows[E->cy];
+
+  row.chars[index] = '\0';
+  memset(row.chars + index + 1, 0,  row.size - index);
+}
+
 editor_t editor_init(File* file) {
   editor_t E = { 0 };
   memcpy(E.filename, file->name, strlen(file->name));
