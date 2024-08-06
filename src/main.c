@@ -2,16 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "fs.h"
 #include "editor.h"
 #include "input.h"
 #include "render.h"
 
 static editor_t E = {0};
 
-void Init(char* filename) {
-  File file = FileRead(filename);
-  E = editor_init(&file);
+void Init(const char* filename) {
+  E = editor_init(filename);
 
   render_init(1280, 720, 30);
 }

@@ -20,8 +20,6 @@ typedef struct editor_s {
   row_t* rows;
 } editor_t;
 
-editor_t editor_init(File *file);
-
 void editor_bol(editor_t* E);
 
 void editor_eol(editor_t* E);
@@ -40,6 +38,6 @@ void editor_delete_forward(editor_t* E);
 
 char* editor_rows_to_string(row_t* rows, unsigned int size);
 
-bool editor_insert_row_at(editor_t* E, usize n);
-
 void editor_return(editor_t* E);
+
+editor_t editor_init(const char* filename);

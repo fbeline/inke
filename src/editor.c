@@ -7,13 +7,6 @@
 
 #include "utils.h"
 
-char next(File* file, usize i) {
-  if (i + 1 >= file->len)
-    return '\0';
-
-  return file->data[i + 1];
-}
-
 char editor_char_at_cursor(editor_t* E) {
   char* chars = E->rows[E->cy].chars;
   usize index = E->cx + E->coloff;
@@ -96,52 +89,6 @@ char* editor_rows_to_string(row_t* rows, unsigned int size) {
   str[strl] = '\0';
 
   return str;
-}
-
-void editor_rowcpy(File* file, row_t* row, usize offset, usize eol) {
-  row->size = eol - offset + 2;
-  row->chars = (char*)malloc(row->size);
-
-  if (file->data[offset] == ' ') offset++; // do not render empty space as row first char
-
-  for (usize k = 0, i = offset; i <= eol && i < file->len; k++) {
-    i = offset + k;
-    char c = file->data[i];
-    if (c == '\n' || c == '\r') c = '\0';
-    if (c == '\t') c = ' ';
-    row->chars[k] = c;
-  }
-  row->chars[row->size - 1] = '\0';
-}
-
-void editor_build_rows(editor_t *E, File *file) {
-  usize rowSize = 10;
-  E->rows = (row_t*)malloc(rowSize * sizeof(row_t));
-
-  unsigned int currentRow = 0;
-  usize lineStart = 0;
-  for (usize i = 0; i < file->len; i++) {
-
-    if (file->data[i] == '\n' || file->data[i] == '\r') {
-      usize eol = i - 1;
-      if (file->data[i] == '\r' && next(file, i) == '\n') {
-        i++;
-        eol--;
-      }
-      editor_rowcpy(file, &E->rows[currentRow], lineStart, i);
-
-      currentRow++;
-      lineStart = i + 1;
-      if (currentRow >= rowSize) {
-        rowSize *= 2;
-        row_t *tmp = realloc(E->rows, rowSize * sizeof(row_t));
-        E->rows = tmp;
-      }
-    }
-  }
-
-  E->rowSize = rowSize;
-  E->rowslen = currentRow;
 }
 
 bool editor_insert_row_at(editor_t* E, usize n) {
@@ -263,11 +210,61 @@ void editor_delete_forward(editor_t* E) {
   row.chars[index] = '\0';
 }
 
-editor_t editor_init(File* file) {
-  editor_t E = { 0 };
-  memcpy(E.filename, file->name, strlen(file->name));
+int editor_open_file(const char* filename, editor_t* E) {
+  FILE* fp;
+  char buffer[1024];
+  usize rows_capacity = 0, rows_size = 0;
 
-  editor_build_rows(&E, file);
+  fp = fopen(filename, "r");
+  if (fp == NULL) {
+    perror("Error opening file");
+    return 1;
+  }
+
+  while(fgets(buffer, sizeof(buffer), fp)) {
+    usize len = strlen(buffer);
+    if (len > 0 && buffer[len-1] == '\n') {
+      buffer[len-1] = '\0';
+    }
+
+    // realoc rows if necessary
+    if (rows_size >= rows_capacity) {
+      rows_capacity = (rows_capacity == 0) ? 1 : rows_capacity * 2;
+      E->rows = realloc(E->rows, rows_capacity * sizeof(row_t));
+      if (E->rows == NULL) {
+        perror("Error reallocating memory");
+        fclose(fp);
+        return 1;
+      }
+    }
+
+    // build line
+    E->rows[rows_size].size = strlen(buffer);
+    E->rows[rows_size].chars = malloc(E->rows[rows_size].size + 1);
+    if (E->rows[rows_size].chars == NULL) {
+      perror("Error allocating memory for chars");
+      fclose(fp);
+      return 1;
+    }
+    memcpy(E->rows[rows_size].chars, buffer, E->rows[rows_size].size + 1); // +1 to cpy \0
+
+    rows_size++;
+  }
+
+  fclose(fp);
+
+  E->rowslen = rows_size;
+  E->rowSize = rows_capacity;
+  memcpy(E->filename, filename, strlen(filename));
+
+  return 0;
+}
+
+editor_t editor_init(const char* filename) {
+  editor_t E = { 0 };
+  if (editor_open_file(filename, &E) != 0) {
+    perror("Error opening file");
+  }
 
   return E;
 }
