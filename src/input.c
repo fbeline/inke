@@ -38,6 +38,11 @@ void input_keyboard_handler(editor_t* E) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_K)) {
     return editor_delete_forward(E);
   }
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
+    char *buf = editor_rows_to_string(E->rows, E->rowslen);
+    FileWrite(E->filename, buf);
+    free(buf);
+  }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {
     return editor_move_cursor_word_forward(E);
   }
@@ -69,11 +74,6 @@ void input_keyboard_handler(editor_t* E) {
   }
   if (IsKeyPressed(KEY_BACKSPACE)) {
     editor_remove_char_at_cursor(E);
-  }
-  if (IsKeyPressed(KEY_F10)) {
-    char *buf = editor_rows_to_string(E->rows, E->rowslen);
-    FileWrite(E->filename, buf);
-    free(buf);
   }
 
   int ch = GetCharPressed();
