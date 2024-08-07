@@ -260,10 +260,22 @@ int editor_open_file(const char* filename, editor_t* E) {
   return 0;
 }
 
+void editor_new_file(const char* filename, editor_t* E) {
+  memcpy(E->filename, filename, strlen(filename));
+  E->rowslen = 1;
+  E->rowSize = 1;
+  E->rows = (row_t*)malloc(sizeof(row_t));
+  E->rows->size = 1;
+  E->rows->chars = malloc(1);
+  E->rows->chars[0] = '\0';
+}
+
 editor_t editor_init(const char* filename) {
   editor_t E = { 0 };
-  if (editor_open_file(filename, &E) != 0) {
-    perror("Error opening file");
+  if (FS_FILE_EXISTS(filename)) {
+    editor_open_file(filename, &E);
+  } else {
+    editor_new_file(filename, &E);
   }
 
   return E;

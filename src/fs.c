@@ -17,4 +17,3 @@ int FileWrite(const char* filename, const char* buf) {
 
   return 0;
 }
-
