@@ -29,6 +29,18 @@ void input_key_up(editor_t* E) {
   }
 }
 
+void input_page_down(editor_t* E) {
+  for (size_t i = 0; i < MAX_ROW; i++) {
+    input_key_down(E);
+  }
+}
+
+void input_page_up(editor_t* E) {
+  for (size_t i = 0; i < MAX_ROW; i++) {
+    input_key_up(E);
+  }
+}
+
 void input_keyboard_handler(editor_t* E) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_A)) {
     return editor_bol(E);
@@ -43,6 +55,7 @@ void input_keyboard_handler(editor_t* E) {
     char *buf = editor_rows_to_string(E->rows, E->row_size);
     FileWrite(E->filename, buf);
     free(buf);
+    return;
   }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {
     return editor_move_cursor_word_forward(E);
@@ -52,6 +65,12 @@ void input_keyboard_handler(editor_t* E) {
   }
   if (IsKeyPressed(KEY_ENTER)) {
     return editor_return(E);
+  }
+  if (IsKeyPressed(KEY_PAGE_DOWN)) {
+    return input_page_down(E);
+  }
+  if (IsKeyPressed(KEY_PAGE_UP)) {
+    return input_page_up(E);
   }
   if (IsKeyPressed(KEY_RIGHT) || 
     IsKeyPressedRepeat(KEY_RIGHT) ||

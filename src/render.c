@@ -7,6 +7,8 @@ static render_state_t rs = { 0 };
 
 static f32 blinkT;
 static bool cVisible = true;
+static const f32 margin_p = 0.05;
+
 static void DrawCursor(editor_t* E) {
   blinkT += GetFrameTime();
 
@@ -32,7 +34,8 @@ void render_load_font(u16 font_size) {
   SetTextureFilter(rs.font.texture, TEXTURE_FILTER_BILINEAR);
 
   Vector2 line_size = MeasureTextEx(rs.font, DUMMY_LINE, rs.font_size, 0);
-  rs.margin_top = rs.window_height * 0.07;
+  rs.margin_top = rs.window_height * margin_p;
+  rs.margin_bottom = rs.window_height * margin_p;
   rs.margin_left = (rs.window_width - line_size.x) / 2;
 }
 
@@ -56,7 +59,9 @@ void render_draw(editor_t* E) {
   E->screenrows = 0;
   for (usize i = 0; i + E->rowoff < E->row_size; i++) {
     f32 y = rs.font_line_spacing * i + rs.margin_top;
-    if (y + rs.font_size >= rs.window_height) break;
+
+    if (i >= MAX_ROW || y + rs.font_size >= rs.window_height - rs.margin_bottom)
+      break;
 
     char vrow[MAX_COL + 1] = {0};
     row_t row = E->rows[i + E->rowoff];

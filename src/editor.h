@@ -3,6 +3,7 @@
 #include "types.h"
 
 #define MAX_COL 66
+#define MAX_ROW 20
 #define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 typedef struct row_s {
