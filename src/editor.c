@@ -226,6 +226,9 @@ int editor_open_file(const char* filename, editor_t* E) {
     if (len > 0 && buffer[len-1] == '\n') {
       buffer[len-1] = '\0';
     }
+    if (len > 1 && buffer[len-2] == '\r') {
+      buffer[len-2] = '\0';
+    }
 
     // realoc rows if necessary
     if (rows_size >= rows_capacity) {
