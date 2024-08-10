@@ -1,7 +1,6 @@
 #pragma once
 
 #include "types.h"
-#include "fs.h"
 
 #define MAX_COL 66
 #define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -16,7 +15,7 @@ typedef struct editor_s {
   i32 cx, cy;
   i32 rowoff, coloff;
   i32 screenrows, screencols;
-  u32 rowslen, rowSize;
+  u32 row_size, row_capacity;
   row_t* rows;
 } editor_t;
 

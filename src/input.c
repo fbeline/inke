@@ -4,12 +4,13 @@
 #include <string.h>
 #include <raylib.h>
 #include "editor.h"
+#include "fs.h"
 #include "utils.h"
 
 void input_key_down(editor_t* E) {
-  E->cy = MIN(E->cy+1, E->rowslen-1);
+  E->cy = MIN(E->cy+1, E->row_size-1);
   if (E->cy - E->rowoff >= E->screenrows) {
-    E->rowoff = MIN(E->rowoff+1, E->rowslen);
+    E->rowoff = MIN(E->rowoff+1, E->row_size);
   }
 
   usize row_len = strlen(E->rows[E->cy].chars);
@@ -39,7 +40,7 @@ void input_keyboard_handler(editor_t* E) {
     return editor_delete_forward(E);
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
-    char *buf = editor_rows_to_string(E->rows, E->rowslen);
+    char *buf = editor_rows_to_string(E->rows, E->row_size);
     FileWrite(E->filename, buf);
     free(buf);
   }

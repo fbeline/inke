@@ -5,6 +5,7 @@
 #include <string.h>
 #include <memory.h>
 
+#include "fs.h"
 #include "utils.h"
 
 char editor_char_at_cursor(editor_t* E) {
@@ -55,7 +56,7 @@ void editor_move_cursor(editor_t* E, i32 x, i32 y) {
 void editor_move_cursor_word_forward(editor_t* E) {
   char ch;
   do {
-    if (E->cy >= E->rowslen - 1 &&
+    if (E->cy >= E->row_size - 1 &&
         strlen(E->rows[E->cy].chars) >= E->cx) break;
     editor_move_cursor(E, E->cx + E->coloff + 1, E->cy);
   } while((ch = editor_char_at_cursor(E)), ch  !=  ' ' && ch != '\0');
@@ -92,17 +93,17 @@ char* editor_rows_to_string(row_t* rows, unsigned int size) {
 }
 
 bool editor_insert_row_at(editor_t* E, usize n) {
-  usize newLen = E->rowslen + 1;
-  if (newLen >= E->rowSize) {
-    usize newSize = E->rowSize + 10;
+  usize newLen = E->row_size + 1;
+  if (newLen >= E->row_capacity) {
+    usize newSize = E->row_capacity + 10;
     row_t* tmp = (row_t*)realloc(E->rows, newSize * sizeof(row_t));
     if (tmp == NULL) return false;
 
-    E->rowSize = newSize;
+    E->row_capacity = newSize;
   }
 
-  memmove(E->rows + n + 1, E->rows + n, sizeof(row_t) * (E->rowslen - n));
-  E->rowslen = newLen;
+  memmove(E->rows + n + 1, E->rows + n, sizeof(row_t) * (E->row_size - n));
+  E->row_size = newLen;
 
   E->rows[n] = (row_t){0, NULL};
   return true;
@@ -131,10 +132,10 @@ void editor_move_line_up(editor_t* E) {
     free(E->rows[E->cy].chars);
     memmove(E->rows + E->cy,
             E->rows + (E->cy + 1),
-            (E->rowslen - E->cy - 1) * sizeof(row_t));
+            (E->row_size - E->cy - 1) * sizeof(row_t));
 
     editor_move_cursor(E, prow_len, E->cy-1);
-    E->rowslen--;
+    E->row_size--;
 }
 
 void editor_remove_char_at_cursor(editor_t *E) {
@@ -256,8 +257,8 @@ int editor_open_file(const char* filename, editor_t* E) {
 
   fclose(fp);
 
-  E->rowslen = rows_size;
-  E->rowSize = rows_capacity;
+  E->row_size = rows_size;
+  E->row_capacity = rows_capacity;
   memcpy(E->filename, filename, strlen(filename));
 
   return 0;
@@ -265,8 +266,8 @@ int editor_open_file(const char* filename, editor_t* E) {
 
 void editor_new_file(const char* filename, editor_t* E) {
   memcpy(E->filename, filename, strlen(filename));
-  E->rowslen = 1;
-  E->rowSize = 1;
+  E->row_size = 1;
+  E->row_capacity = 1;
   E->rows = (row_t*)malloc(sizeof(row_t));
   E->rows->size = 1;
   E->rows->chars = malloc(1);

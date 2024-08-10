@@ -54,7 +54,7 @@ void render_draw(editor_t* E) {
   ClearBackground(RAYWHITE);
 
   E->screenrows = 0;
-  for (usize i = 0; i + E->rowoff < E->rowslen; i++) {
+  for (usize i = 0; i + E->rowoff < E->row_size; i++) {
     f32 y = rs.font_line_spacing * i + rs.margin_top;
     if (y + rs.font_size >= rs.window_height) break;
 
