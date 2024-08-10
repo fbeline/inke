@@ -60,8 +60,7 @@ void render_draw(editor_t* E) {
   for (usize i = 0; i + E->rowoff < E->row_size; i++) {
     f32 y = rs.font_line_spacing * i + rs.margin_top;
 
-    if (i >= MAX_ROW || y + rs.font_size >= rs.window_height - rs.margin_bottom)
-      break;
+    if (i >= MAX_ROW) break;
 
     char vrow[MAX_COL + 1] = {0};
     row_t row = E->rows[i + E->rowoff];

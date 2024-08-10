@@ -33,15 +33,13 @@ void input_key_up(editor_t* E) {
 }
 
 void input_page_down(editor_t* E) {
-  for (size_t i = 0; i < MAX_ROW; i++) {
-    input_key_down(E);
-  }
+  E->cy = MIN(E->cy + MAX_ROW, E->row_size-1);
+  E->rowoff = E->cy;
 }
 
 void input_page_up(editor_t* E) {
-  for (size_t i = 0; i < MAX_ROW; i++) {
-    input_key_up(E);
-  }
+  E->cy = MAX(E->cy - MAX_ROW, 0);
+  E->rowoff = MAX(E->cy - MAX_ROW + 1, 0);
 }
 
 void input_keyboard_handler(editor_t* E) {
