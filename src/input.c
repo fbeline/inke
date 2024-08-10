@@ -8,7 +8,10 @@
 #include "utils.h"
 
 void input_key_down(editor_t* E) {
+  if (E->cy >= E->row_size - 1) return;
+
   E->cy = MIN(E->cy+1, E->row_size-1);
+
   if (E->cy - E->rowoff >= E->screenrows) {
     E->rowoff = MIN(E->rowoff+1, E->row_size);
   }
