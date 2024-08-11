@@ -1,6 +1,7 @@
 #include "render.h"
 
 #include <string.h>
+#include <stdio.h>
 #include "utils.h"
 
 static render_state_t rs = { 0 };
@@ -9,7 +10,7 @@ static f32 blinkT;
 static bool cVisible = true;
 static const f32 margin_p = 0.05;
 
-static void DrawCursor(editor_t* E) {
+static void draw_cursor(editor_t* E) {
   blinkT += GetFrameTime();
 
   if (blinkT >= 0.5) {
@@ -22,6 +23,30 @@ static void DrawCursor(editor_t* E) {
   f32 x = E->cx * rs.font.recs->width + rs.margin_left;
   f32 y = rs.font_line_spacing * (E->cy - E->rowoff) + rs.margin_top;
   DrawRectangleV((Vector2){x, y}, (Vector2){1, rs.font_size}, DARKGRAY);
+}
+
+static void draw_status_bar(editor_t* E) {
+  i32 font_size = rs.font_size / 2;
+  char row_col[15];
+  sprintf(row_col, "%d/%d", E->cy + 1, E->cx + 1);
+  Vector2 row_col_size = MeasureTextEx(GetFontDefault(), "00000000/000", font_size, 0.0f);
+
+  i32 xpos = rs.window_width - row_col_size.x - rs.margin_left;
+  i32 ypos = rs.window_height - row_col_size.y;
+
+  DrawTextEx(rs.font,
+             row_col,
+             (Vector2){xpos, ypos},
+             font_size,
+             0,
+             DARKGRAY);
+
+  DrawTextEx(rs.font,
+             E->filename,
+             (Vector2){rs.margin_left, ypos},
+             font_size,
+             0,
+             DARKGRAY);
 }
 
 void render_load_font(u16 font_size) {
@@ -85,7 +110,8 @@ void render_draw(editor_t* E) {
     (Color){ 238, 238, 238, 255 }
   );
 
-  DrawCursor(E);
+  draw_cursor(E);
+  draw_status_bar(E);
 
   EndDrawing();
 }
