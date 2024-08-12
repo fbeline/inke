@@ -17,6 +17,7 @@ typedef struct editor_s {
   i32 rowoff, coloff;
   i32 screenrows, screencols;
   u32 row_size, row_capacity;
+  bool is_modified;
   row_t* rows;
 } editor_t;
 

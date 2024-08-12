@@ -56,6 +56,7 @@ void input_keyboard_handler(editor_t* E) {
     char *buf = editor_rows_to_string(E->rows, E->row_size);
     FileWrite(E->filename, buf);
     free(buf);
+    E->is_modified = false;
     return;
   }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {

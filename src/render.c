@@ -41,8 +41,17 @@ static void draw_status_bar(editor_t* E) {
              0,
              DARKGRAY);
 
+  char filename[260];
+  const usize filename_len = strlen(E->filename);
+
+  memcpy(filename, E->filename, filename_len);
+  filename[filename_len] = '\0';
+  if (E->is_modified) {
+    memcpy(filename + filename_len, " [+]\0", 5);
+  }
+
   DrawTextEx(rs.font,
-             E->filename,
+             filename,
              (Vector2){rs.margin_left, ypos},
              font_size,
              0,
