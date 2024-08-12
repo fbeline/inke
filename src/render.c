@@ -34,6 +34,8 @@ static void draw_status_bar(editor_t* E) {
   i32 xpos = rs.window_width - row_col_size.x - rs.margin_left;
   i32 ypos = rs.window_height - row_col_size.y;
 
+  DrawRectangle(0, ypos - 2, rs.window_width, font_size + 2, RAYWHITE);
+
   DrawTextEx(rs.font,
              row_col,
              (Vector2){xpos, ypos},
