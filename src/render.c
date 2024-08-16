@@ -48,7 +48,7 @@ static void draw_status_bar(editor_t* E) {
 
   memcpy(filename, E->filename, filename_len);
   filename[filename_len] = '\0';
-  if (E->is_modified) {
+  if (E->dirty) {
     memcpy(filename + filename_len, " [+]\0", 5);
   }
 
@@ -140,7 +140,7 @@ void render_draw(editor_t* E) {
 
   ClearBackground(RAYWHITE);
 
-  if (E->new_file && !E->is_modified)
+  if (E->new_file && !E->dirty)
     render_draw_info(E);
   else {
     render_draw_lines(E);

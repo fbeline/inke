@@ -105,7 +105,7 @@ bool editor_insert_row_at(editor_t* E, usize n) {
   memmove(E->rows + n + 1, E->rows + n, sizeof(row_t) * (E->row_size - n));
   E->row_size = newLen;
   E->rows[n] = (row_t){0, NULL};
-  E->is_modified = true;
+  E->dirty = true;
 
   return true;
 }
@@ -138,7 +138,7 @@ void editor_move_line_up(editor_t* E) {
     editor_move_cursor(E, prow_len, E->cy-1);
     E->row_size--;
 
-    E->is_modified = true;
+    E->dirty = true;
 }
 
 void editor_remove_char_at_cursor(editor_t *E) {
@@ -156,7 +156,7 @@ void editor_remove_char_at_cursor(editor_t *E) {
   else
     E->cx--;
 
-  E->is_modified = true;
+  E->dirty = true;
 }
 
 void editor_insert_char_at(row_t* row, int c, int i) {
@@ -193,7 +193,7 @@ void editor_insert_char_at_cursor(editor_t* E, int c) {
     E->cx = MAX_COL;
   }
 
-  E->is_modified = true;
+  E->dirty = true;
 }
 
 void editor_return(editor_t* E) {
@@ -209,7 +209,7 @@ void editor_return(editor_t* E) {
 
   editor_move_cursor(E, 0, E->cy+1);
   E->coloff = 0;
-  E->is_modified = true;
+  E->dirty = true;
 }
 
 void editor_delete_forward(editor_t* E) {
@@ -217,7 +217,7 @@ void editor_delete_forward(editor_t* E) {
   row_t row = E->rows[E->cy];
 
   row.chars[index] = '\0';
-  E->is_modified = true;
+  E->dirty = true;
 }
 
 int editor_open_file(const char* filename, editor_t* E) {

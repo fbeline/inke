@@ -42,7 +42,19 @@ void input_page_up(editor_t* E) {
   E->rowoff = MAX(E->cy - MAX_ROW + 1, 0);
 }
 
+void input_write_buffer(editor_t* E) {
+  char *buf = editor_rows_to_string(E->rows, E->row_size);
+  FileWrite(E->filename, buf);
+  free(buf);
+  E->dirty = false;
+  E->new_file = false;
+  return;
+}
+
 void input_keyboard_handler(editor_t* E) {
+  if (IsKeyPressed(KEY_ESCAPE)) {
+    return;
+  }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_A)) {
     return editor_bol(E);
   }
@@ -53,12 +65,7 @@ void input_keyboard_handler(editor_t* E) {
     return editor_delete_forward(E);
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
-    char *buf = editor_rows_to_string(E->rows, E->row_size);
-    FileWrite(E->filename, buf);
-    free(buf);
-    E->is_modified = false;
-    E->new_file = false;
-    return;
+    return input_write_buffer(E);
   }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {
     return editor_move_cursor_word_forward(E);
