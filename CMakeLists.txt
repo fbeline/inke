@@ -15,6 +15,8 @@ add_executable(olive
   src/input.h src/input.c
   src/fs.h src/fs.c)
 
+target_include_directories(olive PRIVATE include)
+
 if(WIN32)
   target_link_libraries(olive PRIVATE raylib winmm)
 endif()

@@ -9,6 +9,8 @@ typedef struct render_state_s {
   i32 margin_top, margin_left, margin_bottom;
   u16 font_size, font_line_spacing;
   u16 window_height, window_width;
+  f32 scale;
+  i32 message_box;
   Font font;
 } render_state_t;
 

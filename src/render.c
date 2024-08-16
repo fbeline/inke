@@ -1,7 +1,11 @@
 #include "render.h"
 
+#define RAYGUI_IMPLEMENTATION
+#include <raygui.h>
+
 #include <string.h>
 #include <stdio.h>
+
 #include "utils.h"
 
 static render_state_t rs = { 0 };
@@ -69,6 +73,9 @@ void render_load_font(u16 font_size) {
   GenTextureMipmaps(&rs.font.texture); 
   SetTextureFilter(rs.font.texture, TEXTURE_FILTER_BILINEAR);
 
+  const f64 gui_font_size = MAX(10.f, GuiGetFont().baseSize * rs.scale); 
+  GuiSetStyle(DEFAULT, TEXT_SIZE, gui_font_size);
+
   Vector2 line_size = MeasureTextEx(rs.font, DUMMY_LINE, rs.font_size, 0);
   rs.margin_top = rs.window_height * margin_p;
   rs.margin_bottom = rs.window_height * margin_p;
@@ -78,13 +85,13 @@ void render_load_font(u16 font_size) {
 void render_reload_font(void) {
   if (GetScreenWidth() == rs.window_width) return;
 
-  f32 scale = (f32)GetScreenWidth() / rs.window_width;
+  rs.scale = (f32)GetScreenWidth() / rs.window_width;
   rs.window_width = GetScreenWidth();
   rs.window_height = GetScreenHeight();
 
   UnloadFont(rs.font);
 
-  render_load_font(rs.font_size * scale);
+  render_load_font(rs.font_size * rs.scale);
 }
 
 void render_draw_info(editor_t* E) {
@@ -135,17 +142,38 @@ void render_draw_lines(editor_t* E) {
 
 }
 
+void render_draw_message_box(editor_t* E) {
+  if (rs.message_box == 0) return;
+
+  f32 box_width = 350 * MAX(rs.scale * 0.7, 1.f);
+  f32 box_height = 150 * MAX(rs.scale * 0.7, 1.f);
+  f32 box_x = (rs.window_width - box_width) / 2;
+  f32 box_y = (rs.window_height - box_height) / 2;
+
+  int result = GuiMessageBox(
+    (Rectangle){ box_x, box_y, box_width, box_height },
+    "#191#Save Changes?", 
+    "Open documents contain unsaved changes.", 
+    "Cancel;Discard;Save");
+
+  if (result >= 0)
+    rs.message_box = 0;
+}
+
 void render_draw(editor_t* E) {
   BeginDrawing();
 
   ClearBackground(RAYWHITE);
 
-  if (E->new_file && !E->dirty)
+  if (E->new_file && !E->dirty) {
     render_draw_info(E);
+  }
   else {
     render_draw_lines(E);
     render_draw_vertical_bar(E);
     render_draw_cursor(E);
+
+    render_draw_message_box(E);
   }
 
   draw_status_bar(E);
@@ -154,12 +182,15 @@ void render_draw(editor_t* E) {
 }
 
 void render_init(u16 width, u16 height, u16 font_size) {
+  rs.scale = 1;
+  rs.message_box = 0;
   rs.window_width = width;
   rs.window_height = height;
 
   InitWindow(width, height, "Olive");
   SetWindowState(FLAG_WINDOW_RESIZABLE);
   SetTargetFPS(60);
+  SetExitKey(KEY_NULL);
 
   render_load_font(font_size);
 }

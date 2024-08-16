@@ -2,4 +2,4 @@
 
 #include "editor.h"
 
-void input_keyboard_handler(editor_t *E);
+void input_keyboard_handler(editor_t *E, bool *running);

@@ -51,8 +51,12 @@ void input_write_buffer(editor_t* E) {
   return;
 }
 
-void input_keyboard_handler(editor_t* E) {
+void input_keyboard_handler(editor_t* E, bool* running) {
   if (IsKeyPressed(KEY_ESCAPE)) {
+    if (E->dirty) {
+    } else {
+      *running = false;
+    }
     return;
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_A)) {

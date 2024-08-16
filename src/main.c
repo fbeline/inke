@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "editor.h"
 #include "input.h"
@@ -21,12 +22,11 @@ int main(int argc, char **argv) {
   }
 
   Init(argv[1]);
-
-  while (!WindowShouldClose()) {
-    input_keyboard_handler(&E);
+  bool running = true;
+  while (!WindowShouldClose() && running) {
+    input_keyboard_handler(&E, &running);
 
     render_reload_font();
-
     render_draw(&E);
   }
 
