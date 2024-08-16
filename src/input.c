@@ -57,6 +57,7 @@ void input_keyboard_handler(editor_t* E) {
     FileWrite(E->filename, buf);
     free(buf);
     E->is_modified = false;
+    E->new_file = false;
     return;
   }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {

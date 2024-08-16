@@ -2,6 +2,8 @@
 
 #include "types.h"
 
+#define VERSION "0.0.1"
+
 #define MAX_COL 66
 #define MAX_ROW 19
 #define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -18,6 +20,7 @@ typedef struct editor_s {
   i32 screenrows, screencols;
   u32 row_size, row_capacity;
   bool is_modified;
+  bool new_file;
   row_t* rows;
 } editor_t;
 

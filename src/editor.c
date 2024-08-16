@@ -266,6 +266,7 @@ int editor_open_file(const char* filename, editor_t* E) {
 
   fclose(fp);
 
+  E->new_file = false;
   E->row_size = rows_size;
   E->row_capacity = rows_capacity;
   memcpy(E->filename, filename, strlen(filename));
@@ -281,6 +282,7 @@ void editor_new_file(const char* filename, editor_t* E) {
   E->rows->size = 1;
   E->rows->chars = malloc(1);
   E->rows->chars[0] = '\0';
+  E->new_file = true;
 }
 
 editor_t editor_init(const char* filename) {

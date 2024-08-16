@@ -10,7 +10,7 @@ static f32 blinkT;
 static bool cVisible = true;
 static const f32 margin_p = 0.05;
 
-static void draw_cursor(editor_t* E) {
+static void render_draw_cursor(editor_t* E) {
   blinkT += GetFrameTime();
 
   if (blinkT >= 0.5) {
@@ -87,11 +87,29 @@ void render_reload_font(void) {
   render_load_font(rs.font_size * scale);
 }
 
-void render_draw(editor_t* E) {
-  BeginDrawing();
+void render_draw_info(editor_t* E) {
+  char info[11] = {0};
+  sprintf(info, "OLIVE v%s", VERSION);
+  int text_size = MeasureText(info, rs.font_size);
 
-  ClearBackground(RAYWHITE);
+  DrawTextEx(rs.font, 
+             info, 
+             (Vector2) {rs.window_width/2.f - text_size/2.f, rs.window_height/2.f}, 
+             rs.font_size, 
+             0, 
+             DARKGRAY);
 
+}
+
+void render_draw_vertical_bar(editor_t* E) {
+  DrawRectangleV(
+    (Vector2){rs.margin_left + MAX_COL * rs.font.recs->width, rs.margin_top},
+    (Vector2){3, rs.window_height - rs.margin_top},
+    (Color){ 238, 238, 238, 255 }
+  );
+}
+
+void render_draw_lines(editor_t* E) {
   E->screenrows = 0;
   for (usize i = 0; i + E->rowoff < E->row_size; i++) {
     f32 y = rs.font_line_spacing * i + rs.margin_top;
@@ -115,13 +133,21 @@ void render_draw(editor_t* E) {
     E->screenrows++;
   }
 
-  DrawRectangleV(
-    (Vector2){rs.margin_left + MAX_COL * rs.font.recs->width, rs.margin_top},
-    (Vector2){3, rs.window_height - rs.margin_top},
-    (Color){ 238, 238, 238, 255 }
-  );
+}
 
-  draw_cursor(E);
+void render_draw(editor_t* E) {
+  BeginDrawing();
+
+  ClearBackground(RAYWHITE);
+
+  if (E->new_file && !E->is_modified)
+    render_draw_info(E);
+  else {
+    render_draw_lines(E);
+    render_draw_vertical_bar(E);
+    render_draw_cursor(E);
+  }
+
   draw_status_bar(E);
 
   EndDrawing();
