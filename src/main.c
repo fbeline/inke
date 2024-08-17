@@ -8,11 +8,11 @@
 #include "render.h"
 
 static editor_t E = {0};
+static render_state_t R = {0};
 
 void Init(const char* filename) {
   E = editor_init(filename);
-
-  render_init(1280, 720, 30);
+  R = render_init(1280, 720, 30);
 }
 
 int main(int argc, char **argv) {
@@ -26,8 +26,8 @@ int main(int argc, char **argv) {
   while (!WindowShouldClose() && running) {
     input_keyboard_handler(&E, &running);
 
-    render_reload_font();
-    render_draw(&E);
+    render_reload_font(&R);
+    render_draw(&E, &R);
   }
 
   CloseWindow();        // Close window and OpenGL context

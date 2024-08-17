@@ -14,10 +14,8 @@ typedef struct render_state_s {
   Font font;
 } render_state_t;
 
-void render_draw(editor_t *E);
+void render_draw(editor_t *E, render_state_t* R);
 
-void render_load_font(u16 font_size);
+void render_reload_font(render_state_t* R);
 
-void render_reload_font(void);
-
-void render_init(u16 width, u16 height, u16 font_size);
+render_state_t render_init(u16 width, u16 height, u16 font_size);
