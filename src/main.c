@@ -22,9 +22,9 @@ int main(int argc, char **argv) {
   }
 
   Init(argv[1]);
-  bool running = true;
-  while (!WindowShouldClose() && running) {
-    input_keyboard_handler(&E, &running);
+
+  while (!WindowShouldClose() && E.running) {
+    input_keyboard_handler(&E, &R);
 
     render_reload_font(&R);
     render_draw(&E, &R);

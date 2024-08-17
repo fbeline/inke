@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "editor.h"
+#include "fs.h"
 #include "utils.h"
 
 static f32 blinkT;
@@ -154,8 +156,20 @@ void render_draw_message_box(editor_t* E, render_state_t* R) {
     "Open documents contain unsaved changes.", 
     "Cancel;Discard;Save");
 
-  if (result >= 0)
-    R->message_box = 0;
+  char* buf = NULL;
+  switch (result) {
+    case 1:
+      R->message_box = 0;
+      break;
+    case 2:
+      E->running = false;
+      break;
+    case 3:
+      buf = editor_rows_to_string(E->rows, E->row_size);
+      FileWrite(E->filename, buf);
+      free(buf);
+      E->running = false;
+  }
 }
 
 void render_draw(editor_t* E, render_state_t* R) {

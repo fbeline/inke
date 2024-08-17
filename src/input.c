@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <raylib.h>
-#include "editor.h"
 #include "fs.h"
 #include "utils.h"
 
@@ -51,11 +50,12 @@ void input_write_buffer(editor_t* E) {
   return;
 }
 
-void input_keyboard_handler(editor_t* E, bool* running) {
+void input_keyboard_handler(editor_t* E, render_state_t* R) {
   if (IsKeyPressed(KEY_ESCAPE)) {
     if (E->dirty) {
+      R->message_box = 1;
     } else {
-      *running = false;
+      E->running = false;
     }
     return;
   }

@@ -21,6 +21,7 @@ typedef struct editor_s {
   u32 row_size, row_capacity;
   bool dirty;
   bool new_file;
+  bool running;
   row_t* rows;
 } editor_t;
 
