@@ -117,7 +117,7 @@ void editor_move_line_up(editor_t* E) {
 
     // realloc previous row if necessary
     if (crow_len + prow_len >= E->rows[E->cy-1].size) {
-      char* tmp = realloc(E->rows[E->cy-1].chars, E->rows[E->cy-1].size + crow_len);
+      char* tmp = realloc(E->rows[E->cy-1].chars, E->rows[E->cy-1].size + crow_len + 1);
       if (tmp == NULL) return;
       E->rows[E->cy-1].chars = tmp;
       E->rows[E->cy-1].size += crow_len;
