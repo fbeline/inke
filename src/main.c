@@ -8,7 +8,7 @@
 #include "render.h"
 
 static editor_t E = {0};
-static render_state_t R = {0};
+static render_t R = {0};
 
 void Init(const char* filename) {
   E = editor_init(filename);

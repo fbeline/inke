@@ -50,7 +50,7 @@ void input_write_buffer(editor_t* E) {
   return;
 }
 
-void input_keyboard_handler(editor_t* E, render_state_t* R) {
+void input_keyboard_handler(editor_t* E, render_t* R) {
   if (IsKeyPressed(KEY_ESCAPE)) {
     if (E->dirty) {
       R->message_box = 1;
