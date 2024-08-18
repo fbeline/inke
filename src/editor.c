@@ -220,6 +220,19 @@ void editor_delete_forward(editor_t* E) {
   E->dirty = true;
 }
 
+void editor_insert_text_at_cursor(editor_t* E, const char* text) {
+  usize size = strlen(text);
+  for (usize i = 0; i < size; i++) {
+    if (text[i] == '\n') {
+      editor_return(E);
+      E->cx = 0;
+      E->coloff = 0;
+    } else {
+      editor_insert_char_at_cursor(E, text[i]);
+    }
+  }
+}
+
 int editor_open_file(const char* filename, editor_t* E) {
   FILE* fp;
   char buffer[1024];

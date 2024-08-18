@@ -71,6 +71,9 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
     return input_write_buffer(E);
   }
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Y)) {
+    return editor_insert_text_at_cursor(E, GetClipboardText());
+  }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {
     return editor_move_cursor_word_forward(E);
   }
