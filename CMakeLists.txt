@@ -10,6 +10,7 @@ add_executable(olive
   src/main.c
   src/types.h
   src/utils.h
+  src/cursor.h src/cursor.c
   src/editor.h src/editor.c
   src/render.h src/render.c
   src/input.h src/input.c

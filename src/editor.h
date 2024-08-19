@@ -4,7 +4,6 @@
 
 #define VERSION "0.0.1"
 
-#define MAX_COL 80
 #define MAX_ROW 24
 #define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
@@ -17,7 +16,6 @@ typedef struct editor_s {
   char filename[255];
   i32 cx, cy;
   i32 rcx, rcy;
-  i32 rowoff, coloff;
   i32 screenrows, screencols;
   u32 row_size, row_capacity;
   bool dirty;
@@ -26,26 +24,20 @@ typedef struct editor_s {
   row_t* rows;
 } editor_t;
 
-void editor_bol(editor_t* E);
 
-void editor_eol(editor_t* E);
+void editor_move_line_up(editor_t* E, i32 cy);
 
-void editor_move_cursor(editor_t* E, i32 x, i32 y);
+void editor_delete_forward(editor_t* E, i32 cx, i32 cy);
 
-void editor_move_cursor_word_forward(editor_t* E);
+void editor_break_line(editor_t* E, i32 cx, i32 cy);
 
-void editor_move_cursor_word_backward(editor_t* E);
+void editor_insert_char_at(row_t* row, int c, int i);
 
-void editor_remove_char_at_cursor(editor_t* E);
-
-void editor_insert_char_at_cursor(editor_t* E, int c);
-
-void editor_insert_text_at_cursor(editor_t* E, const char* text);
-
-void editor_delete_forward(editor_t* E);
+bool editor_insert_row_at(editor_t* E, usize n);
 
 char* editor_rows_to_string(row_t* rows, unsigned int size);
 
 void editor_return(editor_t* E);
 
 editor_t editor_init(const char* filename);
+

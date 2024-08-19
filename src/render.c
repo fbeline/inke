@@ -30,20 +30,19 @@ static void render_draw_cursor(editor_t* E, render_t* R) {
 }
 
 static void draw_status_bar(editor_t* E, render_t* R) {
-  i32 font_size = R->font_size / 2;
   char row_col[15];
   sprintf(row_col, "%d/%d", E->cy + 1, E->cx + 1);
-  Vector2 row_col_size = MeasureTextEx(GetFontDefault(), "00000000/000", font_size, 0.0f);
+  Vector2 row_col_size = MeasureTextEx(GetFontDefault(), "00000000/000", R->font_size, 0.0f);
 
   i32 xpos = R->window_width - row_col_size.x - R->margin_left;
   i32 ypos = R->window_height - row_col_size.y;
 
-  DrawRectangle(0, ypos - 2, R->window_width, font_size + 2, RAYWHITE);
+  DrawRectangle(0, ypos - 2, R->window_width, R->font_size + 2, RAYWHITE);
 
   DrawTextEx(R->font,
              row_col,
              (Vector2){xpos, ypos},
-             font_size,
+             R->font_size,
              0,
              DARKGRAY);
 
@@ -59,7 +58,7 @@ static void draw_status_bar(editor_t* E, render_t* R) {
   DrawTextEx(R->font,
              filename,
              (Vector2){R->margin_left, ypos},
-             font_size,
+             R->font_size,
              0,
              DARKGRAY);
 }
@@ -98,7 +97,7 @@ static void render_draw_info(editor_t* E, render_t* R) {
 
 static void render_draw_vertical_bar(editor_t* E, render_t* R) {
   DrawRectangleV(
-    (Vector2){R->margin_left + MAX_COL * R->font.recs->width, R->margin_top},
+    (Vector2){R->margin_left + R->ncol * R->font.recs->width, R->margin_top},
     (Vector2){3, R->window_height - R->margin_top},
     (Color){ 238, 238, 238, 255 }
   );
@@ -111,10 +110,10 @@ static void render_draw_lines(editor_t* E, render_t* R) {
 
     if (i >= MAX_ROW) break;
 
-    char vrow[MAX_COL + 1] = {0};
+    char vrow[512] = {0};
     row_t row = E->rows[i + E->rowoff];
     i64 row_len = strlen(row.chars);
-    i64 vrow_len = MIN(row_len - E->coloff, MAX_COL);
+    i64 vrow_len = MIN(row_len - E->coloff, (i32)R->ncol);
     if (vrow_len <= 0) continue;
 
     memcpy(vrow, row.chars + E->coloff, vrow_len);
@@ -161,15 +160,16 @@ static void render_draw_message_box(editor_t* E, render_t* R) {
 }
 
 void render_reload_font(render_t* R) {
-  if (GetScreenWidth() == R->window_width) return;
+  UnloadFont(R->font);
+  render_load_font(R->font_size * R->scale, R);
+}
 
-  R->scale = (f32)GetScreenWidth() / R->window_width;
+void render_update_window(render_t* R) {
+  if (R == NULL || GetScreenWidth() == R->window_width) return;
+
+  R->scale = MAX((f32)GetScreenWidth() / R->window_width, 1);
   R->window_width = GetScreenWidth();
   R->window_height = GetScreenHeight();
-
-  UnloadFont(R->font);
-
-  render_load_font(R->font_size * R->scale, R);
 }
 
 void render_draw(editor_t* E, render_t* R) {
@@ -199,6 +199,8 @@ render_t render_init(u16 width, u16 height, u16 font_size) {
   R.message_box = 0;
   R.window_width = width;
   R.window_height = height;
+  R.ncol = 80;
+  R.nrow = 24;
 
   InitWindow(width, height, "Olive");
   SetWindowState(FLAG_WINDOW_RESIZABLE);

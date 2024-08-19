@@ -1,7 +1,6 @@
 #pragma once
 
 #include "types.h"
-#include <stdbool.h>
 
 #define COMPILE_TIME_ASSERT(name, expr) \
     typedef char __assert_##name[(expr) ? 1 : -1]
@@ -18,21 +17,21 @@ static inline bool in_range32(u32 val, u32 start, u32 len) {
 }
 
 /**
- * in_range - Determine if a value lies within a range.
+ * IN_RANGE - Determine if a value lies within a range.
  * @val: Value to test.
  * @start: First value in range.
  * @len: Number of values in range.
  */
-#define in_range(val, start, len)					\
+#define IN_RANGE(val, start, len)					\
 	((sizeof(start) | sizeof(len) | sizeof(val)) <= sizeof(u32) ?	\
 		in_range32(val, start, len) : in_range64(val, start, len))
 
 /**
- * swap - swap values of @a and @b
+ * SWAP - swap values of @a and @b
  * @a: first value
  * @b: second value
  */
-#define swap(a, b) \
+#define SWAP(a, b) \
 	do { typeof(a) __tmp = (a); (a) = (b); (b) = __tmp; } while (0)
 
 /**

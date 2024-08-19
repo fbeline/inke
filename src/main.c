@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
   while (!WindowShouldClose() && E.running) {
     input_keyboard_handler(&E, &R);
 
-    render_reload_font(&R);
+    render_update_window(&R);
     render_draw(&E, &R);
   }
 

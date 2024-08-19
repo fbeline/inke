@@ -3,32 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <raylib.h>
+#include "cursor.h"
 #include "fs.h"
 #include "utils.h"
 
 static void input_key_down(editor_t* E) {
-  if (E->cy >= E->row_size - 1) return;
-
-  E->cy = MIN(E->cy+1, (i64)E->row_size-1);
-
-  if (E->cy - E->rowoff >= E->screenrows) {
-    E->rowoff = MIN(E->rowoff+1, (i64)E->row_size);
-  }
-
-  usize row_len = strlen(E->rows[E->cy].chars);
-  if (E->cx > row_len) {
-    editor_eol(E);
-  }
+  cursor_down(E);
 }
 
 static void input_key_up(editor_t* E) {
-  E->cy = MAX(E->cy-1, 0);
-  if (E->cy - E->rowoff <= 0)
-    E->rowoff = MAX(E->rowoff-1, 0);
-
-  if (E->cx > strlen(E->rows[E->cy].chars)) {
-    editor_eol(E);
-  }
+  cursor_up(E); 
 }
 
 static void input_page_down(editor_t* E) {
@@ -114,7 +98,7 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   }
 
   int ch = GetCharPressed();
-  if (in_range(ch, 32, 95)) {
+  if (IN_RANGE(ch, 32, 95)) {
     editor_insert_char_at_cursor(E, ch);
   }
 }
