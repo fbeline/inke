@@ -64,7 +64,7 @@ static void draw_status_bar(editor_t* E, render_t* R) {
              DARKGRAY);
 }
 
-void render_load_font(u16 font_size, render_t* R) {
+static void render_load_font(u16 font_size, render_t* R) {
   R->font_size = font_size;
   R->font_line_spacing = R->font_size * 1.15;
   R->font = LoadFontEx("resources/FiraCode-Regular.ttf", R->font_size, NULL, 250);
@@ -82,19 +82,7 @@ void render_load_font(u16 font_size, render_t* R) {
   R->margin_left = (R->window_width - line_size.x) / 2;
 }
 
-void render_reload_font(render_t* R) {
-  if (GetScreenWidth() == R->window_width) return;
-
-  R->scale = (f32)GetScreenWidth() / R->window_width;
-  R->window_width = GetScreenWidth();
-  R->window_height = GetScreenHeight();
-
-  UnloadFont(R->font);
-
-  render_load_font(R->font_size * R->scale, R);
-}
-
-void render_draw_info(editor_t* E, render_t* R) {
+static void render_draw_info(editor_t* E, render_t* R) {
   char info[11] = {0};
   sprintf(info, "OLIVE v%s", VERSION);
   int text_size = MeasureText(info, R->font_size);
@@ -108,7 +96,7 @@ void render_draw_info(editor_t* E, render_t* R) {
 
 }
 
-void render_draw_vertical_bar(editor_t* E, render_t* R) {
+static void render_draw_vertical_bar(editor_t* E, render_t* R) {
   DrawRectangleV(
     (Vector2){R->margin_left + MAX_COL * R->font.recs->width, R->margin_top},
     (Vector2){3, R->window_height - R->margin_top},
@@ -116,7 +104,7 @@ void render_draw_vertical_bar(editor_t* E, render_t* R) {
   );
 }
 
-void render_draw_lines(editor_t* E, render_t* R) {
+static void render_draw_lines(editor_t* E, render_t* R) {
   E->screenrows = 0;
   for (usize i = 0; i + E->rowoff < E->row_size; i++) {
     f32 y = R->font_line_spacing * i + R->margin_top;
@@ -142,7 +130,7 @@ void render_draw_lines(editor_t* E, render_t* R) {
 
 }
 
-void render_draw_message_box(editor_t* E, render_t* R) {
+static void render_draw_message_box(editor_t* E, render_t* R) {
   if (R->message_box == 0) return;
 
   f32 box_width = 350 * MAX(R->scale * 0.7, 1.f);
@@ -170,6 +158,18 @@ void render_draw_message_box(editor_t* E, render_t* R) {
       free(buf);
       E->running = false;
   }
+}
+
+void render_reload_font(render_t* R) {
+  if (GetScreenWidth() == R->window_width) return;
+
+  R->scale = (f32)GetScreenWidth() / R->window_width;
+  R->window_width = GetScreenWidth();
+  R->window_height = GetScreenHeight();
+
+  UnloadFont(R->font);
+
+  render_load_font(R->font_size * R->scale, R);
 }
 
 void render_draw(editor_t* E, render_t* R) {

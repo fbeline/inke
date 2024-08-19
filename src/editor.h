@@ -4,9 +4,9 @@
 
 #define VERSION "0.0.1"
 
-#define MAX_COL 66
-#define MAX_ROW 19
-#define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+#define MAX_COL 80
+#define MAX_ROW 24
+#define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 typedef struct row_s {
   usize size;

@@ -6,7 +6,7 @@
 #include "fs.h"
 #include "utils.h"
 
-void input_key_down(editor_t* E) {
+static void input_key_down(editor_t* E) {
   if (E->cy >= E->row_size - 1) return;
 
   E->cy = MIN(E->cy+1, (i64)E->row_size-1);
@@ -21,7 +21,7 @@ void input_key_down(editor_t* E) {
   }
 }
 
-void input_key_up(editor_t* E) {
+static void input_key_up(editor_t* E) {
   E->cy = MAX(E->cy-1, 0);
   if (E->cy - E->rowoff <= 0)
     E->rowoff = MAX(E->rowoff-1, 0);
@@ -31,17 +31,17 @@ void input_key_up(editor_t* E) {
   }
 }
 
-void input_page_down(editor_t* E) {
+static void input_page_down(editor_t* E) {
   E->cy = MIN(E->cy + MAX_ROW, (i64)E->row_size-1);
   E->rowoff = E->cy;
 }
 
-void input_page_up(editor_t* E) {
+static void input_page_up(editor_t* E) {
   E->cy = MAX(E->cy - MAX_ROW, 0);
   E->rowoff = MAX(E->cy - MAX_ROW + 1, 0);
 }
 
-void input_write_buffer(editor_t* E) {
+static void input_write_buffer(editor_t* E) {
   char *buf = editor_rows_to_string(E->rows, E->row_size);
   FileWrite(E->filename, buf);
   free(buf);
@@ -114,6 +114,7 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   }
 
   int ch = GetCharPressed();
-  if (IsCharBetween(ch, 32, 127))
+  if (in_range(ch, 32, 95)) {
     editor_insert_char_at_cursor(E, ch);
+  }
 }

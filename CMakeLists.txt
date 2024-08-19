@@ -9,7 +9,7 @@ find_package(raylib CONFIG REQUIRED)
 add_executable(olive
   src/main.c
   src/types.h
-  src/utils.h src/utils.c
+  src/utils.h
   src/editor.h src/editor.c
   src/render.h src/render.c
   src/input.h src/input.c
