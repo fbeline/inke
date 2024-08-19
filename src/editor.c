@@ -17,7 +17,7 @@ char editor_char_at_cursor(editor_t* E) {
 }
 
 void editor_eol(editor_t* E) {
-  i64 len = strlen(E->rows[E->cy].chars);
+  i32 len = strlen(E->rows[E->cy].chars);
   E->cx = MIN(len, MAX_COL);
   E->coloff = MAX(0, len - MAX_COL);
 }

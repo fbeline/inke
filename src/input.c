@@ -9,10 +9,10 @@
 void input_key_down(editor_t* E) {
   if (E->cy >= E->row_size - 1) return;
 
-  E->cy = MIN(E->cy+1, E->row_size-1);
+  E->cy = MIN(E->cy+1, (i64)E->row_size-1);
 
   if (E->cy - E->rowoff >= E->screenrows) {
-    E->rowoff = MIN(E->rowoff+1, E->row_size);
+    E->rowoff = MIN(E->rowoff+1, (i64)E->row_size);
   }
 
   usize row_len = strlen(E->rows[E->cy].chars);
@@ -32,7 +32,7 @@ void input_key_up(editor_t* E) {
 }
 
 void input_page_down(editor_t* E) {
-  E->cy = MIN(E->cy + MAX_ROW, E->row_size-1);
+  E->cy = MIN(E->cy + MAX_ROW, (i64)E->row_size-1);
   E->rowoff = E->cy;
 }
 
