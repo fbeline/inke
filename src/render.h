@@ -10,7 +10,6 @@ typedef struct render_s {
   u16 font_size, font_line_spacing;
   u16 window_height, window_width;
   u16 ncol, nrow;
-  f32 scale;
   i32 message_box;
   Font font;
 } render_t;

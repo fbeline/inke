@@ -117,15 +117,8 @@ void cursor_remove_char(editor_t *E) {
   E->dirty = true;
 }
 
-void cursor_insert_char(editor_t* E, int c) {
-  vec2_t pos = cursor_position();
-  if (strlen(E->rows[pos.y].chars) + 1 >= E->rows[pos.y].size) {
-    E->rows[pos.y].size += 8;
-    char* tmp = realloc(E->rows[pos.y].chars, E->rows[pos.y].size);
-    if (tmp == NULL) return;
-    E->rows[pos.y].chars = tmp;
-  }
-  editor_insert_char_at(&E->rows[pos.y], c, pos.x);
+void cursor_insert_char(editor_t* E, int ch) {
+  editor_insert_char_at(E, raw_x(), raw_y(), ch);
 
   C.x++;
   if (C.x > C.max_col) {

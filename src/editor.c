@@ -84,21 +84,29 @@ void editor_move_line_up(editor_t* E, i32 y) {
     E->dirty = true;
 }
 
-void editor_insert_char_at(row_t* row, int c, int i) {
-  u32 len = strlen(row->chars);
-  if (i < 0 || i > len) {
+void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch) {
+  row_t row = E->rows[y];
+  u32 len = strlen(row.chars);
+  if (x < 0 || x > len) {
     printf("Invalid position\n");
     return;
   }
+
+  if (len + 1 >= row.size) {
+    E->rows[y].size += 8;
+    char* tmp = realloc(E->rows[y].chars, E->rows[y].size);
+    if (tmp == NULL) return;
+    E->rows[y].chars = tmp;
+  }
   
-  char* tmp = malloc(len - i + 1);
+  char* tmp = malloc(len - x + 1);
   if (!tmp) return;
 
-  memcpy(tmp, row->chars + i, len - i);
+  memcpy(tmp, E->rows[y].chars + x, len - x);
 
-  row->chars[i] = c;
-  memcpy(row->chars + i + 1, tmp, len - i);
-  row->chars[len + 1] = '\0';
+  E->rows[y].chars[x] = ch;
+  memcpy(E->rows[y].chars + x + 1, tmp, len - x);
+  E->rows[y].chars[len + 1] = '\0';
 
   free(tmp);
 }

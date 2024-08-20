@@ -4,9 +4,6 @@
 
 #define VERSION "0.0.1"
 
-#define MAX_ROW 24
-#define DUMMY_LINE "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-
 typedef struct row_s {
   usize size;
   char* chars;
@@ -28,7 +25,7 @@ void editor_delete_forward(editor_t* E, i32 x, i32 y);
 
 void editor_break_line(editor_t* E, i32 x, i32 y);
 
-void editor_insert_char_at(row_t* row, int c, int i);
+void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch);
 
 char editor_char_at(editor_t* E, i32 x, i32 y);
 
