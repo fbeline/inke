@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "editor.h"
+#include "cursor.h"
 #include "fs.h"
 #include "utils.h"
 
@@ -24,14 +25,17 @@ static void render_draw_cursor(editor_t* E, render_t* R) {
 
   if (!cVisible) return;
 
-  f32 x = E->cx * R->font.recs->width + R->margin_left;
-  f32 y = R->font_line_spacing * (E->cy - E->rowoff) + R->margin_top;
+  cursor_t cursor = cursor_get();
+
+  f32 x = cursor.x * R->font.recs->width + R->margin_left;
+  f32 y = R->font_line_spacing * (cursor.y - cursor.rowoff) + R->margin_top;
   DrawRectangleV((Vector2){x, y}, (Vector2){1, R->font_size}, DARKGRAY);
 }
 
 static void draw_status_bar(editor_t* E, render_t* R) {
   char row_col[15];
-  sprintf(row_col, "%d/%d", E->cy + 1, E->cx + 1);
+  vec2_t cpos = cursor_position();
+  sprintf(row_col, "%d/%d", cpos.y + 1, cpos.x + 1);
   Vector2 row_col_size = MeasureTextEx(GetFontDefault(), "00000000/000", R->font_size, 0.0f);
 
   i32 xpos = R->window_width - row_col_size.x - R->margin_left;
@@ -104,19 +108,21 @@ static void render_draw_vertical_bar(editor_t* E, render_t* R) {
 }
 
 static void render_draw_lines(editor_t* E, render_t* R) {
+  cursor_t cursor = cursor_get();
+
   E->screenrows = 0;
-  for (usize i = 0; i + E->rowoff < E->row_size; i++) {
+  for (usize i = 0; i + cursor.rowoff < E->row_size; i++) {
     f32 y = R->font_line_spacing * i + R->margin_top;
 
     if (i >= MAX_ROW) break;
 
     char vrow[512] = {0};
-    row_t row = E->rows[i + E->rowoff];
+    row_t row = E->rows[i + cursor.rowoff];
     i64 row_len = strlen(row.chars);
-    i64 vrow_len = MIN(row_len - E->coloff, (i32)R->ncol);
+    i64 vrow_len = MIN(row_len - cursor.coloff, (i32)R->ncol);
     if (vrow_len <= 0) continue;
 
-    memcpy(vrow, row.chars + E->coloff, vrow_len);
+    memcpy(vrow, row.chars + cursor.coloff, vrow_len);
     DrawTextEx(R->font,
                vrow,
                (Vector2){R->margin_left, y},
@@ -208,6 +214,7 @@ render_t render_init(u16 width, u16 height, u16 font_size) {
   SetExitKey(KEY_NULL);
 
   render_load_font(font_size, &R);
+  cursor_set_max(R.ncol, R.nrow);
 
   return R;
 }

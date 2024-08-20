@@ -14,6 +14,14 @@ static i32 raw_y(void) {
   return C.y + C.rowoff;
 }
 
+cursor_t cursor_get(void) {
+  return C;
+}
+
+vec2_t cursor_position(void) {
+  return (vec2_t) {raw_x(), raw_y()};
+}
+
 void cursor_set_max(u16 max_col, u16 max_row) {
   C.max_row = max_row;
   C.max_col = max_col;
@@ -113,11 +121,11 @@ void cursor_insert_char(editor_t* E, int c) {
   E->dirty = true;
 }
 
-void editor_insert_text_at_cursor(editor_t* E, const char* text) {
-  usize size = strlen(text);
-  for (usize i = 0; i < size; i++) {
+void cursor_insert_text(editor_t* E, const char* text) {
+  usize len = strlen(text);
+  for (usize i = 0; i < len; i++) {
     if (text[i] == '\n') {
-      editor_return(E);
+      editor_break_line(E, raw_x(), raw_y());
       C.x = 0;
       C.coloff = 0;
     } else {
@@ -155,11 +163,30 @@ void cursor_up(editor_t* E) {
   }
 }
 
-
 void cursor_page_up(editor_t* E) {
-
+  for (i32 i = 0; i < C.max_row; i ++) {
+    cursor_up(E);
+  }
 }
 
 void cursor_page_down(editor_t* E) {
+  for (i32 i = 0; i < C.max_row; i ++) {
+    cursor_down(E);
+  }
+}
 
+void cursor_delete_forward(editor_t* E) {
+  editor_delete_forward(E, raw_x(), raw_y());
+}
+
+void cursor_right(editor_t* E) {
+  cursor_move(E, raw_x() + 1, raw_y());
+}
+
+void cursor_left(editor_t* E) {
+  cursor_move(E, raw_x() - 1, raw_y());
+}
+
+void cursor_return(editor_t* E) {
+  editor_break_line(E, raw_x(), raw_y());
 }

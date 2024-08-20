@@ -3,12 +3,19 @@
 #include "types.h"
 #include "editor.h"
 
+typedef struct vec2_s {
+  i32 x, y;
+} vec2_t;
+
 typedef struct cursor_s {
   i32 x, y;
   i32 coloff, rowoff;
   u16 max_col, max_row;
 } cursor_t;
 
+cursor_t cursor_get(void);
+
+vec2_t cursor_position(void);
 
 char cursor_char(editor_t* E);
 
@@ -37,3 +44,11 @@ void cursor_set_max(u16 max_col, u16 max_row);
 void cursor_down(editor_t* E);
 
 void cursor_up(editor_t* E);
+
+void cursor_right(editor_t* E);
+
+void cursor_left(editor_t* E);
+
+void cursor_return(editor_t* E);
+
+void cursor_delete_forward(editor_t* E);
