@@ -38,7 +38,7 @@ void cursor_bol(editor_t* E) {
 
 void cursor_eol(editor_t* E) {
   i32 len = strlen(E->rows[raw_y()].chars);
-  C.x = C.max_col;
+  C.x = len,
   C.coloff = MAX(0, len - C.max_col);
 }
 
