@@ -22,11 +22,11 @@ typedef struct editor_s {
   row_t* rows;
 } editor_t;
 
-void editor_move_line_up(editor_t* E, i32 cy);
+void editor_move_line_up(editor_t* E, i32 y);
 
-void editor_delete_forward(editor_t* E, i32 cx, i32 cy);
+void editor_delete_forward(editor_t* E, i32 x, i32 y);
 
-void editor_break_line(editor_t* E, i32 cx, i32 cy);
+void editor_break_line(editor_t* E, i32 x, i32 y);
 
 void editor_insert_char_at(row_t* row, int c, int i);
 
