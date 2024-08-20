@@ -42,6 +42,11 @@ void cursor_eol(editor_t* E) {
   C.coloff = MAX(0, len - C.max_col);
 }
 
+void cursor_return(editor_t* E) {
+  editor_break_line(E, raw_x(), raw_y());
+  cursor_move(E, 0, raw_y() + 1);
+}
+
 void cursor_move(editor_t* E, i32 x, i32 y) {
   if (x < 0 && y == 0) return;
 
@@ -87,12 +92,15 @@ void cursor_move_word_backward(editor_t* E) {
 
 void cursor_remove_char(editor_t *E) {
   if (C.x == 0 && C.coloff == 0) {
-    return editor_move_line_up(E, raw_y());
+    usize len = strlen(E->rows[raw_y()-1].chars);
+    editor_move_line_up(E, raw_y());
+    cursor_move(E, len, raw_y()-1);
+    return;
   }
 
-  usize len = strlen(E->rows[E->cy].chars);
-  memmove(E->rows[E->cy].chars + raw_x() - 1, 
-          E->rows[E->cy].chars + raw_x(),
+  usize len = strlen(E->rows[raw_y()].chars);
+  memmove(E->rows[raw_y()].chars + raw_x() - 1, 
+          E->rows[raw_y()].chars + raw_x(),
           len - raw_x() + 1);
 
   if (C.x == 0 && C.coloff > 0)
@@ -125,13 +133,27 @@ void cursor_insert_text(editor_t* E, const char* text) {
   usize len = strlen(text);
   for (usize i = 0; i < len; i++) {
     if (text[i] == '\n') {
-      editor_break_line(E, raw_x(), raw_y());
-      C.x = 0;
-      C.coloff = 0;
+      cursor_return(E);
     } else {
       cursor_insert_char(E, text[i]);
     }
   }
+}
+
+void cursor_page_up(editor_t* E) {
+  for (i32 i = 0; i < C.max_row; i ++) {
+    cursor_up(E);
+  }
+}
+
+void cursor_page_down(editor_t* E) {
+  for (i32 i = 0; i < C.max_row; i ++) {
+    cursor_down(E);
+  }
+}
+
+void cursor_delete_forward(editor_t* E) {
+  editor_delete_forward(E, raw_x(), raw_y());
 }
 
 void cursor_down(editor_t* E) {
@@ -163,22 +185,6 @@ void cursor_up(editor_t* E) {
   }
 }
 
-void cursor_page_up(editor_t* E) {
-  for (i32 i = 0; i < C.max_row; i ++) {
-    cursor_up(E);
-  }
-}
-
-void cursor_page_down(editor_t* E) {
-  for (i32 i = 0; i < C.max_row; i ++) {
-    cursor_down(E);
-  }
-}
-
-void cursor_delete_forward(editor_t* E) {
-  editor_delete_forward(E, raw_x(), raw_y());
-}
-
 void cursor_right(editor_t* E) {
   cursor_move(E, raw_x() + 1, raw_y());
 }
@@ -187,6 +193,3 @@ void cursor_left(editor_t* E) {
   cursor_move(E, raw_x() - 1, raw_y());
 }
 
-void cursor_return(editor_t* E) {
-  editor_break_line(E, raw_x(), raw_y());
-}
