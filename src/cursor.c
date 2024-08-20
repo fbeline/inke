@@ -78,7 +78,7 @@ void cursor_move_word_forward(editor_t* E) {
   do {
     if (raw_y() >= E->row_size - 1 &&
         strlen(E->rows[raw_y()].chars) >= raw_x()) break;
-    cursor_move(E, raw_y() + 1, raw_x());
+    cursor_move(E, raw_x() + 1, raw_y());
   } while((ch = cursor_char(E)), ch  !=  ' ' && ch != '\0');
 }
 
@@ -86,7 +86,7 @@ void cursor_move_word_backward(editor_t* E) {
   char ch;
   do {
     if (raw_y() == 0 && raw_x() == 0) break;
-    cursor_move(E, raw_x(), raw_y());
+    cursor_move(E, raw_x() - 1, raw_y());
   } while((ch = cursor_char(E)), ch  !=  ' ' && ch != '\0');
 }
 
