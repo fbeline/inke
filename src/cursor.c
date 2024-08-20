@@ -58,11 +58,10 @@ void cursor_move(editor_t* E, i32 x, i32 y) {
   } else if (x < 0 && C.coloff == 0) {
     y = MAX(0, y - 1);
     x = (i32)strlen(E->rows[y].chars);
-    C.coloff = 0;
     cursor_move(E, x, y);
   } else if (x <= len && x >= C.max_col) {
-    C.max_col = x - C.max_col;
-    C.x = x - C.coloff;
+    C.coloff = x - C.max_col;
+    C.x = C.max_col;
   } else if (x > len) {
     C.coloff = 0;
     C.x = 0;
