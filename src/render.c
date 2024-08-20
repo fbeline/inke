@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "editor.h"
+#include "cursor.h"
 #include "fs.h"
 #include "utils.h"
 
@@ -24,26 +25,27 @@ static void render_draw_cursor(editor_t* E, render_t* R) {
 
   if (!cVisible) return;
 
-  f32 x = E->cx * R->font.recs->width + R->margin_left;
-  f32 y = R->font_line_spacing * (E->cy - E->rowoff) + R->margin_top;
+  cursor_t cursor = cursor_get();
+  f32 x = cursor.x * R->font.recs->width + R->margin_left;
+  f32 y = R->font_line_spacing * cursor.y + R->margin_top;
   DrawRectangleV((Vector2){x, y}, (Vector2){1, R->font_size}, DARKGRAY);
 }
 
 static void draw_status_bar(editor_t* E, render_t* R) {
-  i32 font_size = R->font_size / 2;
   char row_col[15];
-  sprintf(row_col, "%d/%d", E->cy + 1, E->cx + 1);
-  Vector2 row_col_size = MeasureTextEx(GetFontDefault(), "00000000/000", font_size, 0.0f);
+  vec2_t cpos = cursor_position();
+  sprintf(row_col, "%d/%d", cpos.y + 1, cpos.x + 1);
+  Vector2 row_col_size = MeasureTextEx(GetFontDefault(), "00000000/000", R->font_size, 0.0f);
 
   i32 xpos = R->window_width - row_col_size.x - R->margin_left;
   i32 ypos = R->window_height - row_col_size.y;
 
-  DrawRectangle(0, ypos - 2, R->window_width, font_size + 2, RAYWHITE);
+  DrawRectangle(0, ypos - 2, R->window_width, R->font_size + 2, RAYWHITE);
 
   DrawTextEx(R->font,
              row_col,
              (Vector2){xpos, ypos},
-             font_size,
+             R->font_size,
              0,
              DARKGRAY);
 
@@ -59,7 +61,7 @@ static void draw_status_bar(editor_t* E, render_t* R) {
   DrawTextEx(R->font,
              filename,
              (Vector2){R->margin_left, ypos},
-             font_size,
+             R->font_size,
              0,
              DARKGRAY);
 }
@@ -73,13 +75,8 @@ static void render_load_font(u16 font_size, render_t* R) {
   GenTextureMipmaps(&R->font.texture); 
   SetTextureFilter(R->font.texture, TEXTURE_FILTER_BILINEAR);
 
-  const f64 gui_font_size = MAX(10.f, GuiGetFont().baseSize * R->scale); 
+  const f64 gui_font_size = R->font_size;
   GuiSetStyle(DEFAULT, TEXT_SIZE, gui_font_size);
-
-  Vector2 line_size = MeasureTextEx(R->font, DUMMY_LINE, R->font_size, 0);
-  R->margin_top = R->window_height * margin_p;
-  R->margin_bottom = R->window_height * margin_p;
-  R->margin_left = (R->window_width - line_size.x) / 2;
 }
 
 static void render_draw_info(editor_t* E, render_t* R) {
@@ -98,34 +95,35 @@ static void render_draw_info(editor_t* E, render_t* R) {
 
 static void render_draw_vertical_bar(editor_t* E, render_t* R) {
   DrawRectangleV(
-    (Vector2){R->margin_left + MAX_COL * R->font.recs->width, R->margin_top},
+    (Vector2){R->margin_left + 80 * R->font.recs->width, R->margin_top},
     (Vector2){3, R->window_height - R->margin_top},
     (Color){ 238, 238, 238, 255 }
   );
 }
 
 static void render_draw_lines(editor_t* E, render_t* R) {
-  E->screenrows = 0;
-  for (usize i = 0; i + E->rowoff < E->row_size; i++) {
+  cursor_t cursor = cursor_get();
+
+  for (usize i = 0; i + cursor.rowoff < E->row_size; i++) {
     f32 y = R->font_line_spacing * i + R->margin_top;
 
-    if (i >= MAX_ROW) break;
+    if (i > R->nrow) break;
 
-    char vrow[MAX_COL + 1] = {0};
-    row_t row = E->rows[i + E->rowoff];
+    char vrow[512] = {0};
+    row_t row = E->rows[i + cursor.rowoff];
     i64 row_len = strlen(row.chars);
-    i64 vrow_len = MIN(row_len - E->coloff, MAX_COL);
-    if (vrow_len <= 0) continue;
+    i64 vrow_len = MIN(row_len - cursor.coloff, (i32)R->ncol);
 
-    memcpy(vrow, row.chars + E->coloff, vrow_len);
+    if (vrow_len <= 0)
+      continue;
+
+    memcpy(vrow, row.chars + cursor.coloff, vrow_len);
     DrawTextEx(R->font,
                vrow,
                (Vector2){R->margin_left, y},
                R->font_size,
                0,
                DARKGRAY);
-
-    E->screenrows++;
   }
 
 }
@@ -133,8 +131,8 @@ static void render_draw_lines(editor_t* E, render_t* R) {
 static void render_draw_message_box(editor_t* E, render_t* R) {
   if (R->message_box == 0) return;
 
-  f32 box_width = 350 * MAX(R->scale * 0.7, 1.f);
-  f32 box_height = 150 * MAX(R->scale * 0.7, 1.f);
+  f32 box_width = 350;
+  f32 box_height = 150;
   f32 box_x = (R->window_width - box_width) / 2;
   f32 box_y = (R->window_height - box_height) / 2;
 
@@ -161,15 +159,22 @@ static void render_draw_message_box(editor_t* E, render_t* R) {
 }
 
 void render_reload_font(render_t* R) {
-  if (GetScreenWidth() == R->window_width) return;
+  UnloadFont(R->font);
+  render_load_font(R->font_size, R);
+}
 
-  R->scale = (f32)GetScreenWidth() / R->window_width;
+void render_update_window(render_t* R) {
+  if (R == NULL || 
+    (GetScreenWidth() == R->window_width && GetScreenHeight() == R->window_height))
+    return;
+
   R->window_width = GetScreenWidth();
   R->window_height = GetScreenHeight();
 
-  UnloadFont(R->font);
+  R->ncol = (u16)floor((R->window_width - R->margin_left * 2) / R->font.recs->width);
+  R->nrow = (u16)floor((R->window_height - R->margin_top - R->margin_bottom) / (R->font.recs->height * 1.2));
 
-  render_load_font(R->font_size * R->scale, R);
+  cursor_set_max(R->ncol, R->nrow);
 }
 
 void render_draw(editor_t* E, render_t* R) {
@@ -195,10 +200,10 @@ void render_draw(editor_t* E, render_t* R) {
 
 render_t render_init(u16 width, u16 height, u16 font_size) {
   render_t R;
-  R.scale = 1;
   R.message_box = 0;
-  R.window_width = width;
-  R.window_height = height;
+  R.margin_top = 20;
+  R.margin_bottom = 30;
+  R.margin_left = 20;
 
   InitWindow(width, height, "Olive");
   SetWindowState(FLAG_WINDOW_RESIZABLE);

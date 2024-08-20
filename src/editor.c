@@ -8,68 +8,6 @@
 #include "fs.h"
 #include "utils.h"
 
-char editor_char_at_cursor(editor_t* E) {
-  char* chars = E->rows[E->cy].chars;
-  usize index = E->cx + E->coloff;
-  if (index > strlen(chars)) return '\0';
-
-  return chars[index];
-}
-
-void editor_eol(editor_t* E) {
-  i32 len = strlen(E->rows[E->cy].chars);
-  E->cx = MIN(len, MAX_COL);
-  E->coloff = MAX(0, len - MAX_COL);
-}
-
-void editor_bol(editor_t* E) {
-  E->cx = 0;
-  E->coloff = 0;
-}
-
-void editor_move_cursor(editor_t* E, i32 x, i32 y) {
-  if (x < 0 && y == 0) return;
-
-  i32 len = (i32)strlen(E->rows[y].chars);
-
-  if (x < 0 && E->coloff > 0) {
-    E->coloff--;
-  } else if (x < 0 && E->coloff == 0) {
-    y = MAX(0, y - 1);
-    x = (i32)strlen(E->rows[y].chars);
-    E->coloff = 0;
-    editor_move_cursor(E, x, y);
-  } else if (x <= len && x >= MAX_COL) {
-    E->coloff = x - MAX_COL;
-    E->cx = x - E->coloff;
-  } else if (x > len) {
-    E->coloff = 0;
-    E->cx = 0;
-    y++;
-  } else {
-    E->cx = x;
-  }
-
-  E->cy = y;
-}
-
-void editor_move_cursor_word_forward(editor_t* E) {
-  char ch;
-  do {
-    if (E->cy >= E->row_size - 1 &&
-        strlen(E->rows[E->cy].chars) >= E->cx) break;
-    editor_move_cursor(E, E->cx + E->coloff + 1, E->cy);
-  } while((ch = editor_char_at_cursor(E)), ch  !=  ' ' && ch != '\0');
-}
-
-void editor_move_cursor_word_backward(editor_t* E) {
-  char ch;
-  do {
-    if (E->cy == 0 && E->cx == 0) break;
-    editor_move_cursor(E, E->cx + E->coloff - 1, E->cy);
-  } while((ch = editor_char_at_cursor(E)), ch  !=  ' ' && ch != '\0');
-}
-
 char* editor_rows_to_string(row_t* rows, unsigned int size) {
   usize strsize = 1;
   usize strl = 0;
@@ -110,127 +48,91 @@ bool editor_insert_row_at(editor_t* E, usize n) {
   return true;
 }
 
-void editor_move_line_up(editor_t* E) {
-    if (E->cy == 0) return;
-    usize crow_len = strlen(E->rows[E->cy].chars);
-    usize prow_len = strlen(E->rows[E->cy-1].chars);
+usize editor_rowlen(editor_t* E, i32 y) {
+  if (y > E->row_size) return 0;
+
+  return strlen(E->rows[y].chars);
+}
+
+char editor_char_at(editor_t* E, i32 x, i32 y) {
+  if (y > E->row_size || x > strlen(E->rows[y].chars))
+    return '\0';
+
+  return E->rows[y].chars[x];
+}
+
+void editor_move_line_up(editor_t* E, i32 y) {
+    if (y == 0) return;
+    usize crow_len = strlen(E->rows[y].chars);
+    usize prow_len = strlen(E->rows[y-1].chars);
 
     // realloc previous row if necessary
-    if (crow_len + prow_len >= E->rows[E->cy-1].size) {
-      char* tmp = realloc(E->rows[E->cy-1].chars, E->rows[E->cy-1].size + crow_len + 1);
+    if (crow_len + prow_len >= E->rows[y-1].size) {
+      char* tmp = realloc(E->rows[y-1].chars, E->rows[y-1].size + crow_len + 1);
       if (tmp == NULL) return;
-      E->rows[E->cy-1].chars = tmp;
-      E->rows[E->cy-1].size += crow_len;
+      E->rows[y-1].chars = tmp;
+      E->rows[y-1].size += crow_len;
     }
 
     // cpy current row to the end of previous row
     if (crow_len > 0) {
-      memcpy(E->rows[E->cy-1].chars + prow_len, E->rows[E->cy].chars, crow_len);
-      E->rows[E->cy-1].chars[crow_len + prow_len] = '\0';
+      memcpy(E->rows[y-1].chars + prow_len, E->rows[y].chars, crow_len);
+      E->rows[y-1].chars[crow_len + prow_len] = '\0';
     }
 
     // remove row
-    free(E->rows[E->cy].chars);
-    memmove(E->rows + E->cy,
-            E->rows + (E->cy + 1),
-            (E->row_size - E->cy - 1) * sizeof(row_t));
+    free(E->rows[y].chars);
+    memmove(E->rows + y,
+            E->rows + (y + 1),
+            (E->row_size - y - 1) * sizeof(row_t));
 
-    editor_move_cursor(E, prow_len, E->cy-1);
     E->row_size--;
-
     E->dirty = true;
 }
 
-void editor_remove_char_at_cursor(editor_t *E) {
-  if (E->cx == 0 && E->coloff == 0) {
-    return editor_move_line_up(E);
-  }
-
-  usize len = strlen(E->rows[E->cy].chars);
-  memmove(E->rows[E->cy].chars + E->cx + E->coloff - 1, 
-          E->rows[E->cy].chars + E->cx + E->coloff,
-          len - E->cx - E->coloff + 1);
-
-  if (E->cx == 0 && E->coloff > 0)
-    E->coloff--;
-  else
-    E->cx--;
-
-  E->dirty = true;
-}
-
-void editor_insert_char_at(row_t* row, int c, int i) {
-  u32 len = strlen(row->chars);
-  if (i < 0 || i > len) {
+void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch) {
+  row_t row = E->rows[y];
+  u32 len = strlen(row.chars);
+  if (x < 0 || x > len) {
     printf("Invalid position\n");
     return;
   }
+
+  if (len + 1 >= row.size) {
+    E->rows[y].size += 8;
+    char* tmp = realloc(E->rows[y].chars, E->rows[y].size);
+    if (tmp == NULL) return;
+    E->rows[y].chars = tmp;
+  }
   
-  char* tmp = malloc(len - i + 1);
+  char* tmp = malloc(len - x + 1);
   if (!tmp) return;
 
-  memcpy(tmp, row->chars + i, len - i);
+  memcpy(tmp, E->rows[y].chars + x, len - x);
 
-  row->chars[i] = c;
-  memcpy(row->chars + i + 1, tmp, len - i);
-  row->chars[len + 1] = '\0';
+  E->rows[y].chars[x] = ch;
+  memcpy(E->rows[y].chars + x + 1, tmp, len - x);
+  E->rows[y].chars[len + 1] = '\0';
 
   free(tmp);
 }
 
-void editor_insert_char_at_cursor(editor_t* E, int c) {
-  if (strlen(E->rows[E->cy].chars) + 1 >= E->rows[E->cy].size) {
-    E->rows[E->cy].size += 8;
-    char* tmp = realloc(E->rows[E->cy].chars, E->rows[E->cy].size);
-    if (tmp == NULL) return;
-    E->rows[E->cy].chars = tmp;
-  }
-  editor_insert_char_at(&E->rows[E->cy], c, E->cx + E->coloff);
+void editor_break_line(editor_t* E, i32 x, i32 y) {
+  if (!editor_insert_row_at(E, y + 1)) return;
 
-  E->cx++;
-  if (E->cx > MAX_COL) {
-    E->coloff++;
-    E->cx = MAX_COL;
-  }
+  E->rows[y + 1].size = strlen(E->rows[y].chars) - x+ 2;
+  E->rows[y + 1].chars = malloc(E->rows[y + 1].size);
+  memcpy(E->rows[y + 1].chars,
+         E->rows[y].chars + x,
+         strlen(E->rows[y].chars) - x + 1);
 
+  E->rows[y].chars[x] = '\0';
   E->dirty = true;
 }
 
-void editor_return(editor_t* E) {
-  if (!editor_insert_row_at(E, E->cy + 1)) return;
-
-  E->rows[E->cy + 1].size = strlen(E->rows[E->cy].chars) - E->cx - E->coloff + 2;
-  E->rows[E->cy + 1].chars = malloc(E->rows[E->cy + 1].size);
-  memcpy(E->rows[E->cy + 1].chars,
-         E->rows[E->cy].chars + E->cx + E->coloff,
-         strlen(E->rows[E->cy].chars) - E->cx - E->coloff + 1);
-
-  E->rows[E->cy].chars[E->cx + E->coloff] = '\0';
-
-  editor_move_cursor(E, 0, E->cy+1);
-  E->coloff = 0;
+void editor_delete_forward(editor_t* E, i32 x, i32 y) {
+  E->rows[y].chars[x] = '\0';
   E->dirty = true;
-}
-
-void editor_delete_forward(editor_t* E) {
-  i32 index = E->coloff + E->cx;
-  row_t row = E->rows[E->cy];
-
-  row.chars[index] = '\0';
-  E->dirty = true;
-}
-
-void editor_insert_text_at_cursor(editor_t* E, const char* text) {
-  usize size = strlen(text);
-  for (usize i = 0; i < size; i++) {
-    if (text[i] == '\n') {
-      editor_return(E);
-      E->cx = 0;
-      E->coloff = 0;
-    } else {
-      editor_insert_char_at_cursor(E, text[i]);
-    }
-  }
 }
 
 int editor_open_file(const char* filename, editor_t* E) {
