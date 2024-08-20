@@ -28,7 +28,9 @@ static void render_draw_cursor(editor_t* E, render_t* R) {
   cursor_t cursor = cursor_get();
   f32 x = cursor.x * R->font.recs->width + R->margin_left;
   f32 y = R->font_line_spacing * cursor.y + R->margin_top;
-  DrawRectangleV((Vector2){x, y}, (Vector2){1, R->font_size}, DARKGRAY);
+  DrawRectangleV((Vector2){x, y},
+                 (Vector2){R->font.recs->width, R->font.recs->height},
+                 DARKGRAY);
 }
 
 static void draw_status_bar(editor_t* E, render_t* R) {
