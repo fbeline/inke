@@ -173,8 +173,8 @@ void cursor_down(editor_t* E) {
     C.rowoff++;
   }
 
-  usize row_len = strlen(E->rows[pos.y].chars);
-  if (pos.y > row_len) {
+  usize row_len = strlen(E->rows[pos.y+1].chars);
+  if (pos.x > row_len) {
     cursor_eol(E);
   }
 }

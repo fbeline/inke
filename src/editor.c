@@ -80,9 +80,7 @@ void editor_move_line_up(editor_t* E, i32 y) {
             E->rows + (y + 1),
             (E->row_size - y - 1) * sizeof(row_t));
 
-    /* editor_move_cursor(E, prow_len, E->y-1); */
     E->row_size--;
-
     E->dirty = true;
 }
 
@@ -115,9 +113,6 @@ void editor_break_line(editor_t* E, i32 x, i32 y) {
          strlen(E->rows[y].chars) - x + 1);
 
   E->rows[y].chars[x] = '\0';
-
-  /* editor_move_cursor(E, 0, E->y+1); */
-  /* E->coloff = 0; */
   E->dirty = true;
 }
 
