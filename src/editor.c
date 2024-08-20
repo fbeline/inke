@@ -48,6 +48,13 @@ bool editor_insert_row_at(editor_t* E, usize n) {
   return true;
 }
 
+char editor_char_at(editor_t* E, i32 x, i32 y) {
+  if (y > E->row_size || x > strlen(E->rows[y].chars))
+    return '\0';
+
+  return E->rows[y].chars[x];
+}
+
 void editor_move_line_up(editor_t* E, i32 cy) {
     if (cy == 0) return;
     usize crow_len = strlen(E->rows[cy].chars);

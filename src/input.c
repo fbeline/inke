@@ -6,22 +6,6 @@
 #include "fs.h"
 #include "utils.h"
 
-static void input_key_down(editor_t* E) {
-  cursor_down(E);
-}
-
-static void input_key_up(editor_t* E) {
-  cursor_up(E); 
-}
-
-static void input_page_down(editor_t* E) {
-  cursor_page_down(E);
-}
-
-static void input_page_up(editor_t* E) {
-  cursor_page_up(E);
-}
-
 static void input_write_buffer(editor_t* E) {
   char *buf = editor_rows_to_string(E->rows, E->row_size);
   FileWrite(E->filename, buf);
@@ -65,10 +49,10 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
     return cursor_return(E);
   }
   if (IsKeyPressed(KEY_PAGE_DOWN)) {
-    return input_page_down(E);
+    return cursor_page_down(E);
   }
   if (IsKeyPressed(KEY_PAGE_UP)) {
-    return input_page_up(E);
+    return cursor_page_up(E);
   }
   if (IsKeyPressed(KEY_RIGHT) || 
     IsKeyPressedRepeat(KEY_RIGHT) ||
@@ -78,7 +62,7 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   if (IsKeyPressed(KEY_DOWN) ||
     IsKeyPressedRepeat(KEY_DOWN) ||
     (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_N))) {
-    input_key_down(E); 
+    cursor_down(E); 
   }
   if (IsKeyPressed(KEY_LEFT) ||
     IsKeyPressedRepeat(KEY_LEFT) ||
@@ -88,7 +72,7 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   if (IsKeyPressed(KEY_UP) ||
     IsKeyPressedRepeat(KEY_UP) ||
     (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_P))) {
-    input_key_up(E);
+    cursor_up(E);
   }
   if (IsKeyPressed(KEY_BACKSPACE)) {
     cursor_remove_char(E);
