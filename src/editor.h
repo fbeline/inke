@@ -11,7 +11,6 @@ typedef struct row_s {
 
 typedef struct editor_s {
   char filename[255];
-  i32 screenrows, screencols;
   u32 row_size, row_capacity;
   bool dirty;
   bool new_file;

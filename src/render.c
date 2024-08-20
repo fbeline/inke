@@ -104,7 +104,6 @@ static void render_draw_vertical_bar(editor_t* E, render_t* R) {
 static void render_draw_lines(editor_t* E, render_t* R) {
   cursor_t cursor = cursor_get();
 
-  E->screenrows = 0;
   for (usize i = 0; i + cursor.rowoff < E->row_size; i++) {
     f32 y = R->font_line_spacing * i + R->margin_top;
 
@@ -125,8 +124,6 @@ static void render_draw_lines(editor_t* E, render_t* R) {
                R->font_size,
                0,
                DARKGRAY);
-
-    E->screenrows++;
   }
 
 }
