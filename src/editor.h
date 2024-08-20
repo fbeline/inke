@@ -28,11 +28,12 @@ void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch);
 
 char editor_char_at(editor_t* E, i32 x, i32 y);
 
+usize editor_rowlen(editor_t* E, i32 y);
+
 bool editor_insert_row_at(editor_t* E, usize n);
 
 char* editor_rows_to_string(row_t* rows, unsigned int size);
 
-void editor_return(editor_t* E);
 
 editor_t editor_init(const char* filename);
 

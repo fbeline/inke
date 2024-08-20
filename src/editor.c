@@ -48,6 +48,12 @@ bool editor_insert_row_at(editor_t* E, usize n) {
   return true;
 }
 
+usize editor_rowlen(editor_t* E, i32 y) {
+  if (y > E->row_size) return 0;
+
+  return strlen(E->rows[y].chars);
+}
+
 char editor_char_at(editor_t* E, i32 x, i32 y) {
   if (y > E->row_size || x > strlen(E->rows[y].chars))
     return '\0';

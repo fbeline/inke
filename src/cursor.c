@@ -37,7 +37,7 @@ void cursor_bol(editor_t* E) {
 }
 
 void cursor_eol(editor_t* E) {
-  i32 len = strlen(E->rows[raw_y()].chars);
+  i32 len = editor_rowlen(E, raw_y());
   C.x = len,
   C.coloff = MAX(0, len - C.max_col);
 }
@@ -51,7 +51,7 @@ void cursor_return(editor_t* E) {
 void cursor_move(editor_t* E, i32 x, i32 y) {
   if (x < 0 && y == 0) return;
 
-  i32 len = (i32)strlen(E->rows[y].chars);
+  i32 len = editor_rowlen(E, y);
 
   if (x < 0 && C.coloff > 0) {
     C.coloff--;
@@ -77,7 +77,7 @@ void cursor_move_word_forward(editor_t* E) {
   char ch;
   do {
     vec2_t pos = cursor_position();
-    if (pos.y >= E->row_size - 1 && strlen(E->rows[pos.y].chars) >= pos.x)
+    if (pos.y >= E->row_size - 1 && editor_rowlen(E, pos.y) >= pos.x)
       break;
     cursor_move(E, pos.x + 1, pos.y);
   } while((ch = cursor_char(E)), ch  !=  ' ' && ch != '\0');
@@ -97,13 +97,13 @@ void cursor_move_word_backward(editor_t* E) {
 void cursor_remove_char(editor_t *E) {
   vec2_t pos = cursor_position();
   if (pos.x == 0) {
-    usize len = strlen(E->rows[pos.y - 1].chars);
+    usize len = editor_rowlen(E, pos.y - 1);
     editor_move_line_up(E, pos.y);
     cursor_move(E, len, pos.y - 1);
     return;
   }
 
-  usize len = strlen(E->rows[pos.y].chars);
+  usize len = editor_rowlen(E, pos.y);
   memmove(E->rows[pos.y].chars + pos.x - 1, 
           E->rows[pos.y].chars + pos.x,
           len - pos.x + 1);
@@ -165,8 +165,7 @@ void cursor_down(editor_t* E) {
     C.rowoff++;
   }
 
-  usize row_len = strlen(E->rows[pos.y+1].chars);
-  if (pos.x > row_len) {
+  if (pos.x > editor_rowlen(E, pos.y + 1)) {
     cursor_eol(E);
   }
 }
@@ -181,7 +180,7 @@ void cursor_up(editor_t* E) {
     C.y--;
   }
 
-  if (raw_x() > strlen(E->rows[y].chars)) {
+  if (raw_x() > editor_rowlen(E, y)) {
     cursor_eol(E);
   }
 }
