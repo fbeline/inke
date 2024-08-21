@@ -9,6 +9,7 @@ typedef struct vec2_s {
 
 typedef struct cursor_s {
   i32 x, y;
+  vec2_t region;
   i32 coloff, rowoff;
   u16 max_col, max_row;
 } cursor_t;
@@ -16,6 +17,12 @@ typedef struct cursor_s {
 cursor_t cursor_get(void);
 
 vec2_t cursor_position(void);
+
+vec2_t cursor_region(void);
+
+void cursor_region_start(void);
+
+void cursor_clear_region(void);
 
 char cursor_char(editor_t* E);
 

@@ -39,6 +39,9 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Y)) {
     return cursor_insert_text(E, GetClipboardText());
   }
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_SPACE)) {
+    return cursor_region_start();
+  }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {
     return cursor_move_word_forward(E);
   }

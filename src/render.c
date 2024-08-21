@@ -15,6 +15,31 @@ static f32 blinkT;
 static bool cVisible = true;
 static const f32 margin_p = 0.05;
 
+Vector2 render_position(render_t* R, i32 col, i32 row) {
+  return (Vector2) {
+    col * R->font.recs->width + R->margin_left,
+    row * R->font.recs->height * R->font_line_spacing + R->margin_top
+  };
+}
+
+static void render_draw_region(editor_t* E, render_t* R) {
+  vec2_t rp = cursor_region();
+  if (rp.x == -1 || rp.y == -1)
+    return;
+
+  vec2_t cp = cursor_position();
+  i32 ydiff = abs(rp.y - cp.y);
+
+  if (ydiff == 0) {
+    i32 pxs = MIN(rp.x, cp.x);
+    i32 pxe = MAX(rp.x, cp.x);
+
+    Vector2 sp = render_position(R, pxs, rp.y);
+    Vector2 ep = render_position(R, pxe, rp.y);
+    DrawRectangle(sp.x, sp.y, ep.x - sp.x, R->font.recs->height, YELLOW);
+  }
+}
+
 static void render_draw_cursor(editor_t* E, render_t* R) {
   blinkT += GetFrameTime();
 
@@ -88,9 +113,6 @@ static void render_load_font(u16 font_size, render_t* R) {
   SetTextLineSpacing(R->font_line_spacing);
   GenTextureMipmaps(&R->font.texture); 
   SetTextureFilter(R->font.texture, TEXTURE_FILTER_BILINEAR);
-
-  const f64 gui_font_size = R->font_size;
-  GuiSetStyle(DEFAULT, TEXT_SIZE, gui_font_size);
 }
 
 static void render_draw_info(editor_t* E, render_t* R) {
@@ -199,6 +221,7 @@ void render_draw(editor_t* E, render_t* R) {
     render_draw_info(E, R);
   }
   else {
+    render_draw_region(E, R);
     render_draw_lines(E, R);
     render_draw_vertical_bar(E, R);
     render_draw_cursor(E, R);
@@ -224,6 +247,8 @@ render_t render_init(u16 width, u16 height, u16 font_size) {
   SetExitKey(KEY_NULL);
 
   render_load_font(font_size, &R);
+
+  cursor_clear_region();
 
   return R;
 }

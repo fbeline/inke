@@ -22,6 +22,21 @@ vec2_t cursor_position(void) {
   return (vec2_t) {raw_x(), raw_y()};
 }
 
+vec2_t cursor_region(void) {
+  return C.region;
+}
+
+void cursor_region_start(void) {
+  if (C.region.x == -1 && C.region.y == -1)
+    C.region = cursor_position();
+  else 
+    cursor_clear_region();
+}
+
+void cursor_clear_region(void) {
+  C.region = (vec2_t){-1, -1};
+}
+
 void cursor_set_max(u16 max_col, u16 max_row) {
   C.max_row = max_row;
   C.max_col = max_col;
