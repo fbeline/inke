@@ -74,24 +74,29 @@ void cursor_move(editor_t* E, i32 x, i32 y) {
 }
 
 void cursor_move_word_forward(editor_t* E) {
-  char ch;
+  char ch1, ch2;
   do {
     vec2_t pos = cursor_position();
     if (pos.y >= E->row_size - 1 && editor_rowlen(E, pos.y) >= pos.x)
       break;
     cursor_move(E, pos.x + 1, pos.y);
-  } while((ch = cursor_char(E)), ch  !=  ' ' && ch != '\0');
+    ch1 = cursor_char(E);
+    ch2 = editor_char_at(E, pos.x + 2, raw_y());
+  } while(!(ch1 !=  ' ' && ch2 == ' '));
+  cursor_move(E, raw_x() + 1, raw_y());
 }
 
 void cursor_move_word_backward(editor_t* E) {
-  char ch;
+  char ch1, ch2;
   do {
     vec2_t pos = cursor_position();
     if (pos.y == 0 && pos.x == 0)
       break; 
 
     cursor_move(E, pos.x - 1, pos.y);
-  } while((ch = cursor_char(E)), ch  !=  ' ' && ch != '\0');
+    ch1 = cursor_char(E);
+    ch2 = editor_char_at(E, pos.x - 2, raw_y());
+  } while(!(ch1 !=  ' ' && ch2 == ' '));
 }
 
 void cursor_remove_char(editor_t *E) {
