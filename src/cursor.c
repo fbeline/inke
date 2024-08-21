@@ -42,7 +42,7 @@ void cursor_eol(editor_t* E) {
   C.coloff = MAX(0, len - C.max_col);
 }
 
-void cursor_return(editor_t* E) {
+void cursor_break_line(editor_t* E) {
   vec2_t pos = cursor_position();
   editor_break_line(E, pos.x, pos.y);
   cursor_move(E, 0, pos.y + 1);
@@ -132,7 +132,7 @@ void cursor_insert_text(editor_t* E, const char* text) {
   usize len = strlen(text);
   for (usize i = 0; i < len; i++) {
     if (text[i] == '\n') {
-      cursor_return(E);
+      cursor_break_line(E);
     } else {
       cursor_insert_char(E, text[i]);
     }

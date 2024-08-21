@@ -46,7 +46,7 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
     return cursor_move_word_backward(E);
   }
   if (IsKeyPressed(KEY_ENTER)) {
-    return cursor_return(E);
+    return cursor_break_line(E);
   }
   if (IsKeyPressed(KEY_PAGE_DOWN)) {
     return cursor_page_down(E);
