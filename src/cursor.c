@@ -33,6 +33,30 @@ void cursor_region_start(void) {
     cursor_clear_region();
 }
 
+char* cursor_region_text(editor_t* E) {
+  if (C.region.x == -1 || C.region.y == -1) return "\0";
+
+  char* result = malloc(1024);
+  usize len = 0;
+
+  vec2_t rp = cursor_region();
+  vec2_t cp = cursor_position();
+  vec2_t ps = rp.y <= cp.y ? rp : cp;
+  vec2_t pe = rp.y > cp.y ? rp : cp;
+  for (i32 i = ps.y; i <= pe.y; i++) {
+    i32 xs = i == ps.y ? ps.x : 0;
+    i32 xe = i == pe.y ? pe.x : editor_rowlen(E, i);
+    usize rowlen = xe - xs;
+    memcpy(result + len, E->rows[i].chars + xs, rowlen);
+    len += rowlen;
+    if (i + 1 <= pe.y) {
+      result[len++] = '\n';
+    }
+  }
+  result[len] = '\0';
+  return result;
+}
+
 void cursor_clear_region(void) {
   C.region = (vec2_t){-1, -1};
 }

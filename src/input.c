@@ -1,6 +1,7 @@
 #include "input.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <raylib.h>
 #include "cursor.h"
 #include "fs.h"
@@ -41,6 +42,13 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_SPACE)) {
     return cursor_region_start();
+  }
+  if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_W)) {
+    char* txt = cursor_region_text(E);
+    SetClipboardText(txt);
+    free(txt);
+
+    cursor_clear_region();
   }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {
     return cursor_move_word_forward(E);

@@ -34,16 +34,12 @@ static void render_draw_region(editor_t* E, render_t* R) {
     return;
 
   vec2_t cp = cursor_position();
-  if (rp.y - cp.y != 0) {
-    vec2_t ps = rp.y <= cp.y ? rp : cp;
-    vec2_t pe = rp.y > cp.y ? rp : cp;
-    for (i32 i = ps.y; i <= pe.y; i++) {
-      i32 xs = i == ps.y ? ps.x : 0;
-      i32 xe = i == pe.y ? pe.x : editor_rowlen(E, i);
-      render_highlight_line(R, i, xs, xe);
-    }
-  } else {
-    render_highlight_line(R, rp.y, MIN(rp.x, cp.x), MAX(rp.x, cp.x));
+  vec2_t ps = rp.y <= cp.y ? rp : cp;
+  vec2_t pe = rp.y > cp.y ? rp : cp;
+  for (i32 i = ps.y; i <= pe.y; i++) {
+    i32 xs = i == ps.y ? ps.x : 0;
+    i32 xe = i == pe.y ? pe.x : editor_rowlen(E, i);
+    render_highlight_line(R, i, xs, xe);
   }
 }
 

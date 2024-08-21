@@ -22,6 +22,8 @@ vec2_t cursor_region(void);
 
 void cursor_region_start(void);
 
+char* cursor_region_text(editor_t* E);
+
 void cursor_clear_region(void);
 
 char cursor_char(editor_t* E);
