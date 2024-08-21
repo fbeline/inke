@@ -31,6 +31,18 @@ static void render_draw_cursor(editor_t* E, render_t* R) {
   DrawRectangleV((Vector2){x, y},
                  (Vector2){R->font.recs->width, R->font.recs->height},
                  DARKGRAY);
+
+  char chc[2] = {'\0', '\0'};
+  chc[0] = cursor_char(E);
+
+  // draw font
+  DrawTextEx(R->font,
+             chc,
+             (Vector2){x, y},
+             R->font_size,
+             0,
+             RAYWHITE
+             );
 }
 
 static void draw_status_bar(editor_t* E, render_t* R) {
@@ -127,7 +139,6 @@ static void render_draw_lines(editor_t* E, render_t* R) {
                0,
                DARKGRAY);
   }
-
 }
 
 static void render_draw_message_box(editor_t* E, render_t* R) {
