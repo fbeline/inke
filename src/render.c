@@ -22,21 +22,34 @@ Vector2 render_position(render_t* R, i32 col, i32 row) {
   };
 }
 
+static void render_highlight_line(render_t* R, i32 y, i32 xs, i32 xe) {
+    Vector2 sp = render_position(R, xs, y);
+    Vector2 ep = render_position(R, xe, y);
+    DrawRectangle(sp.x, sp.y, ep.x - sp.x, R->font.recs->height, YELLOW);
+}
+
 static void render_draw_region(editor_t* E, render_t* R) {
   vec2_t rp = cursor_region();
   if (rp.x == -1 || rp.y == -1)
     return;
 
   vec2_t cp = cursor_position();
-  i32 ydiff = abs(rp.y - cp.y);
+  if (rp.y - cp.y != 0) {
+    vec2_t ps = rp.y <= cp.y ? rp : cp;
+    vec2_t pe = rp.y > cp.y ? rp : cp;
 
-  if (ydiff == 0) {
-    i32 pxs = MIN(rp.x, cp.x);
-    i32 pxe = MAX(rp.x, cp.x);
+    for (i32 i = ps.y; i <= pe.y; i++) {
+      i32 xs = ps.x;
+      i32 xe = pe.x;
 
-    Vector2 sp = render_position(R, pxs, rp.y);
-    Vector2 ep = render_position(R, pxe, rp.y);
-    DrawRectangle(sp.x, sp.y, ep.x - sp.x, R->font.recs->height, YELLOW);
+      if (i != ps.y) xs = 0;
+      if (i != pe.y) xe = (i32)editor_rowlen(E, i);
+
+      printf("y=%d;x [%d, %d]\n", i, xs, xe);
+      render_highlight_line(R, i, xs, xe);
+    }
+  } else {
+    render_highlight_line(R, rp.y, MIN(rp.x, cp.x), MAX(rp.x, cp.x));
   }
 }
 
