@@ -38,39 +38,74 @@ void cursor_bol(editor_t* E) {
 
 void cursor_eol(editor_t* E) {
   i32 len = editor_rowlen(E, raw_y());
-  C.x = len,
-  C.coloff = MAX(0, len - C.max_col);
+  if (len > C.max_col) {
+    C.x = C.max_col;
+    C.coloff = len - C.max_col;
+  } else {
+    C.x = len;
+  }
+}
+
+void cursor_down(editor_t* E) {
+  vec2_t pos = cursor_position();
+  if (pos.y >= E->row_size - 1) return;
+
+  if (C.y < C.max_row) {
+    C.y++;
+  } else {
+    C.rowoff++;
+  }
+
+  if (pos.x > editor_rowlen(E, pos.y + 1)) {
+    cursor_eol(E);
+  }
+}
+
+void cursor_up(editor_t* E) {
+  i32 y = raw_y();
+  if (y <= 0) return;
+
+  if (C.rowoff > 0) {
+    C.rowoff--;
+  } else {
+    C.y--;
+  }
+
+  if (raw_x() > editor_rowlen(E, raw_y())) {
+    cursor_eol(E);
+  }
+}
+
+void cursor_right(editor_t* E) {
+  vec2_t pos = cursor_position();
+  usize len = editor_rowlen(E, pos.y);
+
+  if (pos.x < len && C.x == C.max_col) {
+    C.coloff++;
+  } else if (pos.x >= len) {
+    cursor_down(E);
+    cursor_bol(E);
+  } else {
+    C.x++;
+  }
+}
+
+void cursor_left(editor_t* E) {
+  if (C.x == 0 && C.coloff > 0) {
+    C.coloff--;
+  } else if (C.x == 0 && C.coloff == 0 && (C.y > 0 || C.rowoff > 0)) {
+    cursor_up(E);
+    cursor_eol(E);
+  } else {
+    C.x--;
+  }
 }
 
 void cursor_break_line(editor_t* E) {
   vec2_t pos = cursor_position();
   editor_break_line(E, pos.x, pos.y);
-  cursor_move(E, 0, pos.y + 1);
-}
-
-void cursor_move(editor_t* E, i32 x, i32 y) {
-  if (x < 0 && y == 0) return;
-
-  i32 len = editor_rowlen(E, y);
-
-  if (x < 0 && C.coloff > 0) {
-    C.coloff--;
-  } else if (x < 0 && C.coloff == 0) {
-    y = MAX(0, y - 1);
-    x = (i32)strlen(E->rows[y].chars);
-    cursor_move(E, x, y);
-  } else if (x <= len && x >= C.max_col) {
-    C.coloff = x - C.max_col;
-    C.x = C.max_col;
-  } else if (x > len) {
-    C.coloff = 0;
-    C.x = 0;
-    y++;
-  } else {
-    C.x = x;
-  }
-
-  C.y = y;
+  cursor_down(E);
+  cursor_bol(E);
 }
 
 void cursor_move_word_forward(editor_t* E) {
@@ -79,11 +114,11 @@ void cursor_move_word_forward(editor_t* E) {
     vec2_t pos = cursor_position();
     if (pos.y >= E->row_size - 1 && editor_rowlen(E, pos.y) >= pos.x)
       break;
-    cursor_move(E, pos.x + 1, pos.y);
+    cursor_right(E);
     ch1 = cursor_char(E);
     ch2 = editor_char_at(E, pos.x + 2, raw_y());
   } while(!(ch1 !=  ' ' && ch2 == ' '));
-  cursor_move(E, raw_x() + 1, raw_y());
+  cursor_right(E);
 }
 
 void cursor_move_word_backward(editor_t* E) {
@@ -93,7 +128,7 @@ void cursor_move_word_backward(editor_t* E) {
     if (pos.y == 0 && pos.x == 0)
       break; 
 
-    cursor_move(E, pos.x - 1, pos.y);
+    cursor_left(E);
     ch1 = cursor_char(E);
     ch2 = editor_char_at(E, pos.x - 2, raw_y());
   } while(!(ch1 !=  ' ' && ch2 == ' '));
@@ -104,7 +139,8 @@ void cursor_remove_char(editor_t *E) {
   if (pos.x == 0) {
     usize len = editor_rowlen(E, pos.y - 1);
     editor_move_line_up(E, pos.y);
-    cursor_move(E, len, pos.y - 1);
+    cursor_up(E);
+    cursor_eol(E);
     return;
   }
 
@@ -159,42 +195,3 @@ void cursor_page_down(editor_t* E) {
 void cursor_delete_forward(editor_t* E) {
   editor_delete_forward(E, raw_x(), raw_y());
 }
-
-void cursor_down(editor_t* E) {
-  vec2_t pos = cursor_position();
-  if (pos.y >= E->row_size - 1) return;
-
-  if (C.y < C.max_row) {
-    C.y++;
-  } else {
-    C.rowoff++;
-  }
-
-  if (pos.x > editor_rowlen(E, pos.y + 1)) {
-    cursor_eol(E);
-  }
-}
-
-void cursor_up(editor_t* E) {
-  i32 y = raw_y();
-  if (y <= 0) return;
-
-  if (C.rowoff > 0) {
-    C.rowoff--;
-  } else {
-    C.y--;
-  }
-
-  if (raw_x() > editor_rowlen(E, y)) {
-    cursor_eol(E);
-  }
-}
-
-void cursor_right(editor_t* E) {
-  cursor_move(E, raw_x() + 1, raw_y());
-}
-
-void cursor_left(editor_t* E) {
-  cursor_move(E, raw_x() - 1, raw_y());
-}
-
