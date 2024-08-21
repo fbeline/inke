@@ -18,7 +18,7 @@ static const f32 margin_p = 0.05;
 Vector2 render_position(render_t* R, i32 col, i32 row) {
   return (Vector2) {
     col * R->font.recs->width + R->margin_left,
-    row * R->font.recs->height * R->font_line_spacing + R->margin_top
+    row * R->font_line_spacing + R->margin_top // TODO: REFACTOR Y
   };
 }
 
@@ -37,15 +37,9 @@ static void render_draw_region(editor_t* E, render_t* R) {
   if (rp.y - cp.y != 0) {
     vec2_t ps = rp.y <= cp.y ? rp : cp;
     vec2_t pe = rp.y > cp.y ? rp : cp;
-
     for (i32 i = ps.y; i <= pe.y; i++) {
-      i32 xs = ps.x;
-      i32 xe = pe.x;
-
-      if (i != ps.y) xs = 0;
-      if (i != pe.y) xe = (i32)editor_rowlen(E, i);
-
-      printf("y=%d;x [%d, %d]\n", i, xs, xe);
+      i32 xs = i == ps.y ? ps.x : 0;
+      i32 xe = i == pe.y ? pe.x : editor_rowlen(E, i);
       render_highlight_line(R, i, xs, xe);
     }
   } else {
@@ -64,9 +58,8 @@ static void render_draw_cursor(editor_t* E, render_t* R) {
   if (!cVisible) return;
 
   cursor_t cursor = cursor_get();
-  f32 x = cursor.x * R->font.recs->width + R->margin_left;
-  f32 y = R->font_line_spacing * cursor.y + R->margin_top;
-  DrawRectangleV((Vector2){x, y},
+  Vector2 pos = render_position(R, cursor.x, cursor.y);
+  DrawRectangleV(pos,
                  (Vector2){R->font.recs->width, R->font.recs->height},
                  DARKGRAY);
 
@@ -74,13 +67,7 @@ static void render_draw_cursor(editor_t* E, render_t* R) {
   chc[0] = cursor_char(E);
 
   // draw font
-  DrawTextEx(R->font,
-             chc,
-             (Vector2){x, y},
-             R->font_size,
-             0,
-             RAYWHITE
-             );
+  DrawTextEx(R->font, chc, pos, R->font_size, 0, RAYWHITE);
 }
 
 static void draw_status_bar(editor_t* E, render_t* R) {
