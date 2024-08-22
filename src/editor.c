@@ -135,6 +135,24 @@ void editor_delete_forward(editor_t* E, i32 x, i32 y) {
   E->dirty = true;
 }
 
+char* editor_text_between(editor_t* E, vec2_t start, vec2_t end) {
+  char* text = malloc(1024);
+  usize len = 0;
+
+  for (i32 i = start.y; i <= end.y; i++) {
+    i32 xs = i == start.y ? start.x : 0;
+    i32 xe = i == end.y ? end.x : editor_rowlen(E, i);
+    usize rowlen = xe - xs;
+    memcpy(text + len, E->rows[i].chars + xs, rowlen);
+    len += rowlen;
+    if (i + 1 <= end.y) {
+      text[len++] = '\n';
+    }
+  }
+  text[len] = '\0';
+  return text;
+}
+
 int editor_open_file(const char* filename, editor_t* E) {
   FILE* fp;
   char buffer[1024];

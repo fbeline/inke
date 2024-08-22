@@ -3,10 +3,6 @@
 #include "types.h"
 #include "editor.h"
 
-typedef struct vec2_s {
-  i32 x, y;
-} vec2_t;
-
 typedef struct cursor_s {
   i32 x, y;
   vec2_t region;
@@ -23,6 +19,8 @@ vec2_t cursor_region(void);
 void cursor_region_start(void);
 
 char* cursor_region_text(editor_t* E);
+
+char* cursor_region_kill(editor_t* E);
 
 void cursor_clear_region(void);
 

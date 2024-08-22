@@ -17,3 +17,7 @@ typedef int64_t i64;
 typedef float f32;
 typedef double f64;
 typedef size_t usize;
+
+typedef struct vec2_s {
+  i32 x, y;
+} vec2_t;

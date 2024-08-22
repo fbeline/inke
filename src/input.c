@@ -65,6 +65,13 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   if (IsKeyPressed(KEY_PAGE_UP)) {
     return cursor_page_up(E);
   }
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_W)) {
+    char* txt = cursor_region_kill(E);
+    SetClipboardText(txt);
+    free(txt);
+
+    cursor_clear_region();
+  }
   if (IsKeyPressed(KEY_RIGHT) || 
     IsKeyPressedRepeat(KEY_RIGHT) ||
     (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_F))) {
