@@ -8,6 +8,47 @@
 #include "fs.h"
 #include "utils.h"
 
+typedef struct append_buffer {
+  usize capacity;
+  usize size;
+  char* b;
+} abuf_t;
+
+abuf_t abuf_init(usize capacity) {
+  char* b = malloc(capacity);
+  if (b == NULL) return (abuf_t){0};
+
+  return (abuf_t) {
+    .capacity = capacity,
+    .size = 0,
+    .b = b
+  };
+}
+
+void abuf_append(abuf_t *ab, const char *s) {
+  bool resize = false;
+  const usize len = strlen(s);
+
+  while (ab->capacity <= ab->size + len) {
+    ab->capacity *= 2;
+    resize = true;
+  }
+
+  if (resize) {
+    char *new = realloc(ab->b, ab->capacity);
+    if (new == NULL) return;
+    ab->b = new;
+  }
+
+  memcpy(ab->b + ab->size, s, len);
+  ab->size += len;
+  ab->b[ab->size] = '\0';
+}
+
+void abuf_free(abuf_t *ab) {
+  free(ab->b);
+}
+
 char* editor_rows_to_string(row_t* rows, unsigned int size) {
   abuf_t ab = abuf_init(256);
   for (int i = 0; i < size; i++) {
@@ -43,7 +84,7 @@ usize editor_rowlen(editor_t* E, i32 y) {
 }
 
 char editor_char_at(editor_t* E, i32 x, i32 y) {
-  if (y > E->row_size || x > strlen(E->rows[y].chars))
+  if (y > E->row_size || x > editor_rowlen(E, y))
     return '\0';
 
   return E->rows[y].chars[x];
@@ -51,8 +92,8 @@ char editor_char_at(editor_t* E, i32 x, i32 y) {
 
 void editor_move_line_up(editor_t* E, i32 y) {
     if (y == 0) return;
-    usize crow_len = strlen(E->rows[y].chars);
-    usize prow_len = strlen(E->rows[y-1].chars);
+    usize crow_len = editor_rowlen(E, y);
+    usize prow_len = editor_rowlen(E, y-1);
 
     // realloc previous row if necessary
     if (crow_len + prow_len >= E->rows[y-1].size) {
@@ -80,7 +121,7 @@ void editor_move_line_up(editor_t* E, i32 y) {
 
 void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch) {
   row_t row = E->rows[y];
-  u32 len = strlen(row.chars);
+  u32 len = editor_rowlen(E, y);
   if (x < 0 || x > len) {
     printf("Invalid position\n");
     return;
@@ -108,7 +149,7 @@ void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch) {
 void editor_break_line(editor_t* E, i32 x, i32 y) {
   if (!editor_insert_row_at(E, y + 1)) return;
 
-  E->rows[y + 1].size = strlen(E->rows[y].chars) - x+ 2;
+  E->rows[y + 1].size = editor_rowlen(E, y) - x+ 2;
   E->rows[y + 1].chars = malloc(E->rows[y + 1].size);
   memcpy(E->rows[y + 1].chars,
          E->rows[y].chars + x,
