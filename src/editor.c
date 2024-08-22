@@ -9,25 +9,13 @@
 #include "utils.h"
 
 char* editor_rows_to_string(row_t* rows, unsigned int size) {
-  usize strsize = 1;
-  usize strl = 0;
-  char* str = malloc(strsize);
-  str[0] = '\0';
-
+  abuf_t ab = abuf_init(256);
   for (int i = 0; i < size; i++) {
-    strsize += rows[i].size + 1;
-    char* tmp = realloc(str, strsize);
-    if (tmp == NULL) return NULL;
-    str = tmp;
-
-    memcpy(str + strl, rows[i].chars, strlen(rows[i].chars));
-    strl += strlen(rows[i].chars);
-    str[strl] = '\n';
-    strl++;
+    abuf_append(&ab, rows[i].chars);
+    abuf_append(&ab, "\n");
   }
-  str[strl] = '\0';
 
-  return str;
+  return ab.b;
 }
 
 bool editor_insert_row_at(editor_t* E, usize n) {
