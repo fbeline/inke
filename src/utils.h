@@ -1,14 +1,21 @@
 #pragma once
 
 #include "types.h"
-#include <stdlib.h>
-#include <string.h>
 
-#define COMPILE_TIME_ASSERT(name, expr) \
-    typedef char __assert_##name[(expr) ? 1 : -1]
+/*
+ * Force a compilation error if condition is true, but also produce a
+ * result (of value 0 and type int), so the expression can be used
+ * e.g. in a structure initializer (or where-ever else comma expressions
+ * aren't permitted).
+ */
+#define BUILD_BUG_ON_ZERO(e) (sizeof(struct { int:-!!(e); }))
 
 #define IS_SIGNED(type) ((type)(-1) < 0)
 #define IS_UNSIGNED(type) (!IS_SIGNED(type))
+
+#define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))
+
+#define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
 
 static inline bool in_range64(u64 val, u64 start, u64 len) {
 	return (val - start) < len;
@@ -42,7 +49,7 @@ static inline bool in_range32(u32 val, u32 start, u32 len) {
  * @y: second value
  */
 #define MIN(x, y) ({ \
-    COMPILE_TIME_ASSERT(min_same_type, IS_SIGNED(typeof(x)) == IS_SIGNED(typeof(y)) || IS_UNSIGNED(typeof(x)) == IS_UNSIGNED(typeof(y))); \
+    BUILD_BUG_ON_ZERO(!(IS_SIGNED(typeof(x)) == IS_SIGNED(typeof(y)) || IS_UNSIGNED(typeof(x)) == IS_UNSIGNED(typeof(y)))); \
     (x) < (y) ? (x) : (y); \
 })
 
@@ -52,6 +59,12 @@ static inline bool in_range32(u32 val, u32 start, u32 len) {
  * @y: second value
  */
 #define MAX(x, y) ({ \
-    COMPILE_TIME_ASSERT(max_same_type, (IS_SIGNED(typeof(x)) == IS_SIGNED(typeof(y))) || (IS_UNSIGNED(typeof(x)) == IS_UNSIGNED(typeof(y)))); \
+    BUILD_BUG_ON_ZERO(!(IS_SIGNED(typeof(x)) == IS_SIGNED(typeof(y)) || (IS_UNSIGNED(typeof(x)) == IS_UNSIGNED(typeof(y))))); \
     (x) > (y) ? (x) : (y); \
 })
+
+/**
+ * ARRAY_SIZE - get the number of elements in array @arr
+ * @arr: array to be sized
+ */
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
