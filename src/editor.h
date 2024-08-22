@@ -28,6 +28,8 @@ void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch);
 
 char* editor_text_between(editor_t* E, vec2_t start, vec2_t end);
 
+char* editor_cut_between(editor_t* E, vec2_t start, vec2_t end);
+
 char editor_char_at(editor_t* E, i32 x, i32 y);
 
 usize editor_rowlen(editor_t* E, i32 y);

@@ -46,8 +46,11 @@ char* cursor_region_text(editor_t* E) {
 char* cursor_region_kill(editor_t* E) {
   if (C.region.x == -1 || C.region.y == -1) return "\0";
 
-  // TODO: IMPL
-  return "";
+  vec2_t cp = cursor_position();
+  vec2_t ps = C.region.y <= cp.y ? C.region : cp;
+  vec2_t pe = C.region.y > cp.y ? C.region : cp;
+
+  return editor_cut_between(E, ps, pe);
 }
 
 void cursor_clear_region(void) {
