@@ -22,6 +22,8 @@ void editor_move_line_up(editor_t* E, i32 y);
 
 void editor_delete_forward(editor_t* E, i32 x, i32 y);
 
+void editor_delete_row(editor_t* E, i32 y);
+
 void editor_break_line(editor_t* E, i32 x, i32 y);
 
 void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch);

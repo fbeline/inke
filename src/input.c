@@ -43,6 +43,9 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_SPACE)) {
     return cursor_region_start();
   }
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_BACKSPACE)) {
+    return cursor_delete_row(E);
+  }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_W)) {
     char* txt = cursor_region_text(E);
     SetClipboardText(txt);

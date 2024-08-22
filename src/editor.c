@@ -49,6 +49,20 @@ void abuf_free(abuf_t *ab) {
   free(ab->b);
 }
 
+void editor_delete_row(editor_t* E, i32 y) {
+  if (!IN_RANGE(y, 0, E->row_size))
+    return;
+
+  free(E->rows[y].chars);
+  memmove(E->rows + y,
+          E->rows + (y + 1),
+          (E->row_size - y - 1) * sizeof(row_t));
+
+
+  E->row_size--;
+  E->dirty = true;
+}
+
 char* editor_rows_to_string(row_t* rows, unsigned int size) {
   abuf_t ab = abuf_init(256);
   for (int i = 0; i < size; i++) {
@@ -109,14 +123,7 @@ void editor_move_line_up(editor_t* E, i32 y) {
       E->rows[y-1].chars[crow_len + prow_len] = '\0';
     }
 
-    // remove row
-    free(E->rows[y].chars);
-    memmove(E->rows + y,
-            E->rows + (y + 1),
-            (E->row_size - y - 1) * sizeof(row_t));
-
-    E->row_size--;
-    E->dirty = true;
+    editor_delete_row(E, y);
 }
 
 void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch) {
@@ -165,7 +172,7 @@ void editor_delete_forward(editor_t* E, i32 x, i32 y) {
 }
 
 char* editor_text_between(editor_t* E, vec2_t start, vec2_t end) {
-  abuf_t ab = abuf_init(1);
+  abuf_t ab = abuf_init(16);
 
   for (i32 i = start.y; i <= end.y; i++) {
     i32 xs = i == start.y ? start.x : 0;
@@ -179,7 +186,7 @@ char* editor_text_between(editor_t* E, vec2_t start, vec2_t end) {
 }
 
 char* editor_cut_between(editor_t* E, vec2_t start, vec2_t end) {
-  abuf_t ab = abuf_init(1);
+  abuf_t ab = abuf_init(16);
 
   for (i32 i = start.y; i <= end.y; i++) {
     i32 xs = i == start.y ? start.x : 0;
@@ -189,6 +196,7 @@ char* editor_cut_between(editor_t* E, vec2_t start, vec2_t end) {
       abuf_append(&ab, "\n");
     }
   }
+  E->row_size -= (end.y - start.y);
   return ab.b;
 }
 

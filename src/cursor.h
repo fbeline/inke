@@ -59,3 +59,5 @@ void cursor_left(editor_t* E);
 void cursor_break_line(editor_t* E);
 
 void cursor_delete_forward(editor_t* E);
+
+void cursor_delete_row(editor_t* E);

@@ -230,3 +230,7 @@ void cursor_page_down(editor_t* E) {
 void cursor_delete_forward(editor_t* E) {
   editor_delete_forward(E, raw_x(), raw_y());
 }
+
+void cursor_delete_row(editor_t* E) {
+  editor_delete_row(E, raw_y());
+}
