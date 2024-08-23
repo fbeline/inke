@@ -5,21 +5,15 @@
 #include <raylib.h>
 #include "cursor.h"
 #include "mode.h"
+#include "fs.h"
 #include "utils.h"
 
-void input_keyboard_handler(editor_t* E, render_t* R) {
-  if (IsKeyPressed(KEY_ESCAPE)) {
-    if (E->dirty) {
-      g_mode = MODE_COMMAND;
-      mode_set_exit_save(E);
-    } else {
-      E->running = false;
-    }
-    return;
+void input_insert_handler(editor_t* E) { 
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_X)) {
+    return mode_set_ctrl_x();
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_G)) {
-    g_mode = MODE_INSERT;
-    g_active_command = (command_t){0};
+    return mode_cmd_clean();
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_A)) {
     return cursor_bol(E);
@@ -29,9 +23,6 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_K)) {
     return cursor_delete_forward(E);
-  }
-  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
-    /* return input_write_buffer(E); */
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Y)) {
     return cursor_insert_text(E, GetClipboardText());
@@ -98,11 +89,41 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
     cursor_remove_char(E);
   }
 
-  int ch = GetCharPressed();
+  i32 ch = GetCharPressed();
   if (IN_RANGE(ch, 32, 95)) {
-    if (g_mode & MODE_INSERT)
       cursor_insert_char(E, ch);
-    else if (g_mode & MODE_COMMAND)
-      g_active_command.handler(E, ch);
   }
+}
+
+void input_command_handler(editor_t* E) {
+  if (IsKeyDown(KEY_LEFT_CONTROL)) {
+    if (IsKeyPressed(KEY_C)) {
+      if (E->dirty) {
+        g_mode = MODE_COMMAND;
+        mode_set_exit_save(E);
+      } else {
+        E->running = false;
+      }
+      return;
+    }
+    if (IsKeyPressed(KEY_S)) {
+      char* buf = editor_rows_to_string(E->rows, E->row_size);
+      FileWrite(E->filename, buf);
+      free(buf);
+      E->dirty = false;
+      mode_cmd_clean();
+    }
+  } else {
+    i32 ch = GetCharPressed();
+    if (IN_RANGE(ch, 32, 95)) {
+      g_active_command.handler(E, ch);
+    }
+  }
+}
+
+void input_keyboard_handler(editor_t* E) {
+  if (g_mode & MODE_INSERT)
+    input_insert_handler(E);
+  else if (g_mode & MODE_COMMAND)
+    input_command_handler(E);
 }

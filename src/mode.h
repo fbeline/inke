@@ -13,9 +13,13 @@ typedef struct command_s {
   command_handler_t handler;
 } command_t;
 
-void mode_exit_save(editor_t* E, char r);
+
+
+void mode_cmd_clean(void);
 
 void mode_set_exit_save(editor_t* E);
+
+void mode_set_ctrl_x(void);
 
 extern u8 g_mode;
 extern command_t g_active_command;

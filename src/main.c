@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   Init(argv[1]);
 
   while (!WindowShouldClose() && E.running) {
-    input_keyboard_handler(&E, &R);
+    input_keyboard_handler(&E);
 
     render_update_window(&R);
     render_draw(&E, &R);

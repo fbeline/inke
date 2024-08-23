@@ -23,9 +23,33 @@ void mode_exit_save(editor_t* E, char r) {
   }
 }
 
+void mode_cmd_not_found(editor_t* E, char r) {
+  g_mode = MODE_INSERT;
+}
+
+void mode_cmd_nop(editor_t* E, char r) { }
+
+void mode_cmd_clean(void) {
+  g_mode = MODE_INSERT;
+  g_active_command = (command_t) {
+    "",
+    &mode_cmd_nop
+  };
+}
+
 void mode_set_exit_save(editor_t* E) {
+  g_mode = MODE_COMMAND;
   g_active_command = (command_t) {
     "Save file? (y/n or [c]ancel)",
     &mode_exit_save
   };
 }
+
+void mode_set_ctrl_x(void) {
+  g_mode = MODE_COMMAND;
+  g_active_command = (command_t) {
+    "C-x",
+    &mode_cmd_not_found
+  };
+}
+
