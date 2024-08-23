@@ -48,8 +48,10 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_W)) {
     char* txt = cursor_region_text(E);
-    SetClipboardText(txt);
-    free(txt);
+    if (txt != NULL) {
+      SetClipboardText(txt);
+      free(txt);
+    }
 
     cursor_clear_region();
   }
@@ -70,9 +72,10 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_W)) {
     char* txt = cursor_region_kill(E);
-    SetClipboardText(txt);
-    free(txt);
-
+    if (txt != NULL) {
+      SetClipboardText(txt);
+      free(txt);
+    }
     cursor_clear_region();
   }
   if (IsKeyPressed(KEY_RIGHT) || 

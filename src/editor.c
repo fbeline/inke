@@ -49,17 +49,20 @@ void abuf_free(abuf_t *ab) {
   free(ab->b);
 }
 
-void editor_delete_row(editor_t* E, i32 y) {
-  if (!IN_RANGE(y, 0, E->row_size))
+void editor_delete_rows(editor_t* E, i32 start, i32 end) {
+  if (!IN_RANGE(start, 0, E->row_size) || !IN_RANGE(end, 0, E->row_size))
     return;
 
-  free(E->rows[y].chars);
-  memmove(E->rows + y,
-          E->rows + (y + 1),
-          (E->row_size - y - 1) * sizeof(row_t));
+  usize n = end - start + 1; 
+  for (usize i = start; i <= end; i++) {
+    free(E->rows[i].chars);
+  }
+  memmove(E->rows + start,
+          E->rows + end + 1,
+          (E->row_size - n) * sizeof(row_t));
 
 
-  E->row_size--;
+  E->row_size -= n;
   E->dirty = true;
 }
 
@@ -123,7 +126,7 @@ void editor_move_line_up(editor_t* E, i32 y) {
       E->rows[y-1].chars[crow_len + prow_len] = '\0';
     }
 
-    editor_delete_row(E, y);
+    editor_delete_rows(E, y, y);
 }
 
 void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch) {
@@ -171,6 +174,13 @@ void editor_delete_forward(editor_t* E, i32 x, i32 y) {
   E->dirty = true;
 }
 
+void editor_delete_backward(editor_t* E, i32 x, i32 y) {
+  usize len = editor_rowlen(E, y) - x;
+  memmove(E->rows[y].chars, E->rows[y].chars + x, len);
+  E->rows[y].chars[len] = '\0';
+  E->dirty = true;
+}
+
 char* editor_text_between(editor_t* E, vec2_t start, vec2_t end) {
   abuf_t ab = abuf_init(16);
 
@@ -196,7 +206,18 @@ char* editor_cut_between(editor_t* E, vec2_t start, vec2_t end) {
       abuf_append(&ab, "\n");
     }
   }
-  E->row_size -= (end.y - start.y);
+
+  editor_delete_forward(E, start.x, start.y);
+
+  i32 ldiff = end.y - start.y;
+  if (ldiff >= 2)
+    editor_delete_rows(E, start.y + 1, end.y - 1);
+
+  if (ldiff > 0) {
+    editor_delete_backward(E, end.x, end.y - ldiff + 1);
+    editor_move_line_up(E, end.y - ldiff + 1);
+  }
+
   return ab.b;
 }
 

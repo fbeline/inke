@@ -34,7 +34,7 @@ void cursor_region_start(void) {
 }
 
 char* cursor_region_text(editor_t* E) {
-  if (C.region.x == -1 || C.region.y == -1) return "\0";
+  if (C.region.x == -1 || C.region.y == -1) return NULL;
 
   vec2_t cp = cursor_position();
   vec2_t ps = C.region.y <= cp.y ? C.region : cp;
@@ -44,13 +44,18 @@ char* cursor_region_text(editor_t* E) {
 }
 
 char* cursor_region_kill(editor_t* E) {
-  if (C.region.x == -1 || C.region.y == -1) return "\0";
+  if (C.region.x == -1 || C.region.y == -1) return NULL;
 
   vec2_t cp = cursor_position();
   vec2_t ps = C.region.y <= cp.y ? C.region : cp;
   vec2_t pe = C.region.y > cp.y ? C.region : cp;
 
-  return editor_cut_between(E, ps, pe);
+  char* txt = editor_cut_between(E, ps, pe);
+
+  C.y -= (pe.y - ps.y);
+  C.x = ps.x;
+
+  return txt;
 }
 
 void cursor_clear_region(void) {
@@ -232,5 +237,6 @@ void cursor_delete_forward(editor_t* E) {
 }
 
 void cursor_delete_row(editor_t* E) {
-  editor_delete_row(E, raw_y());
+  i32 n = raw_y();
+  editor_delete_rows(E, n, n);
 }

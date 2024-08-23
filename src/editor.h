@@ -22,7 +22,7 @@ void editor_move_line_up(editor_t* E, i32 y);
 
 void editor_delete_forward(editor_t* E, i32 x, i32 y);
 
-void editor_delete_row(editor_t* E, i32 y);
+void editor_delete_rows(editor_t* E, i32 start, i32 end);
 
 void editor_break_line(editor_t* E, i32 x, i32 y);
 
