@@ -1,14 +1,12 @@
 #include "render.h"
 
-#define RAYGUI_IMPLEMENTATION
-#include <raygui.h>
-
+#include <math.h>
 #include <string.h>
 #include <stdio.h>
 
 #include "editor.h"
+#include "mode.h"
 #include "cursor.h"
-#include "fs.h"
 #include "utils.h"
 
 static f32 blinkT;
@@ -44,6 +42,8 @@ static void render_draw_region(editor_t* E, render_t* R) {
 }
 
 static void render_draw_cursor(editor_t* E, render_t* R) {
+  if (!(g_mode & MODE_INSERT)) return;
+
   blinkT += GetFrameTime();
 
   if (blinkT >= 0.5) {
@@ -67,10 +67,15 @@ static void render_draw_cursor(editor_t* E, render_t* R) {
 }
 
 static void draw_command_bar(editor_t* E, render_t* R) {
-  i32 ypos = R->window_height - R->font.recs->height;
+  if (!(g_mode & MODE_COMMAND)) return;
 
-  // TODO: IMPL EDITOR COMMAND MODE
-  DrawTextEx(R->font, "Save before exit?", (Vector2){R->margin_left, ypos}, R->font_size, 0, DARKGRAY);
+  i32 ypos = R->window_height - R->font.recs->height;
+  DrawTextEx(R->font, 
+             g_active_command.text, 
+             (Vector2){R->margin_left, ypos}, 
+             R->font_size,
+             0,
+             DARKGRAY);
 }
 
 static void draw_status_bar(editor_t* E, render_t* R) {
@@ -166,36 +171,6 @@ static void render_draw_lines(editor_t* E, render_t* R) {
   }
 }
 
-static void render_draw_message_box(editor_t* E, render_t* R) {
-  if (R->message_box == 0) return;
-
-  f32 box_width = 350;
-  f32 box_height = 150;
-  f32 box_x = (R->window_width - box_width) / 2;
-  f32 box_y = (R->window_height - box_height) / 2;
-
-  int result = GuiMessageBox(
-    (Rectangle){ box_x, box_y, box_width, box_height },
-    "#191#Save Changes?", 
-    "Open documents contain unsaved changes.", 
-    "Cancel;Discard;Save");
-
-  char* buf = NULL;
-  switch (result) {
-    case 1:
-      R->message_box = 0;
-      break;
-    case 2:
-      E->running = false;
-      break;
-    case 3:
-      buf = editor_rows_to_string(E->rows, E->row_size);
-      FileWrite(E->filename, buf);
-      free(buf);
-      E->running = false;
-  }
-}
-
 void render_reload_font(render_t* R) {
   UnloadFont(R->font);
   render_load_font(R->font_size, R);
@@ -228,8 +203,6 @@ void render_draw(editor_t* E, render_t* R) {
     render_draw_lines(E, R);
     render_draw_vertical_bar(E, R);
     render_draw_cursor(E, R);
-
-    render_draw_message_box(E, R);
   }
 
   draw_status_bar(E, R);
@@ -240,7 +213,6 @@ void render_draw(editor_t* E, render_t* R) {
 
 render_t render_init(u16 width, u16 height, u16 font_size) {
   render_t R;
-  R.message_box = 0;
   R.margin_top = 20;
   R.margin_bottom = 30;
   R.margin_left = 20;

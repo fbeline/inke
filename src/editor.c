@@ -287,7 +287,7 @@ void editor_new_file(const char* filename, editor_t* E) {
 }
 
 editor_t editor_init(const char* filename) {
-  editor_t E = { .running = true, .mode = MODE_INSERT };
+  editor_t E = { .running = true };
 
   if (FS_FILE_EXISTS(filename)) {
     editor_open_file(filename, &E);

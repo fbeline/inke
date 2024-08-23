@@ -4,26 +4,22 @@
 #include <stdio.h>
 #include <raylib.h>
 #include "cursor.h"
-#include "fs.h"
+#include "mode.h"
 #include "utils.h"
-
-static void input_write_buffer(editor_t* E) {
-  char *buf = editor_rows_to_string(E->rows, E->row_size);
-  FileWrite(E->filename, buf);
-  free(buf);
-  E->dirty = false;
-  E->new_file = false;
-  return;
-}
 
 void input_keyboard_handler(editor_t* E, render_t* R) {
   if (IsKeyPressed(KEY_ESCAPE)) {
     if (E->dirty) {
-      R->message_box = 1;
+      g_mode = MODE_COMMAND;
+      mode_set_exit_save(E);
     } else {
       E->running = false;
     }
     return;
+  }
+  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_G)) {
+    g_mode = MODE_INSERT;
+    g_active_command = (command_t){0};
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_A)) {
     return cursor_bol(E);
@@ -35,7 +31,7 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
     return cursor_delete_forward(E);
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
-    return input_write_buffer(E);
+    /* return input_write_buffer(E); */
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Y)) {
     return cursor_insert_text(E, GetClipboardText());
@@ -104,6 +100,9 @@ void input_keyboard_handler(editor_t* E, render_t* R) {
 
   int ch = GetCharPressed();
   if (IN_RANGE(ch, 32, 95)) {
-    cursor_insert_char(E, ch);
+    if (g_mode & MODE_INSERT)
+      cursor_insert_char(E, ch);
+    else if (g_mode & MODE_COMMAND)
+      g_active_command.handler(E, ch);
   }
 }
