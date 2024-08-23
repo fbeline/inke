@@ -3,6 +3,9 @@
 #include "types.h"
 
 #define VERSION "0.0.1"
+#define MODE_INSERT  0x01
+#define MODE_COMMAND 0x02
+#define MODE_SEARCH  0x04
 
 typedef struct row_s {
   usize size;
@@ -10,6 +13,7 @@ typedef struct row_s {
 } row_t;
 
 typedef struct editor_s {
+  unsigned char mode;
   char filename[255];
   u32 row_size, row_capacity;
   bool dirty;
