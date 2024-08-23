@@ -66,6 +66,13 @@ static void render_draw_cursor(editor_t* E, render_t* R) {
   DrawTextEx(R->font, chc, pos, R->font_size, 0, RAYWHITE);
 }
 
+static void draw_command_bar(editor_t* E, render_t* R) {
+  i32 ypos = R->window_height - R->font.recs->height;
+
+  // TODO: IMPL EDITOR COMMAND MODE
+  DrawTextEx(R->font, "Save before exit?", (Vector2){R->margin_left, ypos}, R->font_size, 0, DARKGRAY);
+}
+
 static void draw_status_bar(editor_t* E, render_t* R) {
   char row_col[15];
   vec2_t cpos = cursor_position();
@@ -73,16 +80,16 @@ static void draw_status_bar(editor_t* E, render_t* R) {
   Vector2 row_col_size = MeasureTextEx(GetFontDefault(), "00000000/000", R->font_size, 0.0f);
 
   i32 xpos = R->window_width - row_col_size.x - R->margin_left;
-  i32 ypos = R->window_height - row_col_size.y;
+  i32 ypos = R->window_height - (row_col_size.y * 2);
 
-  DrawRectangle(0, ypos - 2, R->window_width, R->font_size + 2, RAYWHITE);
+  DrawRectangle(0, ypos - 2, R->window_width, R->font_size + 2, DARKGRAY);
 
   DrawTextEx(R->font,
              row_col,
              (Vector2){xpos, ypos},
              R->font_size,
              0,
-             DARKGRAY);
+             RAYWHITE);
 
   char filename[260];
   const usize filename_len = strlen(E->filename);
@@ -98,7 +105,7 @@ static void draw_status_bar(editor_t* E, render_t* R) {
              (Vector2){R->margin_left, ypos},
              R->font_size,
              0,
-             DARKGRAY);
+             RAYWHITE);
 }
 
 static void render_load_font(u16 font_size, render_t* R) {
@@ -226,6 +233,7 @@ void render_draw(editor_t* E, render_t* R) {
   }
 
   draw_status_bar(E, R);
+  draw_command_bar(E, R);
 
   EndDrawing();
 }
