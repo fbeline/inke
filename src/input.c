@@ -8,7 +8,7 @@
 #include "fs.h"
 #include "utils.h"
 
-void input_insert_handler(editor_t* E) { 
+static void input_insert_handler(editor_t* E) { 
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_X)) {
     return mode_set_ctrl_x();
   }
@@ -101,7 +101,7 @@ void input_insert_handler(editor_t* E) {
   }
 }
 
-void input_command_handler(editor_t* E) {
+static void input_command_handler(editor_t* E) {
   if (IsKeyDown(KEY_LEFT_CONTROL)) {
     if (IsKeyPressed(KEY_C)) {
       if (E->dirty) {
