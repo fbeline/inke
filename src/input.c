@@ -12,9 +12,6 @@ void input_insert_handler(editor_t* E) {
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_X)) {
     return mode_set_ctrl_x();
   }
-  if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_G)) {
-    return mode_cmd_clean();
-  }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_A)) {
     return cursor_bol();
   }
@@ -121,6 +118,9 @@ void input_command_handler(editor_t* E) {
       free(buf);
       E->dirty = false;
       mode_cmd_clean();
+    }
+    if (IsKeyPressed(KEY_G)) {
+      return mode_cmd_clean();
     }
   } else {
     i32 ch = GetCharPressed();
