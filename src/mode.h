@@ -13,8 +13,6 @@ typedef struct command_s {
   command_handler_t handler;
 } command_t;
 
-
-
 void mode_cmd_clean(void);
 
 void mode_set_exit_save(editor_t* E);

@@ -2,13 +2,11 @@
 #include "fs.h"
 
 #include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 
 u8 g_mode = MODE_INSERT;
 command_t g_active_command = {0};
 
-void mode_exit_save(editor_t* E, char r) {
+static void mode_exit_save(editor_t* E, char r) {
   char *buf;
   switch (r) {
     case 'y':
@@ -23,11 +21,11 @@ void mode_exit_save(editor_t* E, char r) {
   }
 }
 
-void mode_cmd_not_found(editor_t* E, char r) {
+static void mode_cmd_not_found(editor_t* E, char r) {
   g_mode = MODE_INSERT;
 }
 
-void mode_cmd_nop(editor_t* E, char r) { }
+static void mode_cmd_nop(editor_t* E, char r) { }
 
 void mode_cmd_clean(void) {
   g_mode = MODE_INSERT;

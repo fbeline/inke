@@ -26,15 +26,17 @@ void cursor_clear_region(void);
 
 char cursor_char(editor_t* E);
 
-void cursor_bol(editor_t* E);
+void cursor_bol();
 
 void cursor_eol(editor_t* E);
+
+void cursor_eof(editor_t* E);
+
+void cursor_bof();
 
 void cursor_page_up(editor_t* E);
 
 void cursor_page_down(editor_t* E);
-
-void cursor_move(editor_t* E, i32 x, i32 y);
 
 void cursor_move_word_forward(editor_t* E);
 

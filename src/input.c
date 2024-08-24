@@ -16,7 +16,7 @@ void input_insert_handler(editor_t* E) {
     return mode_cmd_clean();
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_A)) {
-    return cursor_bol(E);
+    return cursor_bol();
   }
   if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_E)) {
     return cursor_eol(E);
@@ -41,6 +41,15 @@ void input_insert_handler(editor_t* E) {
     }
 
     cursor_clear_region();
+  }
+  if (IsKeyDown(KEY_LEFT_ALT) && IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_COMMA)) {
+    return cursor_bof();
+  }
+  if (IsKeyDown(KEY_LEFT_ALT) && IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_PERIOD)) {
+    return cursor_eof(E);
+  }
+  if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {
+    return cursor_move_word_forward(E);
   }
   if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F)) {
     return cursor_move_word_forward(E);

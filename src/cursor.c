@@ -71,7 +71,7 @@ char cursor_char(editor_t* E) {
   return editor_char_at(E, raw_x(), raw_y());
 }
 
-void cursor_bol(editor_t* E) {
+void cursor_bol(void) {
   C.x = 0;
   C.coloff = 0;
 }
@@ -124,7 +124,7 @@ void cursor_right(editor_t* E) {
     C.coloff++;
   } else if (pos.x >= len) {
     cursor_down(E);
-    cursor_bol(E);
+    cursor_bol();
   } else {
     C.x++;
   }
@@ -145,7 +145,7 @@ void cursor_break_line(editor_t* E) {
   vec2_t pos = cursor_position();
   editor_break_line(E, pos.x, pos.y);
   cursor_down(E);
-  cursor_bol(E);
+  cursor_bol();
 }
 
 void cursor_move_word_forward(editor_t* E) {
@@ -239,4 +239,21 @@ void cursor_delete_forward(editor_t* E) {
 void cursor_delete_row(editor_t* E) {
   i32 n = raw_y();
   editor_delete_rows(E, n, n);
+}
+
+void cursor_eof(editor_t* E) {
+  if (E->row_size > C.max_row) {
+    C.y = C.max_row - 1;
+    C.rowoff = E->row_size - C.max_row;
+  } else {
+    C.y = E->row_size;
+    C.rowoff = 0;
+  }
+  cursor_eol(E);
+}
+
+void cursor_bof(void) {
+  cursor_bol();
+  C.y = 0;
+  C.rowoff = 0;
 }
