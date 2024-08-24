@@ -30,25 +30,22 @@ static void mode_cmd_nop(editor_t* E, char r) { }
 void mode_cmd_clean(void) {
   g_mode = MODE_INSERT;
   g_active_command = (command_t) {
-    COMMAND_EMPTY,
     "",
     &mode_cmd_nop
   };
 }
 
 void mode_set_exit_save(editor_t* E) {
-  g_mode = MODE_COMMAND;
+  g_mode = COMMAND_SINGLE_CHAR;
   g_active_command = (command_t) {
-    COMMAND_SINGLE_CHAR,
     "Save file? (y/n or [c]ancel)",
     &mode_exit_save
   };
 }
 
 void mode_set_ctrl_x(void) {
-  g_mode = MODE_COMMAND;
+  g_mode = COMMAND_CHAIN;
   g_active_command = (command_t) {
-    COMMAND_CHAIN,
     "C-x",
     &mode_cmd_not_found
   };

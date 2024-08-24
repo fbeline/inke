@@ -67,7 +67,8 @@ static void render_draw_cursor(editor_t* E, render_t* R) {
 }
 
 static void draw_command_bar(editor_t* E, render_t* R) {
-  if (!(g_mode & MODE_COMMAND)) return;
+  if (!(g_mode & (COMMAND_CHAIN | COMMAND_SINGLE_CHAR)))
+    return;
 
   i32 ypos = R->window_height - R->font.recs->height;
   DrawTextEx(R->font, 

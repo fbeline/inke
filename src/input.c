@@ -101,11 +101,11 @@ static void input_insert_handler(editor_t* E) {
   }
 }
 
-static void input_command_handler(editor_t* E) {
+static void input_command_chain_handler(editor_t* E) {
   if (IsKeyDown(KEY_LEFT_CONTROL)) {
     if (IsKeyPressed(KEY_C)) {
       if (E->dirty) {
-        g_mode = MODE_COMMAND;
+        g_mode = COMMAND_CHAIN;
         mode_set_exit_save(E);
       } else {
         E->running = false;
@@ -122,17 +122,21 @@ static void input_command_handler(editor_t* E) {
     if (IsKeyPressed(KEY_G)) {
       return mode_cmd_clean();
     }
-  } else {
-    i32 ch = GetCharPressed();
-    if (IN_RANGE(ch, 32, 95)) {
-      g_active_command.handler(E, ch);
-    }
+  }
+}
+
+static void input_command_char_handler(editor_t* E) {
+  i32 ch = GetCharPressed();
+  if (IN_RANGE(ch, 32, 95)) {
+    g_active_command.handler(E, ch);
   }
 }
 
 void input_keyboard_handler(editor_t* E) {
   if (g_mode & MODE_INSERT)
     input_insert_handler(E);
-  else if (g_mode & MODE_COMMAND)
-    input_command_handler(E);
+  else if (g_mode & COMMAND_CHAIN)
+    input_command_chain_handler(E);
+  else if (g_mode & COMMAND_SINGLE_CHAR)
+    input_command_char_handler(E);
 }
