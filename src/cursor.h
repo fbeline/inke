@@ -3,9 +3,15 @@
 #include "types.h"
 #include "editor.h"
 
+typedef struct region_s {
+  bool active;
+  vec2_t pos;    // raw position
+  vec2_t vpos;  //  virtual position
+} region_t;
+
 typedef struct cursor_s {
   i32 x, y;
-  vec2_t region;
+  region_t region;
   i32 coloff, rowoff;
   u16 max_col, max_row;
 } cursor_t;
@@ -14,7 +20,7 @@ cursor_t cursor_get(void);
 
 vec2_t cursor_position(void);
 
-vec2_t cursor_region(void);
+region_t cursor_region(void);
 
 void cursor_region_start(void);
 

@@ -22,33 +22,39 @@ vec2_t cursor_position(void) {
   return (vec2_t) {raw_x(), raw_y()};
 }
 
-vec2_t cursor_region(void) {
+region_t cursor_region(void) {
   return C.region;
 }
 
 void cursor_region_start(void) {
-  if (C.region.x == -1 && C.region.y == -1)
-    C.region = cursor_position();
-  else 
+  if (!C.region.active) {
+    C.region.active = true;
+    C.region.pos = cursor_position();
+    C.region.vpos = (vec2_t){C.x, C.y};
+  } else {
     cursor_clear_region();
+  }
 }
 
 char* cursor_region_text(editor_t* E) {
-  if (C.region.x == -1 || C.region.y == -1) return NULL;
+  if (!C.region.active) return NULL;
 
   vec2_t cp = cursor_position();
-  vec2_t ps = C.region.y <= cp.y ? C.region : cp;
-  vec2_t pe = C.region.y > cp.y ? C.region : cp;
+  vec2_t rp = C.region.pos;
+  vec2_t ps = rp.y <= cp.y ? rp : cp;
+  vec2_t pe = rp.y > cp.y ? rp : cp;
 
   return editor_text_between(E, ps, pe);
 }
 
 char* cursor_region_kill(editor_t* E) {
-  if (C.region.x == -1 || C.region.y == -1) return NULL;
+  if (!C.region.active) return NULL;
+
 
   vec2_t cp = cursor_position();
-  vec2_t ps = C.region.y <= cp.y ? C.region : cp;
-  vec2_t pe = C.region.y > cp.y ? C.region : cp;
+  vec2_t rp = C.region.pos;
+  vec2_t ps = rp.y <= cp.y ? rp : cp;
+  vec2_t pe = rp.y > cp.y ? rp : cp;
 
   char* txt = editor_cut_between(E, ps, pe);
 
@@ -59,7 +65,7 @@ char* cursor_region_kill(editor_t* E) {
 }
 
 void cursor_clear_region(void) {
-  C.region = (vec2_t){-1, -1};
+  C.region.active = false;
 }
 
 void cursor_set_max(u16 max_col, u16 max_row) {
@@ -94,6 +100,7 @@ void cursor_down(editor_t* E) {
     C.y++;
   } else {
     C.rowoff++;
+    C.region.vpos.y--;
   }
 
   if (pos.x > editor_rowlen(E, pos.y + 1)) {
@@ -107,6 +114,7 @@ void cursor_up(editor_t* E) {
 
   if (C.rowoff > 0) {
     C.rowoff--;
+    C.region.vpos.y++;
   } else {
     C.y--;
   }

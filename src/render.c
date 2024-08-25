@@ -21,22 +21,22 @@ Vector2 render_position(render_t* R, i32 col, i32 row) {
 }
 
 static void render_highlight_line(render_t* R, i32 y, i32 xs, i32 xe) {
-    Vector2 sp = render_position(R, xs, y);
-    Vector2 ep = render_position(R, xe, y);
-    DrawRectangle(sp.x, sp.y, ep.x - sp.x, R->font.recs->height, YELLOW);
+  Vector2 sp = render_position(R, xs, y);
+  Vector2 ep = render_position(R, xe, y);
+  DrawRectangle(sp.x, sp.y, ep.x - sp.x, R->font.recs->height, YELLOW);
 }
 
 static void render_draw_region(editor_t* E, render_t* R) {
-  vec2_t rp = cursor_region();
-  if (rp.x == -1 || rp.y == -1)
-    return;
+  cursor_t C = cursor_get();
+  if (!C.region.active) return;
 
-  vec2_t cp = cursor_position();
+  vec2_t cp = {C.x, C.y};
+  vec2_t rp = C.region.vpos;
   vec2_t ps = rp.y <= cp.y ? rp : cp;
   vec2_t pe = rp.y > cp.y ? rp : cp;
   for (i32 i = ps.y; i <= pe.y; i++) {
     i32 xs = i == ps.y ? ps.x : 0;
-    i32 xe = i == pe.y ? pe.x : editor_rowlen(E, i);
+    i32 xe = i == pe.y ? pe.x : editor_rowlen(E, i + C.rowoff);
     render_highlight_line(R, i, xs, xe);
   }
 }
