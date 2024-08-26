@@ -126,7 +126,7 @@ static void input_command_chain_handler(editor_t* E) {
       FileWrite(E->filename, buf);
       E->dirty = false;
       mode_cmd_clean();
-      mode_set_message("\"%s\" %dL, %zuB written", E->filename, E->row_size, strlen(buf));
+      mode_set_message("\"%s\" [unix] %dL, %zuB written", E->filename, E->row_size, strlen(buf));
       free(buf);
     }
     if (kpr(KEY_G)) {
