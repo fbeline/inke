@@ -50,7 +50,6 @@ char* cursor_region_text(editor_t* E) {
 char* cursor_region_kill(editor_t* E) {
   if (!C.region.active) return NULL;
 
-
   vec2_t cp = cursor_position();
   vec2_t rp = C.region.pos;
   vec2_t ps = rp.y <= cp.y ? rp : cp;
@@ -112,7 +111,7 @@ void cursor_up(editor_t* E) {
   i32 y = raw_y();
   if (y <= 0) return;
 
-  if (C.rowoff > 0) {
+  if (C.y == 0 && C.rowoff > 0) {
     C.rowoff--;
     C.region.vpos.y++;
   } else {
@@ -174,7 +173,7 @@ void cursor_move_word_backward(editor_t* E) {
   do {
     vec2_t pos = cursor_position();
     if (pos.y == 0 && pos.x == 0)
-      break; 
+      break;
 
     cursor_left(E);
     ch1 = cursor_char(E);
@@ -193,7 +192,7 @@ void cursor_remove_char(editor_t *E) {
   }
 
   usize len = editor_rowlen(E, pos.y);
-  memmove(E->rows[pos.y].chars + pos.x - 1, 
+  memmove(E->rows[pos.y].chars + pos.x - 1,
           E->rows[pos.y].chars + pos.x,
           len - pos.x + 1);
 
