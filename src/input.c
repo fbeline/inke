@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <raylib.h>
+#include <string.h>
 #include "cursor.h"
 #include "mode.h"
 #include "fs.h"
@@ -24,7 +25,7 @@ static bool kshift(void) {
   return IsKeyDown(KEY_LEFT_SHIFT);
 }
 
-static void input_insert_handler(editor_t* E) { 
+static void input_insert_handler(editor_t* E) {
   if (kctrl() && IsKeyPressed(KEY_X)) {
     return mode_set_ctrl_x();
   }
@@ -90,7 +91,7 @@ static void input_insert_handler(editor_t* E) {
   }
   if (kpr(KEY_DOWN) ||
     (kctrl() && kpr(KEY_N))) {
-    cursor_down(E); 
+    cursor_down(E);
   }
   if (kpr(KEY_LEFT) ||
     (kctrl() && kpr(KEY_B))) {
@@ -123,9 +124,10 @@ static void input_command_chain_handler(editor_t* E) {
     if (kpr(KEY_S)) {
       char* buf = editor_rows_to_string(E->rows, E->row_size);
       FileWrite(E->filename, buf);
-      free(buf);
       E->dirty = false;
       mode_cmd_clean();
+      mode_set_message("\"%s\" %dL, %zuB written", E->filename, E->row_size, strlen(buf));
+      free(buf);
     }
     if (kpr(KEY_G)) {
       return mode_cmd_clean();

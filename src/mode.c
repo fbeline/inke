@@ -2,9 +2,25 @@
 #include "fs.h"
 
 #include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include "utils.h"
 
 u8 g_mode = MODE_INSERT;
 command_t g_active_command = {0};
+static char message[256] = {0};
+
+void mode_set_message(const char* msg, ...) {
+  va_list args;
+	va_start(args, msg);
+  vsnprintf(message, 256, msg, args);
+	va_end(args);
+}
+
+char* mode_get_message(void) {
+  return message;
+}
 
 static void mode_exit_save(editor_t* E, char r) {
   char *buf;

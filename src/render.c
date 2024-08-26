@@ -61,9 +61,23 @@ static void draw_command_bar(editor_t* E, render_t* R) {
     return;
 
   i32 ypos = R->window_height - R->font.recs->height;
-  DrawTextEx(R->font, 
-             g_active_command.text, 
-             (Vector2){R->margin_left, ypos}, 
+  DrawTextEx(R->font,
+             g_active_command.text,
+             (Vector2){R->margin_left, ypos},
+             R->font_size,
+             0,
+             DARKGRAY);
+}
+
+static void draw_message(editor_t* E, render_t* R) {
+  const char* message = mode_get_message();
+  if (strlen(message) == 0 || !(g_mode & MODE_INSERT))
+    return;
+
+  i32 ypos = R->window_height - R->font.recs->height;
+  DrawTextEx(R->font,
+             message,
+             (Vector2){R->margin_left, ypos},
              R->font_size,
              0,
              DARKGRAY);
@@ -110,7 +124,7 @@ static void render_load_font(u16 font_size, render_t* R) {
   R->font = LoadFontEx("resources/FiraCode-Regular.ttf", R->font_size, NULL, 250);
 
   SetTextLineSpacing(R->font_line_spacing);
-  GenTextureMipmaps(&R->font.texture); 
+  GenTextureMipmaps(&R->font.texture);
   SetTextureFilter(R->font.texture, TEXTURE_FILTER_BILINEAR);
 }
 
@@ -119,11 +133,11 @@ static void render_draw_info(editor_t* E, render_t* R) {
   sprintf(info, "OLIVE v%s", VERSION);
   int text_size = MeasureText(info, R->font_size);
 
-  DrawTextEx(R->font, 
-             info, 
-             (Vector2) {R->window_width/2.f - text_size/2.f, R->window_height/2.f}, 
-             R->font_size, 
-             0, 
+  DrawTextEx(R->font,
+             info,
+             (Vector2) {R->window_width/2.f - text_size/2.f, R->window_height/2.f},
+             R->font_size,
+             0,
              DARKGRAY);
 
 }
@@ -168,7 +182,7 @@ void render_reload_font(render_t* R) {
 }
 
 void render_update_window(render_t* R) {
-  if (R == NULL || 
+  if (R == NULL ||
     (GetScreenWidth() == R->window_width && GetScreenHeight() == R->window_height))
     return;
 
@@ -197,6 +211,7 @@ void render_draw(editor_t* E, render_t* R) {
   }
 
   draw_status_bar(E, R);
+  draw_message(E, R);
   draw_command_bar(E, R);
 
   EndDrawing();
