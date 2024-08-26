@@ -6,7 +6,7 @@
 #include <string.h>
 #include "cursor.h"
 #include "mode.h"
-#include "fs.h"
+#include "io.h"
 #include "utils.h"
 
 static bool kpr(int k) {
@@ -122,12 +122,7 @@ static void input_command_chain_handler(editor_t* E) {
       return;
     }
     if (kpr(KEY_S)) {
-      char* buf = editor_rows_to_string(E->rows, E->row_size);
-      FileWrite(E->filename, buf);
-      E->dirty = false;
-      mode_cmd_clean();
-      mode_set_message("\"%s\" [unix] %dL, %zuB written", E->filename, E->row_size, strlen(buf));
-      free(buf);
+      io_write_buffer(E);
     }
     if (kpr(KEY_G)) {
       return mode_cmd_clean();

@@ -1,10 +1,10 @@
 #include "mode.h"
-#include "fs.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include "io.h"
 #include "utils.h"
 
 u8 g_mode = MODE_INSERT;
@@ -26,9 +26,7 @@ static void mode_exit_save(editor_t* E, char r) {
   char *buf;
   switch (r) {
     case 'y':
-      buf = editor_rows_to_string(E->rows, E->row_size);
-      FileWrite(E->filename, buf);
-      free(buf);
+      io_write_buffer(E);
       E->running = false;
     case 'n':
       E->running = false;

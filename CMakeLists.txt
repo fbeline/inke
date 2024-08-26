@@ -9,13 +9,13 @@ find_package(raylib CONFIG REQUIRED)
 add_executable(olive
   src/main.c
   src/types.h
+  src/io.h src/io.c
   src/utils.h src/utils.c
   src/mode.h src/mode.c
   src/cursor.h src/cursor.c
   src/editor.h src/editor.c
   src/render.h src/render.c
-  src/input.h src/input.c
-  src/fs.h src/fs.c)
+  src/input.h src/input.c)
 
 target_include_directories(olive PRIVATE include)
 

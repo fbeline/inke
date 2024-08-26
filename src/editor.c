@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "fs.h"
+#include "io.h"
 #include "utils.h"
 
 typedef struct append_buffer {
@@ -273,7 +273,7 @@ void editor_new_file(const char *filename, editor_t *E) {
 editor_t editor_init(const char *filename) {
   editor_t E = {.running = true};
 
-  if (FS_FILE_EXISTS(filename)) {
+  if (IO_FILE_EXISTS(filename)) {
     editor_open_file(filename, &E);
   } else {
     editor_new_file(filename, &E);
