@@ -9,8 +9,6 @@
 #include "cursor.h"
 #include "utils.h"
 
-static f32 blinkT;
-static bool cVisible = true;
 static const f32 margin_p = 0.05;
 
 Vector2 render_position(render_t* R, i32 col, i32 row) {
@@ -34,6 +32,7 @@ static void render_draw_region(editor_t* E, render_t* R) {
   vec2_t rp = C.region.vpos;
   vec2_t ps = rp.y <= cp.y ? rp : cp;
   vec2_t pe = rp.y > cp.y ? rp : cp;
+  pe.y = MIN((i32)R->nrow + 1, pe.y);
   for (i32 i = ps.y; i <= pe.y; i++) {
     i32 xs = i == ps.y ? ps.x : 0;
     i32 xe = i == pe.y ? pe.x : editor_rowlen(E, i + C.rowoff);
@@ -43,15 +42,6 @@ static void render_draw_region(editor_t* E, render_t* R) {
 
 static void render_draw_cursor(editor_t* E, render_t* R) {
   if (!(g_mode & MODE_INSERT)) return;
-
-  blinkT += GetFrameTime();
-
-  if (blinkT >= 0.5) {
-    blinkT = 0.f;
-    cVisible = !cVisible;
-  }
-
-  if (!cVisible) return;
 
   cursor_t cursor = cursor_get();
   Vector2 pos = render_position(R, cursor.x, cursor.y);
