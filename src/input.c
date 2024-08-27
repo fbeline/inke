@@ -38,6 +38,9 @@ static void input_insert_handler(editor_t* E) {
   if (kctrl() && kpr(KEY_K)) {
     return cursor_delete_forward(E);
   }
+  if (kctrl() && kpr(KEY_SLASH)) {
+    return editor_undo(E);
+  }
   if (kctrl() && kpr(KEY_Y)) {
     return cursor_insert_text(E, GetClipboardText());
   }

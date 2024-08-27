@@ -191,10 +191,7 @@ void cursor_remove_char(editor_t *E) {
     return;
   }
 
-  usize len = editor_rowlen(E, pos.y);
-  memmove(E->rows[pos.y].chars + pos.x - 1,
-          E->rows[pos.y].chars + pos.x,
-          len - pos.x + 1);
+  editor_delete_char_at(E, pos);
 
   if (C.x == 0 && C.coloff > 0)
     C.coloff--;
@@ -206,6 +203,11 @@ void cursor_remove_char(editor_t *E) {
 
 void cursor_insert_char(editor_t* E, int ch) {
   editor_insert_char_at(E, raw_x(), raw_y(), ch);
+
+  editor_undo_push(ADD,
+                   (vec2_t){raw_x() + 1, raw_y()},
+                   (vec2_t){0, 0},
+                   NULL);
 
   C.x++;
   if (C.x > C.max_col) {

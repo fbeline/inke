@@ -35,7 +35,7 @@ void editor_undo_push(undo_type type, vec2_t spos, vec2_t epos, const char* data
 
 undo_t* editor_undo_pop(void);
 
-void editor_undo(void);
+void editor_undo(editor_t* E);
 
 void editor_undo_free(undo_t* undo);
 
@@ -46,6 +46,8 @@ void editor_delete_forward(editor_t* E, i32 x, i32 y);
 void editor_delete_rows(editor_t* E, i32 start, i32 end);
 
 void editor_break_line(editor_t* E, i32 x, i32 y);
+
+void editor_delete_char_at(editor_t* E, vec2_t pos);
 
 void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch);
 

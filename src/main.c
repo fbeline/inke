@@ -23,19 +23,6 @@ int main(int argc, char **argv) {
 
   Init(argv[1]);
 
-  /* editor_undo_push(0, (vec2_t){0, 0}, "0"); */
-  /* editor_undo_push(1, (vec2_t){0, 0}, NULL); */
-  /* editor_undo_push(2, (vec2_t){0, 0}, "2"); */
-
-  /* undo_t *u = editor_undo_pop(); */
-  /* printf("UNDO %d\n", u->action); */
-  /* u = editor_undo_pop(); */
-  /* printf("UNDO %d\n", u->action); */
-  /* editor_undo_free(u); */
-  /* u = editor_undo_pop(); */
-  /* printf("UNDO %d\n", u->action); */
-  /* editor_undo_free(u); */
-
   while (!WindowShouldClose() && E.running) {
     input_keyboard_handler(&E);
 

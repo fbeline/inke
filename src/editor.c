@@ -61,6 +61,8 @@ void editor_undo_push(undo_type type, vec2_t spos, vec2_t epos, const char* data
 
 undo_t* editor_undo_pop(void) {
   undo_t* head = undo_head;
+  if (head == NULL) return NULL;
+
   undo_head = head->next;
   return head;
 }
@@ -70,10 +72,6 @@ void editor_undo_free(undo_t* undo) {
   if (undo->strdata != NULL) free(undo->strdata);
 
   free(undo);
-}
-
-void editor_undo(void) {
-
 }
 
 void editor_delete_rows(editor_t *E, i32 start, i32 end) {
@@ -151,6 +149,14 @@ void editor_move_line_up(editor_t *E, i32 y) {
   }
 
   editor_delete_rows(E, y, y);
+}
+
+
+void editor_delete_char_at(editor_t* E, vec2_t pos) {
+  usize len = editor_rowlen(E, pos.y);
+  memmove(E->rows[pos.y].chars + pos.x - 1,
+          E->rows[pos.y].chars + pos.x,
+          len - pos.x + 1);
 }
 
 void editor_insert_char_at(editor_t *E, i32 x, i32 y, char ch) {
@@ -303,6 +309,21 @@ void editor_new_file(const char *filename, editor_t *E) {
   E->rows->chars = malloc(1);
   E->rows->chars[0] = '\0';
   E->new_file = true;
+}
+
+void editor_undo(editor_t* E) {
+  undo_t* undo = editor_undo_pop();
+
+  if (undo == NULL) return;
+
+  switch (undo->type) {
+  case ADD:
+    editor_delete_char_at(E, undo->spos);
+  default:
+    printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
+  }
+
+  editor_undo_free(undo);
 }
 
 editor_t editor_init(const char *filename) {
