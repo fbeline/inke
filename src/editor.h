@@ -19,6 +19,21 @@ typedef struct editor_s {
   row_t* rows;
 } editor_t;
 
+typedef struct undo_s {
+  u8 action;
+  vec2_t pos;
+  char* data;
+  struct undo_s* next;
+} undo_t;
+
+void editor_undo_push(u8 action, vec2_t pos, const char* data);
+
+undo_t* editor_undo_pop(void);
+
+void editor_undo(void);
+
+void editor_undo_free(undo_t* undo);
+
 void editor_move_line_up(editor_t* E, i32 y);
 
 void editor_delete_forward(editor_t* E, i32 x, i32 y);

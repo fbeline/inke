@@ -8,6 +8,8 @@
 #include "io.h"
 #include "utils.h"
 
+static undo_t* undo_head = NULL;
+
 typedef struct append_buffer {
   usize capacity;
   usize size;
@@ -40,6 +42,38 @@ void abuf_append(abuf_t *ab, const char *s) {
 }
 
 void abuf_free(abuf_t *ab) { free(ab->b); }
+
+void editor_undo_push(u8 action, vec2_t pos, const char* data) {
+  undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
+  undo->action = action;
+  undo->pos = pos;
+  undo->next = undo_head;
+  undo->data = NULL;
+  if (data != NULL) {
+    usize size = strlen(data);
+    undo->data = malloc(size);
+    memcpy(undo->data, data, size);
+  }
+
+  undo_head = undo;
+}
+
+undo_t* editor_undo_pop(void) {
+  undo_t* head = undo_head;
+  undo_head = head->next;
+  return head;
+}
+
+void editor_undo_free(undo_t* undo) {
+  if (undo == NULL) return;
+  if (undo->data != NULL) free(undo->data);
+
+  free(undo);
+}
+
+void editor_undo(void) {
+
+}
 
 void editor_delete_rows(editor_t *E, i32 start, i32 end) {
   if (!IN_RANGE(start, 0, E->row_size) || !IN_RANGE(end, 0, E->row_size))
