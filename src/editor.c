@@ -43,16 +43,17 @@ void abuf_append(abuf_t *ab, const char *s) {
 
 void abuf_free(abuf_t *ab) { free(ab->b); }
 
-void editor_undo_push(u8 action, vec2_t pos, const char* data) {
+void editor_undo_push(undo_type type, vec2_t spos, vec2_t epos, const char* data) {
   undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
-  undo->action = action;
-  undo->pos = pos;
+  undo->type = type;
+  undo->spos = spos;
+  undo->epos = epos;
   undo->next = undo_head;
-  undo->data = NULL;
+  undo->strdata = NULL;
   if (data != NULL) {
     usize size = strlen(data);
-    undo->data = malloc(size);
-    memcpy(undo->data, data, size);
+    undo->strdata = malloc(size);
+    memcpy(undo->strdata, data, size);
   }
 
   undo_head = undo;
@@ -66,7 +67,7 @@ undo_t* editor_undo_pop(void) {
 
 void editor_undo_free(undo_t* undo) {
   if (undo == NULL) return;
-  if (undo->data != NULL) free(undo->data);
+  if (undo->strdata != NULL) free(undo->strdata);
 
   free(undo);
 }

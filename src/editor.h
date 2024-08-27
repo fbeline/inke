@@ -19,14 +19,19 @@ typedef struct editor_s {
   row_t* rows;
 } editor_t;
 
+typedef enum {
+  ADD, DEL, ENTER, BACK, CUT, PASTE
+} undo_type;
+
 typedef struct undo_s {
-  u8 action;
-  vec2_t pos;
-  char* data;
+  undo_type type;
+  vec2_t spos;
+  vec2_t epos;
+  char* strdata;
   struct undo_s* next;
 } undo_t;
 
-void editor_undo_push(u8 action, vec2_t pos, const char* data);
+void editor_undo_push(undo_type type, vec2_t spos, vec2_t epos, const char* data);
 
 undo_t* editor_undo_pop(void);
 
