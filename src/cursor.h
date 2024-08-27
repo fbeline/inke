@@ -18,6 +18,8 @@ typedef struct cursor_s {
 
 cursor_t cursor_get(void);
 
+void cursor_set(cursor_t* cursor);
+
 vec2_t cursor_position(void);
 
 region_t cursor_region(void);

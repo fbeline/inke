@@ -11,6 +11,7 @@ add_executable(olive
   src/types.h
   src/io.h src/io.c
   src/utils.h src/utils.c
+  src/undo.h src/undo.c
   src/mode.h src/mode.c
   src/cursor.h src/cursor.c
   src/editor.h src/editor.c

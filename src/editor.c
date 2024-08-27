@@ -8,8 +8,6 @@
 #include "io.h"
 #include "utils.h"
 
-static undo_t* undo_head = NULL;
-
 typedef struct append_buffer {
   usize capacity;
   usize size;
@@ -42,37 +40,6 @@ void abuf_append(abuf_t *ab, const char *s) {
 }
 
 void abuf_free(abuf_t *ab) { free(ab->b); }
-
-void editor_undo_push(undo_type type, vec2_t spos, vec2_t epos, const char* data) {
-  undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
-  undo->type = type;
-  undo->spos = spos;
-  undo->epos = epos;
-  undo->next = undo_head;
-  undo->strdata = NULL;
-  if (data != NULL) {
-    usize size = strlen(data);
-    undo->strdata = malloc(size);
-    memcpy(undo->strdata, data, size);
-  }
-
-  undo_head = undo;
-}
-
-undo_t* editor_undo_pop(void) {
-  undo_t* head = undo_head;
-  if (head == NULL) return NULL;
-
-  undo_head = head->next;
-  return head;
-}
-
-void editor_undo_free(undo_t* undo) {
-  if (undo == NULL) return;
-  if (undo->strdata != NULL) free(undo->strdata);
-
-  free(undo);
-}
 
 void editor_delete_rows(editor_t *E, i32 start, i32 end) {
   if (!IN_RANGE(start, 0, E->row_size) || !IN_RANGE(end, 0, E->row_size))
@@ -309,21 +276,6 @@ void editor_new_file(const char *filename, editor_t *E) {
   E->rows->chars = malloc(1);
   E->rows->chars[0] = '\0';
   E->new_file = true;
-}
-
-void editor_undo(editor_t* E) {
-  undo_t* undo = editor_undo_pop();
-
-  if (undo == NULL) return;
-
-  switch (undo->type) {
-  case ADD:
-    editor_delete_char_at(E, undo->spos);
-  default:
-    printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
-  }
-
-  editor_undo_free(undo);
 }
 
 editor_t editor_init(const char *filename) {

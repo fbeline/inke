@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <raylib.h>
 #include <string.h>
+#include "undo.h"
 #include "cursor.h"
 #include "mode.h"
 #include "io.h"
@@ -39,7 +40,7 @@ static void input_insert_handler(editor_t* E) {
     return cursor_delete_forward(E);
   }
   if (kctrl() && kpr(KEY_SLASH)) {
-    return editor_undo(E);
+    return undo(E);
   }
   if (kctrl() && kpr(KEY_Y)) {
     return cursor_insert_text(E, GetClipboardText());

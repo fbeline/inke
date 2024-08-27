@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include "undo.h"
 #include "utils.h"
 
 static cursor_t C = {0};
@@ -16,6 +17,14 @@ static i32 raw_y(void) {
 
 cursor_t cursor_get(void) {
   return C;
+}
+
+void cursor_set(cursor_t* cursor) {
+  C.region = cursor->region;
+  C.x = cursor->x;
+  C.y = cursor->y;
+  C.coloff = cursor->coloff;
+  C.rowoff = cursor->rowoff;
 }
 
 vec2_t cursor_position(void) {
@@ -204,10 +213,10 @@ void cursor_remove_char(editor_t *E) {
 void cursor_insert_char(editor_t* E, int ch) {
   editor_insert_char_at(E, raw_x(), raw_y(), ch);
 
-  editor_undo_push(ADD,
-                   (vec2_t){raw_x() + 1, raw_y()},
-                   (vec2_t){0, 0},
-                   NULL);
+  undo_push(ADD,
+            (vec2_t){raw_x() + 1, raw_y()},
+            cursor_get(),
+            NULL);
 
   C.x++;
   if (C.x > C.max_col) {
