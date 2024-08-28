@@ -46,28 +46,30 @@ void undo(editor_t* E) {
   switch (undo->type) {
     case ADD:
       editor_delete_char_at(E, undo->pos);
-      cursor_set(&undo->cursor);
       break;
     case BACKSPACE:
       editor_insert_char_at(E, undo->pos.x, undo->pos.y, undo->strdata[0]);
-      cursor_set(&undo->cursor);
       break;
     case LINEUP:
       editor_break_line(E, undo->pos.x, undo->pos.y);
-      cursor_set(&undo->cursor);
       break;
     case LINEBREAK:
       editor_move_line_up(E, undo->pos.y);
-      cursor_set(&undo->cursor);
       break;
     case LINEDELETE:
       editor_insert_row_with_data_at(E, undo->pos.y, undo->strdata);
-      cursor_set(&undo->cursor);
       break;
+    case DELETE_FORWARD:
+      editor_insert_text(E, undo->pos, undo->strdata);
+      break;
+
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
+      undo_free(undo);
+      return;
   }
 
+  cursor_set(&undo->cursor);
   undo_free(undo);
 }
 

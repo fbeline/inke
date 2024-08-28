@@ -224,6 +224,21 @@ char *editor_cut_between(editor_t *E, vec2_t start, vec2_t end) {
   return ab.b;
 }
 
+void editor_insert_text(editor_t* E, vec2_t pos, char* strdata) {
+  row_t* row = &E->rows[pos.y];
+  usize clen = strlen(E->rows[pos.y].chars);
+  usize dlen = strlen(strdata);
+  usize nlen = clen + dlen + 1;
+  if (nlen >= row->size) {
+    row->size = nlen * 2;
+    row->chars = nrealloc(row->chars, row->size);
+  }
+
+  memmove(row->chars + pos.x + dlen, row->chars + pos.x + 1, clen - pos.x);
+  memcpy(row->chars + pos.x, strdata, dlen);
+  row->chars[nlen] = '\0';
+}
+
 int editor_open_file(const char *filename, editor_t *E) {
   FILE *fp;
   char buffer[1024];

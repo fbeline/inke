@@ -262,7 +262,12 @@ void cursor_page_down(editor_t* E) {
 }
 
 void cursor_delete_forward(editor_t* E) {
-  editor_delete_forward(E, raw_x(), raw_y());
+  vec2_t pos = cursor_position();
+  usize len = editor_rowlen(E, pos.y);
+  const char* strdata = editor_text_between(E, pos, (vec2_t){len, pos.y});
+  undo_push(DELETE_FORWARD, pos, cursor_get(), strdata);
+
+  editor_delete_forward(E, pos.x, pos.y);
 }
 
 void cursor_delete_row(editor_t* E) {
