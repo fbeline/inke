@@ -160,6 +160,9 @@ void cursor_left(editor_t* E) {
 
 void cursor_break_line(editor_t* E) {
   vec2_t pos = cursor_position();
+
+  undo_push(LINEBREAK, (vec2_t){0, pos.y+1}, cursor_get(), NULL);
+
   editor_break_line(E, pos.x, pos.y);
   cursor_down(E);
   cursor_bol();

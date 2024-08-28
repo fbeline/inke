@@ -56,6 +56,10 @@ void undo(editor_t* E) {
       editor_break_line(E, undo->pos.x, undo->pos.y);
       cursor_set(&undo->cursor);
       break;
+    case LINEBREAK:
+      editor_move_line_up(E, undo->pos.y);
+      cursor_set(&undo->cursor);
+      break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
   }
