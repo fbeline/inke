@@ -15,8 +15,9 @@ void undo_push(undo_type type, vec2_t pos, cursor_t cursor, const char* data) {
   undo->strdata = NULL;
   if (data != NULL) {
     usize size = strlen(data);
-    undo->strdata = malloc(size);
+    undo->strdata = malloc(size + 1);
     memcpy(undo->strdata, data, size);
+    undo->strdata[size] = '\0';
   }
 
   undo_head = undo;
@@ -43,14 +44,18 @@ void undo(editor_t* E) {
   if (undo == NULL) return;
 
   switch (undo->type) {
-  case ADD:
-    editor_delete_char_at(E, undo->pos);
-    cursor_set(&undo->cursor);
-  default:
-    printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
+    case ADD:
+      editor_delete_char_at(E, undo->pos);
+      cursor_set(&undo->cursor);
+      break;
+    case BACKSPACE:
+      editor_insert_char_at(E, undo->pos.x, undo->pos.y, undo->strdata[0]);
+      cursor_set(&undo->cursor);
+      break;
+    default:
+      printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
   }
 
   undo_free(undo);
 }
-
 

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "undo.h"
 #include "utils.h"
+#include <stdio.h>
 
 static cursor_t C = {0};
 
@@ -192,6 +193,7 @@ void cursor_move_word_backward(editor_t* E) {
 
 void cursor_remove_char(editor_t *E) {
   vec2_t pos = cursor_position();
+
   if (pos.x == 0) {
     usize len = editor_rowlen(E, pos.y - 1);
     editor_move_line_up(E, pos.y);
@@ -199,6 +201,10 @@ void cursor_remove_char(editor_t *E) {
     cursor_eol(E);
     return;
   }
+
+  vec2_t undo_pos = {pos.x - 1, pos.y};
+  char strdata[2] = { editor_char_at(E, undo_pos.x, undo_pos.y), '\0' };
+  undo_push(BACKSPACE, undo_pos, cursor_get(), strdata);
 
   editor_delete_char_at(E, pos);
 
