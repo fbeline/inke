@@ -52,6 +52,10 @@ void undo(editor_t* E) {
       editor_insert_char_at(E, undo->pos.x, undo->pos.y, undo->strdata[0]);
       cursor_set(&undo->cursor);
       break;
+    case LINEUP:
+      editor_break_line(E, undo->pos.x, undo->pos.y);
+      cursor_set(&undo->cursor);
+      break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
   }

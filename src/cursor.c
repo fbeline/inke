@@ -194,8 +194,10 @@ void cursor_move_word_backward(editor_t* E) {
 void cursor_remove_char(editor_t *E) {
   vec2_t pos = cursor_position();
 
-  if (pos.x == 0) {
-    usize len = editor_rowlen(E, pos.y - 1);
+  if (pos.x == 0 && pos.y == 0) return;
+  if (pos.x == 0 && pos.y > 0) {
+    usize prlen = editor_rowlen(E, pos.y-1);
+    undo_push(LINEUP, (vec2_t){prlen, pos.y-1}, cursor_get(), NULL);
     editor_move_line_up(E, pos.y);
     cursor_up(E);
     cursor_eol(E);
