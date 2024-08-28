@@ -56,6 +56,13 @@ void editor_delete_rows(editor_t *E, i32 start, i32 end) {
   E->dirty = true;
 }
 
+usize editor_rowlen(editor_t *E, i32 y) {
+  if (y > E->row_size)
+    return 0;
+
+  return strlen(E->rows[y].chars);
+}
+
 char *editor_rows_to_string(row_t *rows, unsigned int size) {
   abuf_t ab = abuf_init(256);
   for (int i = 0; i < size; i++) {
@@ -82,11 +89,11 @@ bool editor_insert_row_at(editor_t *E, usize n) {
   return true;
 }
 
-usize editor_rowlen(editor_t *E, i32 y) {
-  if (y > E->row_size)
-    return 0;
+void editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata) {
+  editor_insert_row_at(E, y);
 
-  return strlen(E->rows[y].chars);
+  E->rows[y].chars = strdup(strdata);
+  E->rows[y].size = strlen(strdata);
 }
 
 char editor_char_at(editor_t *E, i32 x, i32 y) {

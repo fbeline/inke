@@ -60,6 +60,10 @@ void undo(editor_t* E) {
       editor_move_line_up(E, undo->pos.y);
       cursor_set(&undo->cursor);
       break;
+    case LINEDELETE:
+      editor_insert_row_with_data_at(E, undo->pos.y, undo->strdata);
+      cursor_set(&undo->cursor);
+      break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
   }

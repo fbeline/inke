@@ -5,7 +5,7 @@
 #include "cursor.h"
 
 typedef enum {
-  ADD, DEL, ENTER, BACKSPACE, CUT, PASTE, LINEUP, LINEBREAK
+  ADD, DEL, ENTER, BACKSPACE, CUT, PASTE, LINEUP, LINEBREAK, LINEDELETE
 } undo_type;
 
 typedef struct undo_s {
