@@ -54,7 +54,7 @@ void cursor_remove_char(editor_t* E);
 
 void cursor_insert_char(editor_t* E, int c);
 
-void cursor_insert_text(editor_t* E, char* text);
+void cursor_insert_text(editor_t* E, const char* text);
 
 void cursor_set_max(u16 max_col, u16 max_row);
 

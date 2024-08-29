@@ -43,7 +43,7 @@ bool editor_insert_row_at(editor_t* E, usize n);
 
 void editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata);
 
-void editor_insert_text(editor_t* E, vec2_t pos, char* strdata, usize dlen);
+void editor_insert_text(editor_t* E, vec2_t pos, const char* str, usize dlen);
 
 char* editor_rows_to_string(row_t* rows, unsigned int size);
 

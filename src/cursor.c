@@ -238,31 +238,42 @@ void cursor_insert_char(editor_t* E, int ch) {
   E->dirty = true;
 }
 
-void cursor_insert_text(editor_t* E, char* text) {
+void cursor_insert_text(editor_t* E, const char* text) {
+  if (text == NULL) return;
+
+  char* flt = NULL;
   usize len = strlen(text);
   usize start = 0;
   usize i = 0;
-  printf("> %s\n", text);
+  usize n = 0;
   for (i = 0; i < len; i++) {
-    printf("start=%zu; i=%zu\n", start, i);
     if (text[i] == '\n') {
       vec2_t pos = cursor_position();
-      u8 le = i > 0 && text[i-1] == '\r' ? 2 : 1;
-      editor_insert_text(E, pos, text + start, i - start - le);
+      if (n == 0) {
+        flt = strdup(E->rows[pos.y].chars);
+        E->rows[pos.y].chars[0] = '\0';
+      }
+      editor_insert_text(E, pos, text + start, i - start);
       editor_insert_row_at(E, pos.y + 1);
-      printf(">> %s\n", E->rows[pos.y].chars);
 
       cursor_down(E);
       cursor_bol();
 
+      n++;
+      i++; // ignore \n
       start = i;
-      printf(">> cursor %d, %d\n", raw_x(), raw_y());
     }
   }
   if (start < i) {
-    editor_insert_text(E, cursor_position(), text + start, i);
-    for (usize j = start; j <= i; j++)
+    editor_insert_text(E, cursor_position(), text + start, i - start);
+
+    for (usize j = start; j < i; j++)
       cursor_right(E);
+
+    if (flt != NULL) {
+      editor_insert_text(E, cursor_position(), flt, strlen(flt));
+      free(flt);
+    }
   }
 }
 

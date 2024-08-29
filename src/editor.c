@@ -229,16 +229,13 @@ char *editor_cut_between(editor_t *E, vec2_t start, vec2_t end) {
   return ab.b;
 }
 
-void editor_insert_text(editor_t* E, vec2_t pos, char* strdata, usize dlen) {
+void editor_insert_text(editor_t* E, vec2_t pos, const char* strdata, usize dlen) {
   if (strdata == NULL || dlen == 0) return;
 
   row_t* row = &E->rows[pos.y];
   usize clen = row->size > 0 ? strlen(row->chars) : 0;
   usize nlen = clen + dlen + 1;
-  if (row->size == 0) {
-    row->size = nlen + 1;
-    row->chars = malloc(row->size);
-  } else if (nlen >= row->size && row->size > 0) {
+  if (nlen >= row->size && row->size > 0) {
     row->size = nlen * 2;
     row->chars = nrealloc(row->chars, row->size);
   }
@@ -246,7 +243,7 @@ void editor_insert_text(editor_t* E, vec2_t pos, char* strdata, usize dlen) {
   memmove(row->chars + pos.x + dlen, row->chars + pos.x + 1, clen - pos.x);
   memcpy(row->chars + pos.x, strdata, dlen);
 
-  row->chars[nlen] = '\0';
+  row->chars[nlen-1] = '\0';
 }
 
 int editor_open_file(const char *filename, editor_t *E) {
