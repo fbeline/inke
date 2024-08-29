@@ -60,7 +60,7 @@ usize editor_rowlen(editor_t *E, i32 y) {
   if (y > E->row_size)
     return 0;
 
-  return strlen(E->rows[y].chars);
+  return E->rows[y].size > 0 ? strlen(E->rows[y].chars) : 0;
 }
 
 char *editor_rows_to_string(row_t *rows, unsigned int size) {
@@ -83,7 +83,9 @@ bool editor_insert_row_at(editor_t *E, usize n) {
 
   memmove(E->rows + n + 1, E->rows + n, sizeof(row_t) * (E->row_size - n));
   E->row_size = newLen;
-  E->rows[n] = (row_t){0, NULL};
+  E->rows[n].size = 1;
+  E->rows[n].chars = malloc(1);
+  E->rows[n].chars[0] = '\0';
   E->dirty = true;
 
   return true;
@@ -91,9 +93,12 @@ bool editor_insert_row_at(editor_t *E, usize n) {
 
 void editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata) {
   editor_insert_row_at(E, y);
+  usize len = strlen(strdata);
 
-  E->rows[y].chars = strdup(strdata);
-  E->rows[y].size = strlen(strdata);
+  E->rows[y].size = len + 1;
+  E->rows[y].chars = nrealloc(E->rows[y].chars, E->rows[y].size);
+
+  memcpy(E->rows[y].chars, strdata, len);
 }
 
 char editor_char_at(editor_t *E, i32 x, i32 y) {
@@ -224,18 +229,23 @@ char *editor_cut_between(editor_t *E, vec2_t start, vec2_t end) {
   return ab.b;
 }
 
-void editor_insert_text(editor_t* E, vec2_t pos, char* strdata) {
+void editor_insert_text(editor_t* E, vec2_t pos, char* strdata, usize dlen) {
+  if (strdata == NULL || dlen == 0) return;
+
   row_t* row = &E->rows[pos.y];
-  usize clen = strlen(E->rows[pos.y].chars);
-  usize dlen = strlen(strdata);
+  usize clen = row->size > 0 ? strlen(row->chars) : 0;
   usize nlen = clen + dlen + 1;
-  if (nlen >= row->size) {
+  if (row->size == 0) {
+    row->size = nlen + 1;
+    row->chars = malloc(row->size);
+  } else if (nlen >= row->size && row->size > 0) {
     row->size = nlen * 2;
     row->chars = nrealloc(row->chars, row->size);
   }
 
   memmove(row->chars + pos.x + dlen, row->chars + pos.x + 1, clen - pos.x);
   memcpy(row->chars + pos.x, strdata, dlen);
+
   row->chars[nlen] = '\0';
 }
 

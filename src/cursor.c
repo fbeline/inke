@@ -238,14 +238,31 @@ void cursor_insert_char(editor_t* E, int ch) {
   E->dirty = true;
 }
 
-void cursor_insert_text(editor_t* E, const char* text) {
+void cursor_insert_text(editor_t* E, char* text) {
   usize len = strlen(text);
-  for (usize i = 0; i < len; i++) {
+  usize start = 0;
+  usize i = 0;
+  printf("> %s\n", text);
+  for (i = 0; i < len; i++) {
+    printf("start=%zu; i=%zu\n", start, i);
     if (text[i] == '\n') {
-      cursor_break_line(E);
-    } else {
-      cursor_insert_char(E, text[i]);
+      vec2_t pos = cursor_position();
+      u8 le = i > 0 && text[i-1] == '\r' ? 2 : 1;
+      editor_insert_text(E, pos, text + start, i - start - le);
+      editor_insert_row_at(E, pos.y + 1);
+      printf(">> %s\n", E->rows[pos.y].chars);
+
+      cursor_down(E);
+      cursor_bol();
+
+      start = i;
+      printf(">> cursor %d, %d\n", raw_x(), raw_y());
     }
+  }
+  if (start < i) {
+    editor_insert_text(E, cursor_position(), text + start, i);
+    for (usize j = start; j <= i; j++)
+      cursor_right(E);
   }
 }
 

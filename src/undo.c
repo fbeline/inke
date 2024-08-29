@@ -60,7 +60,7 @@ void undo(editor_t* E) {
       editor_insert_row_with_data_at(E, undo->pos.y, undo->strdata);
       break;
     case DELETE_FORWARD:
-      editor_insert_text(E, undo->pos, undo->strdata);
+      editor_insert_text(E, undo->pos, undo->strdata, strlen(undo->strdata));
       break;
 
     default:
