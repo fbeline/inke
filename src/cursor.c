@@ -246,13 +246,16 @@ void cursor_insert_text(editor_t* E, const char* text) {
   usize start = 0;
   usize i = 0;
   usize n = 0;
+
   for (i = 0; i < len; i++) {
     if (text[i] == '\n') {
       vec2_t pos = cursor_position();
       if (n == 0) {
-        flt = strdup(E->rows[pos.y].chars);
-        E->rows[pos.y].chars[0] = '\0';
+        flt = strdup(E->rows[pos.y].chars + pos.x);
+        E->rows[pos.y].chars[pos.x] = '\0';
       }
+      if(text[start] == '\n') start++;
+
       editor_insert_text(E, pos, text + start, i - start);
       editor_insert_row_at(E, pos.y + 1);
 
@@ -260,11 +263,12 @@ void cursor_insert_text(editor_t* E, const char* text) {
       cursor_bol();
 
       n++;
-      i++; // ignore \n
       start = i;
     }
   }
+
   if (start < i) {
+    if(text[start] == '\n') start++;
     editor_insert_text(E, cursor_position(), text + start, i - start);
 
     for (usize j = start; j < i; j++)
