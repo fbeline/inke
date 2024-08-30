@@ -49,8 +49,9 @@ void editor_delete_rows(editor_t *E, i32 start, i32 end) {
   for (usize i = start; i <= end; i++) {
     free(E->rows[i].chars);
   }
-  memmove(E->rows + start, E->rows + end + 1,
-          (E->row_size - n) * sizeof(row_t));
+
+  if (E->row_size - end - 1 > 0)
+    memmove(E->rows + start, E->rows + end + 1, (E->row_size - n) * sizeof(row_t));
 
   E->row_size -= n;
   E->dirty = true;
