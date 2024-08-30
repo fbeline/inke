@@ -148,7 +148,9 @@ void cursor_right(editor_t* E) {
 }
 
 void cursor_left(editor_t* E) {
-  if (C.x == 0 && C.coloff > 0) {
+  if (C.x == 0 && C.coloff == 0) {
+
+  } else if (C.x == 0 && C.coloff > 0) {
     C.coloff--;
   } else if (C.x == 0 && C.coloff == 0 && (C.y > 0 || C.rowoff > 0)) {
     cursor_up(E);
