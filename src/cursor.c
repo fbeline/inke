@@ -225,10 +225,11 @@ void cursor_remove_char(editor_t *E) {
 }
 
 void cursor_insert_char(editor_t* E, int ch) {
-  editor_insert_char_at(E, raw_x(), raw_y(), ch);
+  vec2_t pos = cursor_position();
+  editor_insert_char_at(E, pos.x, pos.y, ch);
 
   undo_push(ADD,
-            (vec2_t){raw_x() + 1, raw_y()},
+            (vec2_t){pos.x + 1, pos.y},
             cursor_get(),
             NULL);
 

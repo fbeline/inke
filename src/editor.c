@@ -130,27 +130,24 @@ void editor_delete_char_at(editor_t* E, vec2_t pos) {
 }
 
 void editor_insert_char_at(editor_t *E, i32 x, i32 y, char ch) {
-  row_t row = E->rows[y];
+  row_t* row = &E->rows[y];
   u32 len = editor_rowlen(E, y);
-  if (x < 0 || x > len) {
-    printf("Invalid position\n");
-    return;
+  if (x < 0 || x > len)
+    die("Invalid position x=%d", x);
+
+  if (len + 1 >= row->size) {
+    row->size += 8;
+    row->chars = nrealloc(row->chars, row->size);
   }
 
-  if (len + 1 >= row.size) {
-    E->rows[y].size += 8;
-    E->rows[y].chars = nrealloc(E->rows[y].chars, E->rows[y].size);
-  }
+  usize tmpsize = len - x;
+  char *tmp = malloc(tmpsize);
+  if (!tmp) return;
 
-  char *tmp = malloc(len - x + 1);
-  if (!tmp)
-    return;
-
-  memcpy(tmp, E->rows[y].chars + x, len - x);
-
-  E->rows[y].chars[x] = ch;
-  memcpy(E->rows[y].chars + x + 1, tmp, len - x);
-  E->rows[y].chars[len + 1] = '\0';
+  memcpy(tmp, row->chars + x, tmpsize);
+  memcpy(row->chars + x + 1, tmp, tmpsize);
+  row->chars[x] = ch;
+  row->chars[len + 1] = '\0';
 
   free(tmp);
 }
