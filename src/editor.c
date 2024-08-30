@@ -74,22 +74,17 @@ char *editor_rows_to_string(row_t *rows, unsigned int size) {
   return ab.b;
 }
 
-bool editor_insert_row_at(editor_t *E, usize n) {
-  usize newLen = E->row_size + 1;
-  if (newLen >= E->row_capacity) {
-    usize newSize = E->row_capacity + 10;
-    E->rows = (row_t *)realloc(E->rows, newSize * sizeof(row_t));
-    E->row_capacity = newSize;
+void editor_insert_row_at(editor_t *E, usize n) {
+  if (++E->row_size >= E->row_capacity) {
+    E->row_capacity += 10;
+    E->rows = nrealloc(E->rows, E->row_capacity * sizeof(row_t));
   }
 
   memmove(E->rows + n + 1, E->rows + n, sizeof(row_t) * (E->row_size - n));
-  E->row_size = newLen;
   E->rows[n].size = 1;
   E->rows[n].chars = malloc(1);
   E->rows[n].chars[0] = '\0';
   E->dirty = true;
-
-  return true;
 }
 
 void editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata) {
@@ -161,15 +156,15 @@ void editor_insert_char_at(editor_t *E, i32 x, i32 y, char ch) {
 }
 
 void editor_break_line(editor_t *E, i32 x, i32 y) {
-  if (!editor_insert_row_at(E, y + 1))
-    return;
+  editor_insert_row_at(E, y + 1);
 
-  E->rows[y + 1].size = editor_rowlen(E, y) - x + 2;
-  E->rows[y + 1].chars = malloc(E->rows[y + 1].size);
-  memcpy(E->rows[y + 1].chars, E->rows[y].chars + x,
-         strlen(E->rows[y].chars) - x + 1);
+  row_t* crow = &E->rows[y];
+  row_t* nrow = &E->rows[y + 1];
 
-  E->rows[y].chars[x] = '\0';
+  nrow->size = editor_rowlen(E, y) - x + 1;
+  nrow->chars = reallocstrcpy(nrow->chars, crow->chars + x, nrow->size);
+
+  crow->chars[x] = '\0';
   E->dirty = true;
 }
 

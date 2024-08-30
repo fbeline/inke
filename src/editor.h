@@ -39,7 +39,7 @@ char editor_char_at(editor_t* E, i32 x, i32 y);
 
 usize editor_rowlen(editor_t* E, i32 y);
 
-bool editor_insert_row_at(editor_t* E, usize n);
+void editor_insert_row_at(editor_t* E, usize n);
 
 void editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata);
 
