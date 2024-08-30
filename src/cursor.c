@@ -205,7 +205,8 @@ void cursor_remove_char(editor_t *E) {
     undo_push(LINEUP, (vec2_t){prlen, pos.y-1}, cursor_get(), NULL);
     editor_move_line_up(E, pos.y);
     cursor_up(E);
-    cursor_eol(E);
+    C.x = MIN(C.max_col, prlen);
+    C.coloff = MAX(0, (i32)prlen - C.x);
     return;
   }
 
