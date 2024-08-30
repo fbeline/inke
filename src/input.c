@@ -81,7 +81,7 @@ static void input_insert_handler(editor_t* E) {
   if (kpr(KEY_PAGE_UP)) {
     return cursor_page_up(E);
   }
-  if (kctrl() && IsKeyPressed(KEY_W)) {
+  if (kctrl() && kpr(KEY_W)) {
     char* txt = cursor_region_kill(E);
     if (txt != NULL) {
       SetClipboardText(txt);

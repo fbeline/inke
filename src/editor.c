@@ -273,15 +273,12 @@ int editor_open_file(const char *filename, editor_t *E) {
     }
 
     // build line
-    E->rows[rows_size].size = strlen(buffer);
-    E->rows[rows_size].chars = malloc(E->rows[rows_size].size + 1);
-    if (E->rows[rows_size].chars == NULL) {
-      perror("Error allocating memory for chars");
-      fclose(fp);
-      return 1;
-    }
-    memcpy(E->rows[rows_size].chars, buffer,
-           E->rows[rows_size].size + 1); // +1 to cpy \0
+    row_t* row = &E->rows[rows_size];
+    row->size = strlen(buffer) + 1;
+    row->chars = malloc(row->size);
+    if (row->chars == NULL) die("out of memory");
+
+    memcpy(row->chars, buffer, row->size);
 
     rows_size++;
   }
