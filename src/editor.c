@@ -113,18 +113,15 @@ void editor_move_line_up(editor_t *E, i32 y) {
   usize crow_len = editor_rowlen(E, y);
   usize prow_len = editor_rowlen(E, y - 1);
 
-  // realloc previous row if necessary
-  if (crow_len + prow_len >= E->rows[y - 1].size) {
-    E->rows[y - 1].chars =
-        nrealloc(E->rows[y - 1].chars, E->rows[y - 1].size + crow_len + 1);
-    E->rows[y - 1].size += crow_len;
+  row_t* prow = &E->rows[y-1];
+  row_t* crow = &E->rows[y];
+
+  if (crow_len + prow_len >= prow->size) {
+    prow->size += crow_len;
+    prow->chars = nrealloc(prow->chars, prow->size);
   }
 
-  // cpy current row to the end of previous row
-  if (crow_len > 0) {
-    memcpy(E->rows[y - 1].chars + prow_len, E->rows[y].chars, crow_len);
-    E->rows[y - 1].chars[crow_len + prow_len] = '\0';
-  }
+  strcat(prow->chars, crow->chars);
 
   editor_delete_rows(E, y, y);
 }
