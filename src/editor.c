@@ -94,12 +94,10 @@ bool editor_insert_row_at(editor_t *E, usize n) {
 
 void editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata) {
   editor_insert_row_at(E, y);
-  usize len = strlen(strdata);
 
-  E->rows[y].size = len + 1;
-  E->rows[y].chars = nrealloc(E->rows[y].chars, E->rows[y].size);
-
-  memcpy(E->rows[y].chars, strdata, len);
+  row_t* row = &E->rows[y];
+  row->size = strlen(strdata) + 1;
+  row->chars = reallocstrcpy(row->chars, strdata, row->size);
 }
 
 char editor_char_at(editor_t *E, i32 x, i32 y) {

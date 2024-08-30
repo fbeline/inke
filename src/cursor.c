@@ -307,11 +307,17 @@ void cursor_delete_forward(editor_t* E) {
 
 void cursor_delete_row(editor_t* E) {
   i32 y = raw_y();
+  bool ll = E->row_size - (y + 1) == 0;
 
   char* strdata = strdup(E->rows[y].chars);
   undo_push(LINEDELETE, (vec2_t){0, y}, cursor_get(), strdata);
 
   editor_delete_rows(E, y, y);
+
+  if (ll) {
+    cursor_up(E);
+    cursor_bol();
+  }
 }
 
 void cursor_eof(editor_t* E) {
