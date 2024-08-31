@@ -22,9 +22,8 @@ abuf_t abuf_init(usize capacity) {
   return (abuf_t){.capacity = capacity, .size = 0, .b = b};
 }
 
-void abuf_append(abuf_t *ab, const char *s) {
+void abuf_append_s(abuf_t *ab, const char *s, usize len) {
   bool resize = false;
-  const usize len = strlen(s);
 
   while (ab->capacity <= ab->size + len) {
     ab->capacity *= 2;
@@ -37,6 +36,10 @@ void abuf_append(abuf_t *ab, const char *s) {
   memcpy(ab->b + ab->size, s, len);
   ab->size += len;
   ab->b[ab->size] = '\0';
+}
+
+void abuf_append(abuf_t *ab, const char *s) {
+  abuf_append_s(ab, s, strlen(s));
 }
 
 void abuf_free(abuf_t *ab) { free(ab->b); }
@@ -129,6 +132,20 @@ void editor_delete_char_at(editor_t* E, vec2_t pos) {
           len - pos.x + 1);
 }
 
+void editor_delete_between(editor_t* E, i32 y, i32 xs, i32 xe) {
+  usize olen = editor_rowlen(E, y);
+  if (xs == 0 && xe >= olen - 1) {
+    E->rows[y].chars[0] = '\0';
+    return;
+  }
+
+  usize dsize = olen - xe;
+  memmove(E->rows[y].chars + xs, E->rows[y].chars + xe, dsize);
+
+  if (xs > 0 && xe >= olen - 1)
+    E->rows[y].chars[xs + dsize] = '\0';
+}
+
 void editor_insert_char_at(editor_t *E, i32 x, i32 y, char ch) {
   row_t* row = &E->rows[y];
   u32 len = editor_rowlen(E, y);
@@ -197,22 +214,19 @@ char *editor_cut_between(editor_t *E, vec2_t start, vec2_t end) {
   for (i32 i = start.y; i <= end.y; i++) {
     i32 xs = i == start.y ? start.x : 0;
     i32 xe = i == end.y ? end.x : editor_rowlen(E, i);
-    abuf_append(&ab, E->rows[i].chars + xs);
+    abuf_append_s(&ab, E->rows[i].chars + xs, xe - xs);
     if (i + 1 <= end.y) {
       abuf_append(&ab, "\n");
     }
+    editor_delete_between(E, i, xs, xe);
   }
-
-  editor_delete_forward(E, start.x, start.y);
 
   i32 ldiff = end.y - start.y;
   if (ldiff >= 2)
     editor_delete_rows(E, start.y + 1, end.y - 1);
 
-  if (ldiff > 0) {
-    editor_delete_backward(E, end.x, end.y - ldiff + 1);
+  if (ldiff > 0)
     editor_move_line_up(E, end.y - ldiff + 1);
-  }
 
   return ab.b;
 }

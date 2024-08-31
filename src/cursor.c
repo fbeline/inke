@@ -2,9 +2,9 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "undo.h"
 #include "utils.h"
-#include <stdio.h>
 
 static cursor_t C = {0};
 
