@@ -200,7 +200,7 @@ char *editor_text_between(editor_t *E, vec2_t start, vec2_t end) {
   for (i32 i = start.y; i <= end.y; i++) {
     i32 xs = i == start.y ? start.x : 0;
     i32 xe = i == end.y ? end.x : editor_rowlen(E, i);
-    abuf_append(&ab, E->rows[i].chars + xs);
+    abuf_append_s(&ab, E->rows[i].chars + xs, xe - xs);
     if (i + 1 <= end.y) {
       abuf_append(&ab, "\n");
     }
