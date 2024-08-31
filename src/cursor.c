@@ -310,6 +310,13 @@ void cursor_delete_row(editor_t* E) {
   i32 y = raw_y();
   bool ll = E->row_size - (y + 1) == 0;
 
+  if (y == 0 && ll) { // editor must have at least one row
+    E->rows[0].chars[0] = '\0';
+    cursor_bol();
+    return;
+  }
+
+
   char* strdata = strdup(E->rows[y].chars);
   undo_push(LINEDELETE, (vec2_t){0, y}, cursor_get(), strdata);
 
