@@ -62,7 +62,10 @@ void undo(editor_t* E) {
     case DELETE_FORWARD:
       editor_insert_text(E, undo->pos, undo->strdata, strlen(undo->strdata));
       break;
-
+    case CUT:
+      cursor_set(&undo->cursor);
+      cursor_insert_text(E, undo->strdata);
+      break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
       undo_free(undo);

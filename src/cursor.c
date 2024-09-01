@@ -67,6 +67,10 @@ char* cursor_region_kill(editor_t* E) {
 
   char* txt = editor_cut_between(E, ps, pe);
 
+  char* strdata = strdup(txt);
+  undo_push(CUT, ps, cursor_get(), strdata);
+
+  // TODO: FIX ME
   C.y -= (pe.y - ps.y);
   C.x = ps.x;
 
