@@ -99,7 +99,7 @@ void editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata) {
 }
 
 char editor_char_at(editor_t *E, i32 x, i32 y) {
-  if (y > E->row_size || x > editor_rowlen(E, y))
+  if (y > E->row_size || x < 0 || x > editor_rowlen(E, y))
     return '\0';
 
   return E->rows[y].chars[x];

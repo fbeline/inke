@@ -148,13 +148,14 @@ void cursor_right(editor_t* E) {
 }
 
 void cursor_left(editor_t* E) {
-  if (C.x == 0 && C.coloff == 0) {
-
-  } else if (C.x == 0 && C.coloff > 0) {
-    C.coloff--;
-  } else if (C.x == 0 && C.coloff == 0 && (C.y > 0 || C.rowoff > 0)) {
+  vec2_t pos = cursor_position();
+  if (pos.x == 0 && pos.y == 0) {
+    return;
+  } else if (pos.x == 0 && pos.y > 0) {
     cursor_up(E);
     cursor_eol(E);
+  } else if (C.x == 0 && C.coloff > 0) {
+    C.coloff--;
   } else {
     C.x--;
   }
