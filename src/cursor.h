@@ -18,6 +18,8 @@ typedef struct cursor_s {
   u16 max_col, max_row;
 } cursor_t;
 
+void cursor_init(void);
+
 cursor_t cursor_get(void);
 
 void cursor_set(cursor_t* cursor);

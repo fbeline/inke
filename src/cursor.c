@@ -41,20 +41,35 @@ void cursor_region_start(void) {
     C.region.active = true;
     C.region.vpos = (vec2_t){C.x, C.y};
     cursor_t cursor = cursor_get();
-    C.region.cursor = malloc(sizeof(cursor_t)); // TODO: FIX IT
     memcpy(C.region.cursor, &cursor, sizeof(cursor_t));
   } else {
     cursor_clear_region();
   }
 }
 
+static void cursor_region_calc(vec2_t* start, vec2_t* end, cursor_t* cursor) {
+  if (start == NULL || end == NULL) die("Error on region calc\n");
+
+  vec2_t cp = cursor_position();
+  vec2_t rp = { C.region.cursor->x + C.region.cursor->coloff,
+                C.region.cursor->y + C.region.cursor->rowoff };
+
+  if (rp.y <= cp.y) {
+    *start = rp;
+    *end = cp;
+    if (cursor) *cursor = *C.region.cursor;
+  } else {
+    *start = cp;
+    *end = rp;
+    if (cursor) *cursor = C;
+  }
+}
+
 char* cursor_region_text(editor_t* E) {
   if (!C.region.active) return NULL;
 
-  vec2_t cp = cursor_position();
-  vec2_t rp = { C.region.cursor->x + C.region.cursor->coloff, C.region.cursor->y + C.region.cursor->rowoff };
-  vec2_t ps = rp.y <= cp.y ? rp : cp;
-  vec2_t pe = rp.y > cp.y ? rp : cp;
+  vec2_t ps, pe;
+  cursor_region_calc(&ps, &pe, NULL);
 
   return editor_text_between(E, ps, pe);
 }
@@ -62,27 +77,16 @@ char* cursor_region_text(editor_t* E) {
 char* cursor_region_kill(editor_t* E) {
   if (!C.region.active) return NULL;
 
-  vec2_t cp = cursor_position();
-  vec2_t rp = { C.region.cursor->x + C.region.cursor->coloff, C.region.cursor->y + C.region.cursor->rowoff };
   vec2_t ps, pe;
-  cursor_t *cursor;
-
-  if (rp.y <= cp.y) {
-    ps = rp;
-    pe = cp;
-    cursor = C.region.cursor;
-  } else {
-    ps = cp;
-    pe = rp;
-    cursor = &C;
-  }
+  cursor_t cursor = {0};
+  cursor_region_calc(&ps, &pe, &cursor);
 
   char* txt = editor_cut_between(E, ps, pe);
 
   char* strdata = strdup(txt);
-  undo_push(CUT, ps, cursor_get(), strdata);
+  undo_push(CUT, ps, cursor, strdata);
 
-  cursor_set(cursor);
+  cursor_set(&cursor);
 
   return txt;
 }
@@ -260,6 +264,8 @@ void cursor_insert_char(editor_t* E, int ch) {
 void cursor_insert_text(editor_t* E, const char* text) {
   if (text == NULL) return;
 
+  printf("TXT: %s\n", text);
+
   char* flt = NULL;
   usize len = strlen(text);
   usize start = 0;
@@ -270,8 +276,10 @@ void cursor_insert_text(editor_t* E, const char* text) {
     if (text[i] == '\n') {
       vec2_t pos = cursor_position();
       if (n == 0) {
+        printf("SIZE=%zu:\t%s\n", strlen(E->rows[pos.y].chars), E->rows[pos.y].chars);
         flt = strdup(E->rows[pos.y].chars + pos.x);
-        E->rows[pos.y].chars[pos.x] = '\0';
+        printf("FLT:\t%s\n", flt);
+        E->rows[pos.y].chars[pos.x + 1] = '\0';
       }
       if(text[start] == '\n') start++;
 
@@ -358,4 +366,8 @@ void cursor_bof(void) {
   cursor_bol();
   C.y = 0;
   C.rowoff = 0;
+}
+
+void cursor_init(void) {
+  C.region.cursor = (cursor_t*)malloc(sizeof(cursor_t));
 }

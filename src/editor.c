@@ -141,9 +141,7 @@ void editor_delete_between(editor_t* E, i32 y, i32 xs, i32 xe) {
 
   usize dsize = olen - xe;
   memmove(E->rows[y].chars + xs, E->rows[y].chars + xe, dsize);
-
-  if (xs > 0 && xe >= olen - 1)
-    E->rows[y].chars[xs + dsize] = '\0';
+  E->rows[y].chars[xs + dsize] = '\0';
 }
 
 void editor_insert_char_at(editor_t *E, i32 x, i32 y, char ch) {

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "editor.h"
+#include "cursor.h"
 #include "input.h"
 #include "render.h"
 
@@ -13,6 +14,7 @@ static render_t R = {0};
 void Init(const char* filename) {
   E = editor_init(filename);
   R = render_init(1280, 720, 30);
+  cursor_init();
 }
 
 int main(int argc, char **argv) {
