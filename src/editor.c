@@ -36,6 +36,7 @@ void abuf_append_s(abuf_t *ab, const char *s, usize len) {
   memcpy(ab->b + ab->size, s, len);
   ab->size += len;
   ab->b[ab->size] = '\0';
+
 }
 
 void abuf_append(abuf_t *ab, const char *s) {
@@ -240,7 +241,7 @@ void editor_insert_text(editor_t* E, vec2_t pos, const char* strdata, usize dlen
     row->chars = nrealloc(row->chars, row->size);
   }
 
-  memmove(row->chars + pos.x + dlen, row->chars + pos.x + 1, clen - pos.x);
+  memmove(row->chars + pos.x + dlen, row->chars + pos.x, clen - pos.x);
   memcpy(row->chars + pos.x, strdata, dlen);
 
   row->chars[nlen-1] = '\0';

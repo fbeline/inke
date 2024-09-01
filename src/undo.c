@@ -64,7 +64,6 @@ void undo(editor_t* E) {
       break;
     case CUT:
       cursor_set(&undo->cursor);
-      printf("UNDO: %s\n", undo->strdata);
       cursor_insert_text(E, undo->strdata);
       break;
     default:

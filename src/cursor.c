@@ -264,8 +264,6 @@ void cursor_insert_char(editor_t* E, int ch) {
 void cursor_insert_text(editor_t* E, const char* text) {
   if (text == NULL) return;
 
-  printf("TXT: %s\n", text);
-
   char* flt = NULL;
   usize len = strlen(text);
   usize start = 0;
@@ -276,9 +274,7 @@ void cursor_insert_text(editor_t* E, const char* text) {
     if (text[i] == '\n') {
       vec2_t pos = cursor_position();
       if (n == 0) {
-        printf("SIZE=%zu:\t%s\n", strlen(E->rows[pos.y].chars), E->rows[pos.y].chars);
         flt = strdup(E->rows[pos.y].chars + pos.x);
-        printf("FLT:\t%s\n", flt);
         E->rows[pos.y].chars[pos.x + 1] = '\0';
       }
       if(text[start] == '\n') start++;
