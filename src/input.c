@@ -51,14 +51,6 @@ static void input_insert_handler(editor_t* E) {
   if (kctrl() && kshift() && IsKeyPressed(KEY_BACKSPACE)) {
     return cursor_delete_row(E);
   }
-  if (kctrl() && kpr(KEY_W)) {
-    char* txt = cursor_region_kill(E);
-    if (txt != NULL) {
-      SetClipboardText(txt);
-      free(txt);
-    }
-    cursor_clear_region();
-  }
   if (kalt() && IsKeyPressed(KEY_W)) {
     char* txt = cursor_region_text(E);
     if (txt != NULL) {
@@ -66,7 +58,15 @@ static void input_insert_handler(editor_t* E) {
       free(txt);
     }
 
-    cursor_clear_region();
+    return cursor_clear_region();
+  }
+  if (kctrl() && kpr(KEY_W)) {
+    char* txt = cursor_region_kill(E);
+    if (txt != NULL) {
+      SetClipboardText(txt);
+      free(txt);
+    }
+    return cursor_clear_region();
   }
   if (kalt() && kshift() && kpr(KEY_COMMA)) {
     return cursor_bof();

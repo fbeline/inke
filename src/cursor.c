@@ -39,8 +39,10 @@ region_t cursor_region(void) {
 void cursor_region_start(void) {
   if (!C.region.active) {
     C.region.active = true;
-    C.region.pos = cursor_position();
     C.region.vpos = (vec2_t){C.x, C.y};
+    cursor_t cursor = cursor_get();
+    C.region.cursor = malloc(sizeof(cursor_t)); // TODO: FIX IT
+    memcpy(C.region.cursor, &cursor, sizeof(cursor_t));
   } else {
     cursor_clear_region();
   }
@@ -50,7 +52,7 @@ char* cursor_region_text(editor_t* E) {
   if (!C.region.active) return NULL;
 
   vec2_t cp = cursor_position();
-  vec2_t rp = C.region.pos;
+  vec2_t rp = { C.region.cursor->x + C.region.cursor->coloff, C.region.cursor->y + C.region.cursor->rowoff };
   vec2_t ps = rp.y <= cp.y ? rp : cp;
   vec2_t pe = rp.y > cp.y ? rp : cp;
 
@@ -61,18 +63,26 @@ char* cursor_region_kill(editor_t* E) {
   if (!C.region.active) return NULL;
 
   vec2_t cp = cursor_position();
-  vec2_t rp = C.region.pos;
-  vec2_t ps = rp.y <= cp.y ? rp : cp;
-  vec2_t pe = rp.y > cp.y ? rp : cp;
+  vec2_t rp = { C.region.cursor->x + C.region.cursor->coloff, C.region.cursor->y + C.region.cursor->rowoff };
+  vec2_t ps, pe;
+  cursor_t *cursor;
+
+  if (rp.y <= cp.y) {
+    ps = rp;
+    pe = cp;
+    cursor = C.region.cursor;
+  } else {
+    ps = cp;
+    pe = rp;
+    cursor = &C;
+  }
 
   char* txt = editor_cut_between(E, ps, pe);
 
   char* strdata = strdup(txt);
   undo_push(CUT, ps, cursor_get(), strdata);
 
-  // TODO: FIX ME
-  C.y -= (pe.y - ps.y);
-  C.x = ps.x;
+  cursor_set(cursor);
 
   return txt;
 }

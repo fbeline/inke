@@ -3,10 +3,12 @@
 #include "types.h"
 #include "editor.h"
 
+struct cursor_s;
+
 typedef struct region_s {
   bool active;
-  vec2_t pos;    // raw position
-  vec2_t vpos;  //  virtual position
+  vec2_t vpos;
+  struct cursor_s *cursor;
 } region_t;
 
 typedef struct cursor_s {
