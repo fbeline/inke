@@ -204,6 +204,15 @@ int test_editor_insert_text() {
   return 0;
 }
 
+int test_rows_to_string() {
+  editor_t E = factory();
+
+  char* str = editor_rows_to_string(E.rows, E.row_size);
+  ASSERT_STRING_EQUAL("foo bar baz\nqux quux corge\n", str);
+
+  return 0;
+}
+
 int main() {
   int result = 0;
 
@@ -219,6 +228,7 @@ int main() {
   result += test_insert_row_at();
   result += test_insert_row_with_data_at();
   result += test_editor_insert_text();
+  result += test_rows_to_string();
 
   if (result == 0) {
     printf("All tests for editor.c passed!\n");
