@@ -174,6 +174,36 @@ int test_insert_row_at() {
   return 0;
 }
 
+int test_insert_row_with_data_at() {
+  editor_t E = factory();
+
+  editor_insert_row_with_data_at(&E, 0, "first row");
+  ASSERT_STRING_EQUAL("first row", E.rows[0].chars);
+
+  editor_insert_row_with_data_at(&E, 1, "middle row");
+  ASSERT_STRING_EQUAL("middle row", E.rows[1].chars);
+
+  editor_insert_row_with_data_at(&E, E.row_size, "last row");
+  ASSERT_STRING_EQUAL("last row", E.rows[E.row_size-1].chars);
+
+  return 0;
+}
+
+int test_editor_insert_text() {
+  editor_t E = factory();
+
+  editor_insert_text(&E, (vec2_t){0, 0}, "first ", 6);
+  ASSERT_STRING_EQUAL("first foo bar baz", E.rows[0].chars);
+
+  editor_insert_text(&E, (vec2_t){6, 0}, "middle ", 7);
+  ASSERT_STRING_EQUAL("first middle foo bar baz", E.rows[0].chars);
+
+  editor_insert_text(&E, (vec2_t){strlen(E.rows[0].chars), 0}, " end", 4);
+  ASSERT_STRING_EQUAL("first middle foo bar baz end", E.rows[0].chars);
+
+  return 0;
+}
+
 int main() {
   int result = 0;
 
@@ -187,6 +217,8 @@ int main() {
   result += test_char_at();
   result += test_row_len();
   result += test_insert_row_at();
+  result += test_insert_row_with_data_at();
+  result += test_editor_insert_text();
 
   if (result == 0) {
     printf("All tests for editor.c passed!\n");
