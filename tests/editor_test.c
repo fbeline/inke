@@ -1,19 +1,7 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../src/editor.h"
-
-#define ASSERT_EQUAL(expected, actual) \
-    if ((expected) != (actual)) { \
-        printf("Test failed: %s == %s, expected %d but got %d\n", #expected, #actual, (expected), (actual)); \
-        return 1; \
-    }
-
-#define ASSERT_STRING_EQUAL(expected, actual) \
-    if (strcmp((expected), (actual)) != 0) { \
-        printf("Test failed: %s == %s\nexpected=\"%s\"\nresult=\"%s\"\n", #expected, #actual, (expected), (actual)); \
-        return 1; \
-    }
+#include "ctest.h"
 
 editor_t factory() {
    editor_t e = {
@@ -229,12 +217,6 @@ int main() {
   result += test_insert_row_with_data_at();
   result += test_editor_insert_text();
   result += test_rows_to_string();
-
-  if (result == 0) {
-    printf("All tests for editor.c passed!\n");
-  } else {
-    printf("%d test(s) for editor.c failed.\n", result);
-  }
 
   return result;
 }
