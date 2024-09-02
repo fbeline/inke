@@ -7,4 +7,4 @@ if [ $? -ne 0 ]; then
 fi
 
 cp ./build/compile_commands.json .
-ctest --test-dir build
+ctest --output-on-failure --test-dir build
