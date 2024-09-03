@@ -342,7 +342,7 @@ void cursor_eof(cursor_t* C) {
     C->y = C->max_row - 1;
     C->rowoff = E->row_size - C->max_row;
   } else {
-    C->y = E->row_size;
+    C->y = E->row_size - 1;
     C->rowoff = 0;
   }
   cursor_eol(C);

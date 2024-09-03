@@ -98,13 +98,34 @@ static int test_eol(void) {
 
   return 0;
 }
+
 static int test_eof(void) {
   cursor_t C = factory();
+  i32 len = strlen(C.editor->rows[1].chars);
+
+  cursor_eof(&C);
+  ASSERT_EQUAL(1, C.y);
+  ASSERT_EQUAL(0, C.rowoff);
+  ASSERT_EQUAL(len, C.x);
+
+  // row size < max row
+  cursor_t C2 = factory();
+  C2.max_row = 1;
+  cursor_eof(&C2);
+  ASSERT_EQUAL(0, C2.y);
+  ASSERT_EQUAL(1, C2.rowoff);
+  ASSERT_EQUAL(len, C.x);
 
   return 0;
 }
+
 static int test_bof(void) {
   cursor_t C = factory();
+  C.x = 20; C.coloff = 30;
+  C.y = 10; C.rowoff = 15;
+
+  cursor_bof(&C);
+  ASSERT_VEC2_EQUAL(0, 0, cursor_position(&C));
 
   return 0;
 }
