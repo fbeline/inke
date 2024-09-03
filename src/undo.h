@@ -21,7 +21,7 @@ void undo_push(undo_type type, vec2_t pos, cursor_t cursor, const char* data);
 
 undo_t* undo_pop(void);
 
-void undo(editor_t* E);
+void undo(cursor_t* C);
 
 void undo_free(undo_t* undo);
 

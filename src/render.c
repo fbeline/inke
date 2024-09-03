@@ -24,39 +24,37 @@ static void render_highlight_line(render_t* R, i32 y, i32 xs, i32 xe) {
   DrawRectangle(sp.x, sp.y, ep.x - sp.x, R->font.recs->height, YELLOW);
 }
 
-static void render_draw_region(editor_t* E, render_t* R) {
-  cursor_t C = cursor_get();
-  if (!C.region.active) return;
+static void render_draw_region(cursor_t* C, render_t* R) {
+  if (!C->region.active) return;
 
-  vec2_t cp = {C.x, C.y};
-  vec2_t rp = C.region.vpos;
+  vec2_t cp = {C->x, C->y};
+  vec2_t rp = C->region.vpos;
   vec2_t ps = rp.y <= cp.y ? rp : cp;
   vec2_t pe = rp.y > cp.y ? rp : cp;
   pe.y = MIN((i32)R->nrow + 1, pe.y);
   for (i32 i = ps.y; i <= pe.y; i++) {
     i32 xs = i == ps.y ? ps.x : 0;
-    i32 xe = i == pe.y ? pe.x : editor_rowlen(E, i + C.rowoff);
+    i32 xe = i == pe.y ? pe.x : editor_rowlen(C->editor, i + C->rowoff);
     render_highlight_line(R, i, xs, xe);
   }
 }
 
-static void render_draw_cursor(editor_t* E, render_t* R) {
+static void render_draw_cursor(cursor_t* C, render_t* R) {
   if (!(g_mode & MODE_INSERT)) return;
 
-  cursor_t cursor = cursor_get();
-  Vector2 pos = render_position(R, cursor.x, cursor.y);
+  Vector2 pos = render_position(R, C->x, C->y);
   DrawRectangleV(pos,
                  (Vector2){R->font.recs->width, R->font.recs->height},
                  DARKGRAY);
 
   char chc[2] = {'\0', '\0'};
-  chc[0] = cursor_char(E);
+  chc[0] = cursor_char(C);
 
   // draw font
   DrawTextEx(R->font, chc, pos, R->font_size, 0, RAYWHITE);
 }
 
-static void draw_command_bar(editor_t* E, render_t* R) {
+static void draw_command_bar(render_t* R) {
   if (!(g_mode & (COMMAND_CHAIN | COMMAND_SINGLE_CHAR)))
     return;
 
@@ -69,7 +67,7 @@ static void draw_command_bar(editor_t* E, render_t* R) {
              DARKGRAY);
 }
 
-static void draw_message(editor_t* E, render_t* R) {
+static void draw_message(render_t* R) {
   const char* message = mode_get_message();
   if (strlen(message) == 0 || !(g_mode & MODE_INSERT))
     return;
@@ -83,9 +81,9 @@ static void draw_message(editor_t* E, render_t* R) {
              DARKGRAY);
 }
 
-static void draw_status_bar(editor_t* E, render_t* R) {
+static void draw_status_bar(cursor_t* C, render_t* R) {
   char row_col[15];
-  vec2_t cpos = cursor_position();
+  vec2_t cpos = cursor_position(C);
   sprintf(row_col, "%d/%d", cpos.y + 1, cpos.x + 1);
   Vector2 row_col_size = MeasureTextEx(GetFontDefault(), "00000000/000", R->font_size, 0.0f);
 
@@ -102,11 +100,11 @@ static void draw_status_bar(editor_t* E, render_t* R) {
              RAYWHITE);
 
   char filename[260];
-  const usize filename_len = strlen(E->filename);
+  const usize filename_len = strlen(C->editor->filename);
 
-  memcpy(filename, E->filename, filename_len);
+  memcpy(filename, C->editor->filename, filename_len);
   filename[filename_len] = '\0';
-  if (E->dirty) {
+  if (C->editor->dirty) {
     memcpy(filename + filename_len, " [+]\0", 5);
   }
 
@@ -128,7 +126,7 @@ static void render_load_font(u16 font_size, render_t* R) {
   SetTextureFilter(R->font.texture, TEXTURE_FILTER_BILINEAR);
 }
 
-static void render_draw_info(editor_t* E, render_t* R) {
+static void render_draw_info(render_t* R) {
   char info[11] = {0};
   sprintf(info, "OLIVE v%s", VERSION);
   int text_size = MeasureText(info, R->font_size);
@@ -142,7 +140,7 @@ static void render_draw_info(editor_t* E, render_t* R) {
 
 }
 
-static void render_draw_vertical_bar(editor_t* E, render_t* R) {
+static void render_draw_vertical_bar(render_t* R) {
   DrawRectangleV(
     (Vector2){R->margin_left + 80 * R->font.recs->width, R->margin_top},
     (Vector2){3, R->window_height - R->margin_top},
@@ -150,23 +148,22 @@ static void render_draw_vertical_bar(editor_t* E, render_t* R) {
   );
 }
 
-static void render_draw_lines(editor_t* E, render_t* R) {
-  cursor_t cursor = cursor_get();
-
-  for (usize i = 0; i + cursor.rowoff < E->row_size; i++) {
+static void render_draw_lines(cursor_t* C, render_t* R) {
+  editor_t* E = C->editor;
+  for (usize i = 0; i + C->rowoff < E->row_size; i++) {
     f32 y = R->font_line_spacing * i + R->margin_top;
 
     if (i > R->nrow) break;
 
     char vrow[512] = {0};
-    row_t row = E->rows[i + cursor.rowoff];
+    row_t row = E->rows[i + C->rowoff];
     i64 row_len = strlen(row.chars);
-    i64 vrow_len = MIN(row_len - cursor.coloff, (i32)R->ncol);
+    i64 vrow_len = MIN(row_len - C->coloff, (i32)R->ncol);
 
     if (vrow_len <= 0)
       continue;
 
-    memcpy(vrow, row.chars + cursor.coloff, vrow_len);
+    memcpy(vrow, row.chars + C->coloff, vrow_len);
     DrawTextEx(R->font,
                vrow,
                (Vector2){R->margin_left, y},
@@ -181,7 +178,7 @@ void render_reload_font(render_t* R) {
   render_load_font(R->font_size, R);
 }
 
-void render_update_window(render_t* R) {
+void render_update_window(cursor_t* C, render_t* R) {
   if (R == NULL ||
     (GetScreenWidth() == R->window_width && GetScreenHeight() == R->window_height))
     return;
@@ -192,27 +189,27 @@ void render_update_window(render_t* R) {
   R->ncol = (u16)floor((R->window_width - R->margin_left * 2) / R->font.recs->width);
   R->nrow = (u16)floor((R->window_height - R->margin_top - R->margin_bottom) / (R->font.recs->height * 1.2));
 
-  cursor_set_max(R->ncol, R->nrow);
+  cursor_set_max(C, R->ncol, R->nrow);
 }
 
-void render_draw(editor_t* E, render_t* R) {
+void render_draw(cursor_t* C, render_t* R) {
   BeginDrawing();
 
   ClearBackground(RAYWHITE);
 
-  if (E->new_file && !E->dirty) {
-    render_draw_info(E, R);
+  if (C->editor->new_file && !C->editor->dirty) {
+    render_draw_info(R);
   }
   else {
-    render_draw_region(E, R);
-    render_draw_lines(E, R);
-    render_draw_vertical_bar(E, R);
-    render_draw_cursor(E, R);
+    render_draw_region(C, R);
+    render_draw_lines(C, R);
+    render_draw_vertical_bar( R);
+    render_draw_cursor(C, R);
   }
 
-  draw_status_bar(E, R);
-  draw_message(E, R);
-  draw_command_bar(E, R);
+  draw_status_bar(C, R);
+  draw_message(R);
+  draw_command_bar(R);
 
   EndDrawing();
 }
@@ -229,8 +226,6 @@ render_t render_init(u16 width, u16 height, u16 font_size) {
   SetExitKey(KEY_NULL);
 
   render_load_font(font_size, &R);
-
-  cursor_clear_region();
 
   return R;
 }

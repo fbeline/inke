@@ -10,11 +10,12 @@
 
 static editor_t E = {0};
 static render_t R = {0};
+static cursor_t C = {0};
 
 void Init(const char* filename) {
   E = editor_init(filename);
+  C = cursor_init(&E);
   R = render_init(1280, 720, 30);
-  cursor_init();
 }
 
 int main(int argc, char **argv) {
@@ -26,10 +27,10 @@ int main(int argc, char **argv) {
   Init(argv[1]);
 
   while (!WindowShouldClose() && E.running) {
-    input_keyboard_handler(&E);
+    input_keyboard_handler(&C);
 
-    render_update_window(&R);
-    render_draw(&E, &R);
+    render_update_window(&C, &R);
+    render_draw(&C, &R);
   }
 
   CloseWindow();        // Close window and OpenGL context

@@ -1,5 +1,5 @@
 #pragma once
 
-#include "editor.h"
+#include "cursor.h"
 
-void input_keyboard_handler(editor_t *E);
+void input_keyboard_handler(cursor_t *C);

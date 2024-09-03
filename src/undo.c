@@ -38,7 +38,8 @@ void undo_free(undo_t* undo) {
   free(undo);
 }
 
-void undo(editor_t* E) {
+void undo(cursor_t* C) {
+  editor_t* E = C->editor;
   undo_t* undo = undo_pop();
 
   if (undo == NULL) return;
@@ -63,8 +64,8 @@ void undo(editor_t* E) {
       editor_insert_text(E, undo->pos, undo->strdata, strlen(undo->strdata));
       break;
     case CUT:
-      cursor_set(&undo->cursor);
-      cursor_insert_text(E, undo->strdata);
+      cursor_set(C, &undo->cursor);
+      cursor_insert_text(C, undo->strdata);
       break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
@@ -72,7 +73,7 @@ void undo(editor_t* E) {
       return;
   }
 
-  cursor_set(&undo->cursor);
+  cursor_set(C, &undo->cursor);
   undo_free(undo);
 }
 

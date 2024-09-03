@@ -3,6 +3,7 @@
 #include <raylib.h>
 
 #include "types.h"
+#include "cursor.h"
 #include "editor.h"
 
 typedef struct render_s {
@@ -13,10 +14,10 @@ typedef struct render_s {
   Font font;
 } render_t;
 
-void render_draw(editor_t *E, render_t* R);
-
-void render_update_window(render_t* R);
-
 void render_reload_font(render_t* R);
+
+void render_draw(cursor_t* C, render_t* R);
+
+void render_update_window(cursor_t* C, render_t* R);
 
 render_t render_init(u16 width, u16 height, u16 font_size);

@@ -26,95 +26,96 @@ static bool kshift(void) {
   return IsKeyDown(KEY_LEFT_SHIFT);
 }
 
-static void input_insert_handler(editor_t* E) {
+static void input_insert_handler(cursor_t* C) {
   if (kctrl() && IsKeyPressed(KEY_X)) {
     return mode_set_ctrl_x();
   }
   if (kctrl() && kpr(KEY_A)) {
-    return cursor_bol();
+    return cursor_bol(C);
   }
   if (kctrl() && kpr(KEY_E)) {
-    return cursor_eol(E);
+    return cursor_eol(C);
   }
   if (kctrl() && kpr(KEY_K)) {
-    return cursor_delete_forward(E);
+    return cursor_delete_forward(C);
   }
   if (kctrl() && kpr(KEY_SLASH)) {
-    return undo(E);
+    return undo(C);
   }
   if (kctrl() && kpr(KEY_Y)) {
-    return cursor_insert_text(E, GetClipboardText());
+    return cursor_insert_text(C, GetClipboardText());
   }
   if (kctrl() && IsKeyPressed(KEY_SPACE)) {
-    return cursor_region_start();
+    return cursor_region_start(C);
   }
   if (kctrl() && kshift() && IsKeyPressed(KEY_BACKSPACE)) {
-    return cursor_delete_row(E);
+    return cursor_delete_row(C);
   }
   if (kalt() && IsKeyPressed(KEY_W)) {
-    char* txt = cursor_region_text(E);
+    char* txt = cursor_region_text(C);
     if (txt != NULL) {
       SetClipboardText(txt);
       free(txt);
     }
 
-    return cursor_clear_region();
+    return cursor_clear_region(C);
   }
   if (kctrl() && kpr(KEY_W)) {
-    char* txt = cursor_region_kill(E);
+    char* txt = cursor_region_kill(C);
     if (txt != NULL) {
       SetClipboardText(txt);
       free(txt);
     }
-    return cursor_clear_region();
+    return cursor_clear_region(C);
   }
   if (kalt() && kshift() && kpr(KEY_COMMA)) {
-    return cursor_bof();
+    return cursor_bof(C);
   }
   if (kalt() && kshift() && kpr(KEY_PERIOD)) {
-    return cursor_eof(E);
+    return cursor_eof(C);
   }
   if (kalt() && kpr(KEY_F)) {
-    return cursor_move_word_forward(E);
+    return cursor_move_word_forward(C);
   }
   if (kalt() && kpr(KEY_B)) {
-    return cursor_move_word_backward(E);
+    return cursor_move_word_backward(C);
   }
   if (kpr(KEY_ENTER)) {
-    return cursor_break_line(E);
+    return cursor_break_line(C);
   }
   if (kpr(KEY_PAGE_DOWN)) {
-    return cursor_page_down(E);
+    return cursor_page_down(C);
   }
   if (kpr(KEY_PAGE_UP)) {
-    return cursor_page_up(E);
+    return cursor_page_up(C);
   }
   if (kpr(KEY_RIGHT) ||
     (kctrl() && kpr(KEY_F))) {
-    cursor_right(E);
+    cursor_right(C);
   }
   if (kpr(KEY_DOWN) ||
     (kctrl() && kpr(KEY_N))) {
-    cursor_down(E);
+    cursor_down(C);
   }
   if (kpr(KEY_LEFT) ||
     (kctrl() && kpr(KEY_B))) {
-    cursor_left(E);
+    cursor_left(C);
   }
   if (kpr(KEY_UP) ||
     (kctrl() && kpr(KEY_P))) {
-    cursor_up(E);
+    cursor_up(C);
   }
   if (kpr(KEY_BACKSPACE)) {
-    cursor_remove_char(E);
+    cursor_remove_char(C);
   }
 
   i32 ch = GetCharPressed();
   if (ch >= 32 && ch <= 126)
-      cursor_insert_char(E, ch);
+      cursor_insert_char(C, ch);
 }
 
-static void input_command_chain_handler(editor_t* E) {
+static void input_command_chain_handler(cursor_t* C) {
+  editor_t* E = C->editor;
   if (kctrl()) {
     if (kpr(KEY_C)) {
       if (E->dirty) {
@@ -134,17 +135,17 @@ static void input_command_chain_handler(editor_t* E) {
   }
 }
 
-static void input_command_char_handler(editor_t* E) {
+static void input_command_char_handler(cursor_t* C) {
   i32 ch = GetCharPressed();
   if (ch >= 32 && ch <= 126)
-    g_active_command.handler(E, ch);
+    g_active_command.handler(C->editor, ch);
 }
 
-void input_keyboard_handler(editor_t* E) {
+void input_keyboard_handler(cursor_t* C) {
   if (g_mode & MODE_INSERT)
-    input_insert_handler(E);
+    input_insert_handler(C);
   else if (g_mode & COMMAND_CHAIN)
-    input_command_chain_handler(E);
+    input_command_chain_handler(C);
   else if (g_mode & COMMAND_SINGLE_CHAR)
-    input_command_char_handler(E);
+    input_command_char_handler(C);
 }
