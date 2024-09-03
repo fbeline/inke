@@ -183,11 +183,12 @@ void cursor_move_word_forward(cursor_t* C) {
   editor_t* E = C->editor;
   do {
     vec2_t pos = cursor_position(C);
-    if (pos.y >= E->row_size - 1 && editor_rowlen(E, pos.y) >= pos.x)
-      break;
+    if (pos.y == E->row_size - 1 && pos.x >= editor_rowlen(E, pos.y))
+      return;
     cursor_right(C);
+    pos = cursor_position(C);
     ch1 = cursor_char(C);
-    ch2 = editor_char_at(E, pos.x + 2, raw_y(C));
+    ch2 = editor_char_at(E, pos.x + 1, pos.y);
   } while(!(ch1 !=  ' ' && ch2 == ' '));
   cursor_right(C);
 }

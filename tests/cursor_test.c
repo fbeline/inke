@@ -95,7 +95,6 @@ static int test_eol(void) {
   ASSERT_EQUAL(C.max_col, C.x);
   ASSERT_EQUAL(len - C.max_col, C.coloff);
 
-
   return 0;
 }
 
@@ -130,6 +129,52 @@ static int test_bof(void) {
   return 0;
 }
 
+static int test_move_word_forward(void) {
+  cursor_t C = factory();
+
+  cursor_move_word_forward(&C);
+  ASSERT_VEC2_EQUAL(3, 0, cursor_position(&C));
+
+  cursor_move_word_forward(&C);
+  ASSERT_VEC2_EQUAL(7, 0, cursor_position(&C));
+
+  // move to next line
+  cursor_move_word_forward(&C);
+  ASSERT_VEC2_EQUAL(3, 1, cursor_position(&C));
+
+  // do not exceed last line last word
+  cursor_move_word_forward(&C);
+  cursor_move_word_forward(&C);
+  cursor_move_word_forward(&C);
+  cursor_move_word_forward(&C);
+  cursor_move_word_forward(&C);
+  ASSERT_VEC2_EQUAL((i32)strlen(C.editor->rows[1].chars), 1, cursor_position(&C));
+
+  return 0;
+}
+
+static int test_move_word_backward(void) {
+  cursor_t C = factory();
+
+  // limit cursor to start of file
+  cursor_move_word_backward(&C);
+  cursor_move_word_backward(&C);
+  ASSERT_VEC2_EQUAL(0, 0, cursor_position(&C));
+
+  C.y = 1;
+  C.x = editor_rowlen(C.editor, 1);
+
+  cursor_move_word_backward(&C);
+  ASSERT_VEC2_EQUAL(9, 1, cursor_position(&C));
+
+  // go line up
+  cursor_move_word_backward(&C);
+  cursor_move_word_backward(&C);
+  ASSERT_VEC2_EQUAL(8, 0, cursor_position(&C));
+
+  return 0;
+}
+
 int main() {
   int result = 0;
 
@@ -139,6 +184,8 @@ int main() {
   result += test_eol();
   result += test_eof();
   result += test_bof();
+  result += test_move_word_forward();
+  result += test_move_word_backward();
 
   return result;
 }
