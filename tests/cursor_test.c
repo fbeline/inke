@@ -30,6 +30,8 @@ editor_t editor_factory() {
 cursor_t factory() {
   editor_t E = editor_factory();
   cursor_t C = {0};
+  C.max_col = 9999;
+  C.max_row = 9999;
   C.editor = malloc(sizeof(editor_t));
   memcpy(C.editor, &E, sizeof(editor_t));
 
@@ -43,7 +45,66 @@ static int test_cursor_position(void) {
 
   C.x = 10; C.coloff = 5;
   C.y = 3; C.rowoff = 20;
-  ASSERT_VEC2_EQUAL(16, 23, cursor_position(&C));
+  ASSERT_VEC2_EQUAL(15, 23, cursor_position(&C));
+
+  return 0;
+}
+
+static int test_cursor_char(void) {
+  cursor_t C = factory();
+
+  // first char
+  ASSERT_EQUAL('f', cursor_char(&C));
+
+  // middle line
+  C.x = 4;
+  ASSERT_EQUAL('b', cursor_char(&C));
+
+  // last char
+  C.x = strlen(C.editor->rows[0].chars) - 1;
+  ASSERT_EQUAL('z', cursor_char(&C));
+
+  return 0;
+}
+
+static int test_bol(void) {
+  cursor_t C = factory();
+  C.x = 10;
+  C.coloff = 5;
+
+  cursor_bol(&C);
+
+  ASSERT_EQUAL(0, C.x);
+  ASSERT_EQUAL(0, C.coloff);
+
+  return 0;
+}
+
+static int test_eol(void) {
+  cursor_t C = factory();
+  i32 len = strlen(C.editor->rows[0].chars);
+
+  // maxcol 9999
+  cursor_eol(&C);
+  ASSERT_EQUAL(len, C.x);
+
+  // maxcol 4
+  C.x = 0;
+  C.max_col = 4;
+  cursor_eol(&C);
+  ASSERT_EQUAL(C.max_col, C.x);
+  ASSERT_EQUAL(len - C.max_col, C.coloff);
+
+
+  return 0;
+}
+static int test_eof(void) {
+  cursor_t C = factory();
+
+  return 0;
+}
+static int test_bof(void) {
+  cursor_t C = factory();
 
   return 0;
 }
@@ -52,6 +113,11 @@ int main() {
   int result = 0;
 
   result += test_cursor_position();
+  result += test_cursor_char();
+  result += test_bol();
+  result += test_eol();
+  result += test_eof();
+  result += test_bof();
 
   return result;
 }
