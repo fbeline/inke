@@ -175,6 +175,58 @@ static int test_move_word_backward(void) {
   return 0;
 }
 
+static int test_remove_char(void) {
+  cursor_t C = factory();
+
+  // do nothing if cursor is at pos.x 0
+  cursor_remove_char(&C);
+  ASSERT_STRING_EQUAL("foo bar baz", C.editor->rows[0].chars);
+
+  // remove first char of line
+  C.x = 1;
+  cursor_remove_char(&C);
+  ASSERT_STRING_EQUAL("oo bar baz", C.editor->rows[0].chars);
+
+  // remove last char
+  cursor_eol(&C);
+  cursor_remove_char(&C);
+  ASSERT_STRING_EQUAL("oo bar ba", C.editor->rows[0].chars);
+
+  return 0;
+}
+
+static int test_insert_char(void) {
+  cursor_t C = factory();
+
+  // first char
+  cursor_insert_char(&C, 'a');
+  ASSERT_STRING_EQUAL("afoo bar baz", C.editor->rows[0].chars);
+
+  // middle
+  C.x = 4;
+  cursor_insert_char(&C, 'a');
+  ASSERT_STRING_EQUAL("afooa bar baz", C.editor->rows[0].chars);
+
+  // last char
+  cursor_eol(&C);
+  cursor_insert_char(&C, 'a');
+  ASSERT_STRING_EQUAL("afooa bar baza", C.editor->rows[0].chars);
+
+  return 0;
+}
+
+static int test_insert_text(void) {
+  cursor_t C = factory();
+  C.x = 4;
+
+  cursor_insert_text(&C, "line1\nline2 ");
+  ASSERT_STRING_EQUAL("foo line1", C.editor->rows[0].chars);
+  ASSERT_STRING_EQUAL("line2 bar baz", C.editor->rows[1].chars);
+  ASSERT_EQUAL(3, C.editor->row_size);
+
+  return 0;
+}
+
 int main() {
   int result = 0;
 
@@ -186,6 +238,9 @@ int main() {
   result += test_bof();
   result += test_move_word_forward();
   result += test_move_word_backward();
+  result += test_remove_char();
+  result += test_insert_char();
+  result += test_insert_text();
 
   return result;
 }

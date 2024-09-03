@@ -265,7 +265,7 @@ void cursor_insert_text(cursor_t* C, const char* text) {
       vec2_t pos = cursor_position(C);
       if (n == 0) {
         flt = strdup(E->rows[pos.y].chars + pos.x);
-        E->rows[pos.y].chars[pos.x + 1] = '\0';
+        E->rows[pos.y].chars[pos.x] = '\0';
       }
       if(text[start] == '\n') start++;
 
