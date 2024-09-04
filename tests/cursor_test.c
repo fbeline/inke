@@ -284,6 +284,40 @@ static int test_cursor_left(void) {
   return 0;
 }
 
+int test_break_line(void) {
+  cursor_t C = factory();
+
+  C.x = 3;
+  cursor_break_line(&C);
+  ASSERT_STRING_EQUAL("foo", C.editor->rows[0].chars);
+  ASSERT_STRING_EQUAL(" bar baz", C.editor->rows[1].chars);
+
+  return 0;
+}
+
+int test_delete_forward(void) {
+  cursor_t C = factory();
+
+  C.x = 3;
+  cursor_delete_forward(&C);
+  ASSERT_STRING_EQUAL("foo", C.editor->rows[0].chars);
+
+  return 0;
+}
+
+int test_delete_row(void) {
+  cursor_t C = factory();
+
+  cursor_delete_row(&C);
+  ASSERT_STRING_EQUAL("qux quux corge", C.editor->rows[0].chars);
+
+  // always keep at least 1 line in memory
+  cursor_delete_row(&C);
+  ASSERT_STRING_EQUAL("", C.editor->rows[0].chars);
+
+  return 0;
+}
+
 int main() {
   int result = 0;
 
@@ -302,6 +336,9 @@ int main() {
   result += test_cursor_right();
   result += test_cursor_down();
   result += test_cursor_left();
+  result += test_break_line();
+  result += test_delete_forward();
+  result += test_delete_row();
 
   return result;
 }
