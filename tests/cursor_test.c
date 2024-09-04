@@ -4,7 +4,7 @@
 #include "ctest.h"
 
 editor_t editor_factory() {
-   editor_t e = {
+  editor_t e = {
     .mode = 0,
     .filename = "foo.txt",
     .row_size = 2,
@@ -227,6 +227,63 @@ static int test_insert_text(void) {
   return 0;
 }
 
+static int test_cursor_down(void) {
+  cursor_t C = factory();
+
+  cursor_down(&C);
+  ASSERT_EQUAL(1, C.y);
+
+  return 0;
+}
+
+static int test_cursor_up(void) {
+  cursor_t C = factory();
+
+  cursor_up(&C);
+  ASSERT_EQUAL(0, C.y);
+
+  C.y = 1;
+  cursor_up(&C);
+  ASSERT_EQUAL(0, C.y);
+
+  return 0;
+}
+
+
+static int test_cursor_right(void) {
+  cursor_t C = factory();
+
+  cursor_right(&C);
+  ASSERT_VEC2_EQUAL(1, 0, cursor_position(&C));
+
+  // go line down
+  C.x = editor_rowlen(C.editor, 0);
+  cursor_right(&C);
+  ASSERT_VEC2_EQUAL(0, 1, cursor_position(&C));
+
+  return 0;
+}
+
+static int test_cursor_left(void) {
+  cursor_t C = factory();
+
+  // do nothing when at start of file
+  cursor_left(&C);
+  ASSERT_VEC2_EQUAL(0, 0, cursor_position(&C));
+
+  C.x = 3;
+  cursor_left(&C);
+  ASSERT_VEC2_EQUAL(2, 0, cursor_position(&C));
+
+  // goes line up
+  C.x = 0; C.y = 1;
+  cursor_left(&C);
+  i32 l0len = editor_rowlen(C.editor, 0);
+  ASSERT_VEC2_EQUAL(l0len, 0, cursor_position(&C));
+
+  return 0;
+}
+
 int main() {
   int result = 0;
 
@@ -241,6 +298,10 @@ int main() {
   result += test_remove_char();
   result += test_insert_char();
   result += test_insert_text();
+  result += test_cursor_up();
+  result += test_cursor_right();
+  result += test_cursor_down();
+  result += test_cursor_left();
 
   return result;
 }
