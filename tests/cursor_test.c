@@ -30,6 +30,8 @@ editor_t editor_factory() {
 cursor_t factory() {
   editor_t E = editor_factory();
   cursor_t C = {0};
+  C.region.active = false;
+  C.region.cursor = malloc(sizeof(cursor_t));
   C.max_col = 9999;
   C.max_row = 9999;
   C.editor = malloc(sizeof(editor_t));
@@ -318,6 +320,48 @@ int test_delete_row(void) {
   return 0;
 }
 
+int test_region_text(void) {
+  cursor_t C = factory();
+
+  // single line region
+  cursor_region_start(&C);
+  C.x = 3;
+  char* foo = cursor_region_text(&C);
+  ASSERT_STRING_EQUAL("foo", foo);
+  C.region.active = false;
+
+  // multline region
+  C.x = 4; C.y = 0;
+  cursor_region_start(&C);
+  C.x = 3; C.y = 1;
+  char* str = cursor_region_text(&C);
+  ASSERT_STRING_EQUAL("bar baz\nqux", str);
+
+  return 0;
+}
+
+int test_region_kill(void) {
+  cursor_t C = factory();
+
+  // single line cut
+  cursor_region_start(&C);
+  C.x = 3;
+  char* foo = cursor_region_kill(&C);
+  ASSERT_STRING_EQUAL("foo", foo);
+  ASSERT_STRING_EQUAL(" bar baz", C.editor->rows[0].chars);
+
+  // multline cut
+  C = factory();
+  C.x = 4; C.y = 0;
+  cursor_region_start(&C);
+  C.x = 3; C.y = 1;
+  char* str = cursor_region_kill(&C);
+  ASSERT_STRING_EQUAL("bar baz\nqux", str);
+  ASSERT_STRING_EQUAL("foo  quux corge", C.editor->rows[0].chars);
+
+  return 0;
+}
+
 int main() {
   int result = 0;
 
@@ -339,6 +383,8 @@ int main() {
   result += test_break_line();
   result += test_delete_forward();
   result += test_delete_row();
+  result += test_region_text();
+  result += test_region_kill();
 
   return result;
 }
