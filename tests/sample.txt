@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Check if a directory was provided as an argument
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <directory>"
+    exit 1
+fi
+
+# Directory to process
+dir="$1"
+
+# Check if the provided argument is a valid directory
+if [ ! -d "$dir" ]; then
+    echo "Error: Directory '$dir' does not exist."
+    exit 1
+fi
+
+# Rename files in the directory
+for file in "$dir"/*; do
+    # Check if it's a file
+    if [ -f "$file" ]; then
+        # Extract the base name and extension
+        base_name=$(basename "$file")
+        new_name=$(echo "$base_name" | sed 's/-video-/.E/g')
+
+        # Rename the file
+        mv "$file" "$dir/$new_name"
+    fi
+done
+
+echo "Renaming complete."
