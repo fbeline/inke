@@ -123,11 +123,10 @@ static void render_load_font(u16 font_size, render_t* R) {
   R->font_line_spacing = R->font_size * 1.15;
 
 #ifdef _WIN32
-  snprintf(path, sizeof(path), "resources/FiraCode-Regular.ttf");
+  snprintf(path, sizeof(path), "C:\\Windows\\Fonts\\Consola.ttf");
 #else
   const char *home = getenv("HOME");
   if (home == NULL) die("Cannot find $HOME.");
-
   snprintf(path, sizeof(path), "%s/.fonts/FiraCode-Regular.ttf", home);
 #endif
 

@@ -15,7 +15,12 @@ static cursor_t C = {0};
 void Init(const char* filename) {
   E = editor_init(filename);
   C = cursor_init(&E);
+
+#ifdef _WIN32
+  R = render_init(1280, 720, 16);
+#else
   R = render_init(1280, 720, 30);
+#endif
 }
 
 int main(int argc, char **argv) {
