@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 #include "editor.h"
@@ -117,10 +118,20 @@ static void draw_status_bar(cursor_t* C, render_t* R) {
 }
 
 static void render_load_font(u16 font_size, render_t* R) {
+  char path[512];
   R->font_size = font_size;
   R->font_line_spacing = R->font_size * 1.15;
-  R->font = LoadFontEx("resources/FiraCode-Regular.ttf", R->font_size, NULL, 250);
 
+#ifdef _WIN32
+  snprintf(path, sizeof(path), "resources/FiraCode-Regular.ttf");
+#else
+  const char *home = getenv("HOME");
+  if (home == NULL) die("Cannot find $HOME.");
+
+  snprintf(path, sizeof(path), "%s/.fonts/FiraCode-Regular.ttf", home);
+#endif
+
+  R->font = LoadFontEx(path, R->font_size, NULL, 250);
   SetTextLineSpacing(R->font_line_spacing);
   GenTextureMipmaps(&R->font.texture);
   SetTextureFilter(R->font.texture, TEXTURE_FILTER_BILINEAR);
