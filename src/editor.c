@@ -46,19 +46,37 @@ void abuf_append(abuf_t *ab, const char *s) {
 void abuf_free(abuf_t *ab) { free(ab->b); }
 
 void editor_delete_rows(editor_t *E, i32 start, i32 end) {
-  if (!IN_RANGE(start, 0, E->row_size) || !IN_RANGE(end, 0, E->row_size))
+  E->dirty = true;
+  if (E->row_size == 1) {
+    E->rows[0].chars[0] = '\0';
     return;
+  }
 
-  usize n = end - start + 1;
-  for (usize i = start; i <= end; i++) {
+  start = MAX(0, start);
+  start = MIN(start, (i32)E->row_size-1);
+  end = MIN(end, (i32)E->row_size-1);
+  end = MAX(end, 0);
+
+  if (end < start)
+    die("editor_delete_rows invalid args start=%d, end=%d", start, end);
+
+  for(i32 i = start; i <= end; i++) {
     free(E->rows[i].chars);
   }
 
-  if (E->row_size - end - 1 > 0)
-    memmove(E->rows + start, E->rows + end + 1, (E->row_size - n) * sizeof(row_t));
+  // all lines deleted
+  if (start == 0 && end == E->row_size - 1) {
+    E->rows[0].chars = malloc(1);
+    E->rows[0].chars[0] = '\0';
+    E->row_size = 1;
+    return;
+  }
+
+  i32 n = end - start + 1;
+  if (end < E->row_size - 1) // do not move if end == last line
+    memmove(E->rows + start, E->rows + end + 1, (E->row_size - end - 1) * sizeof(row_t));
 
   E->row_size -= n;
-  E->dirty = true;
 }
 
 usize editor_rowlen(editor_t *E, i32 y) {

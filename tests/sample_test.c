@@ -21,9 +21,14 @@ static int test_flow(void) {
   // BREAKLINE / ADD NEW ROW
   cursor_move_word_forward(&C);
   cursor_break_line(&C);
-  ASSERT_STRING_EQUAL("# Check", C.editor->rows[1].chars);
-  ASSERT_STRING_EQUAL(" if a directory was provided as an argument", C.editor->rows[2].chars);
+  ASSERT_STRING_EQUAL("# Check", E.rows[1].chars);
+  ASSERT_STRING_EQUAL(" if a directory was provided as an argument", E.rows[2].chars);
   ASSERT_EQUAL(31, E.row_size);
+
+  // delete last row
+  cursor_eof(&C);
+  cursor_delete_row(&C);
+  ASSERT_STRING_EQUAL("", E.rows[E.row_size-1].chars);
 
   return 0;
 }

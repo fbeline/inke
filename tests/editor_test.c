@@ -66,8 +66,11 @@ int test_delete_rows() {
 
   editor_delete_rows(&E, 0, 0);
   ASSERT_EQUAL(E.row_size, 1);
+  ASSERT_STRING_EQUAL("qux quux corge", E.rows[0].chars);
+
   editor_delete_rows(&E, 0, 0);
-  ASSERT_EQUAL(E.row_size, 0);
+  ASSERT_EQUAL(E.row_size, 1); // min row size is 1
+  ASSERT_STRING_EQUAL("", E.rows[0].chars);
 
   return 0;
 }
