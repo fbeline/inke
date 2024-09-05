@@ -43,7 +43,9 @@ static void input_insert_handler(cursor_t* C) {
     return undo(C);
   }
   if (kctrl() && kpr(KEY_Y)) {
-    return cursor_insert_text(C, GetClipboardText());
+    cursor_t sc = *C;
+    cursor_insert_text(C, GetClipboardText());
+    return undo_push(PASTE, cursor_position(C), sc, NULL);
   }
   if (kctrl() && IsKeyPressed(KEY_SPACE)) {
     return cursor_region_start(C);

@@ -67,6 +67,9 @@ void undo(cursor_t* C) {
       cursor_set(C, &undo->cursor);
       cursor_insert_text(C, undo->strdata);
       break;
+    case PASTE:
+      editor_cut_between(C->editor, cursor_position(&undo->cursor), undo->pos);
+      break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
       undo_free(undo);
