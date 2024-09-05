@@ -330,6 +330,9 @@ void cursor_delete_row(cursor_t* C) {
   undo_push(LINEDELETE, (vec2_t){0, y}, *C, strdata);
 
   editor_delete_rows(C->editor, y, y);
+  if (raw_x(C) > editor_rowlen(C->editor, y)) {
+    cursor_eol(C);
+  }
 
   if (ll) {
     cursor_up(C);

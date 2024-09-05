@@ -29,7 +29,6 @@
         "VCPKG_TARGET_TRIPLET": "x64-linux",
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_C_FLAGS": "-fsanitize=undefined,address",
         "CMAKE_C_FLAGS_DEBUG": "-g"
       }
     },

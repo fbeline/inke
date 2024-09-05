@@ -270,6 +270,19 @@ void editor_insert_text(editor_t* E, vec2_t pos, const char* strdata, usize dlen
   }
 }
 
+static void editor_new_file(const char *filename, editor_t *E) {
+  strcpy(E->filename, filename);
+  E->row_size = 1;
+  E->row_capacity = 1;
+  E->rows = (row_t *)malloc(sizeof(row_t));
+  E->rows->size = 1;
+  E->rows->chars = malloc(1);
+  E->rows->chars[0] = '\0';
+  E->new_file = true;
+}
+
+
+
 int editor_open_file(const char *filename, editor_t *E) {
   FILE *fp;
   char buffer[1024];
@@ -309,23 +322,14 @@ int editor_open_file(const char *filename, editor_t *E) {
 
   fclose(fp);
 
-  E->new_file = false;
   E->row_size = rows_size;
   E->row_capacity = rows_capacity;
-  memcpy(E->filename, filename, strlen(filename));
+  strcpy(E->filename, filename);
+
+  if (rows_size == 0) editor_new_file(filename, E);
+  E->new_file = false;
 
   return 0;
-}
-
-void editor_new_file(const char *filename, editor_t *E) {
-  memcpy(E->filename, filename, strlen(filename));
-  E->row_size = 1;
-  E->row_capacity = 1;
-  E->rows = (row_t *)malloc(sizeof(row_t));
-  E->rows->size = 1;
-  E->rows->chars = malloc(1);
-  E->rows->chars[0] = '\0';
-  E->new_file = true;
 }
 
 editor_t editor_init(const char *filename) {

@@ -5,8 +5,8 @@ set(PROJECT_SOURCES
   ../src/undo.h ../src/undo.c
 )
 
-file(COPY ${CMAKE_SOURCE_DIR}/tests/sample.txt
-     DESTINATION ${CMAKE_BINARY_DIR}/tests/)
+file(COPY ${CMAKE_SOURCE_DIR}/tests/samples/
+     DESTINATION ${CMAKE_BINARY_DIR}/tests/samples/)
 
 add_executable(editor_test editor_test.c ${PROJECT_SOURCES})
 add_executable(cursor_test cursor_test.c ${PROJECT_SOURCES})

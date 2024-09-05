@@ -5,7 +5,7 @@
 #include "../src/editor.h"
 
 static int test_flow(void) {
-  editor_t E = editor_init("sample.txt");
+  editor_t E = editor_init("samples/sample.txt");
   cursor_t C = cursor_init(&E);
 
   ASSERT_EQUAL(31, E.row_size);
@@ -33,6 +33,15 @@ static int test_flow(void) {
   return 0;
 }
 
+static int test_empty_file(void) {
+  editor_t E = editor_init("samples/empty_sample.txt");
+  cursor_t C = cursor_init(&E);
+
+  ASSERT_EQUAL(1, E.row_size);
+
+  return 0;
+}
+
 int main() {
-  return test_flow();
+  return test_flow() + test_empty_file();
 }
