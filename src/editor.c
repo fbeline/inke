@@ -80,7 +80,7 @@ void editor_delete_rows(editor_t *E, i32 start, i32 end) {
 }
 
 usize editor_rowlen(editor_t *E, i32 y) {
-  if (y > E->row_size)
+  if (y >= E->row_size)
     return 0;
 
   return E->rows[y].size > 0 ? strlen(E->rows[y].chars) : 0;
@@ -280,8 +280,6 @@ static void editor_new_file(const char *filename, editor_t *E) {
   E->rows->chars[0] = '\0';
   E->new_file = true;
 }
-
-
 
 int editor_open_file(const char *filename, editor_t *E) {
   FILE *fp;

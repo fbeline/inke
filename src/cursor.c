@@ -317,7 +317,7 @@ void cursor_delete_forward(cursor_t* C) {
 
 void cursor_delete_row(cursor_t* C) {
   i32 y = raw_y(C);
-  bool ll = C->editor->row_size - (y + 1) == 0;
+  bool ll = C->editor->row_size - (y + 1) == 0; //last line
 
   if (y == 0 && ll) { // editor must have at least one row
     C->editor->rows[0].chars[0] = '\0';
@@ -325,19 +325,16 @@ void cursor_delete_row(cursor_t* C) {
     return;
   }
 
-
   char* strdata = strdup(C->editor->rows[y].chars);
   undo_push(LINEDELETE, (vec2_t){0, y}, *C, strdata);
 
   editor_delete_rows(C->editor, y, y);
-  if (raw_x(C) > editor_rowlen(C->editor, y)) {
-    cursor_eol(C);
-  }
 
   if (ll) {
     cursor_up(C);
-    cursor_bol(C);
+    y--;
   }
+  if (raw_x(C) > editor_rowlen(C->editor, y)) cursor_eol(C);
 }
 
 void cursor_eof(cursor_t* C) {
