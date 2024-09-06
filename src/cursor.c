@@ -60,7 +60,10 @@ char* cursor_region_text(cursor_t* C) {
   vec2_t ps, pe;
   cursor_region_calc(C, &ps, &pe, NULL);
 
-  return editor_text_between(C->editor, ps, pe);
+  line_t *lp = editor_text_between(C->editor, ps, pe);
+  char *result = strdup(lp->text);
+  line_free(lp);
+  return result;
 }
 
 char* cursor_region_kill(cursor_t* C) {
@@ -70,14 +73,14 @@ char* cursor_region_kill(cursor_t* C) {
   cursor_t cursor = {0};
   cursor_region_calc(C, &ps, &pe, &cursor);
 
-  char* txt = editor_cut_between(C->editor, ps, pe);
+  line_t *lp = editor_cut_between(C->editor, ps, pe);
+  char* strdata = strdup(lp->text);
+  line_free(lp);
 
-  char* strdata = strdup(txt);
   undo_push(CUT, ps, cursor, strdata);
-
   cursor_set(C, &cursor);
 
-  return txt;
+  return strdata;
 }
 
 void cursor_clear_region(cursor_t* C) {
@@ -309,8 +312,9 @@ void cursor_page_down(cursor_t* C) {
 void cursor_delete_forward(cursor_t* C) {
   vec2_t pos = cursor_position(C);
   usize len = editor_rowlen(C->editor, pos.y);
-  const char* strdata = editor_text_between(C->editor, pos, (vec2_t){len, pos.y});
-  undo_push(DELETE_FORWARD, pos, *C, strdata);
+  line_t *lp = editor_text_between(C->editor, pos, (vec2_t){len, pos.y});
+  undo_push(DELETE_FORWARD, pos, *C, lp->text);
+  line_free(lp);
 
   editor_delete_forward(C->editor, pos.x, pos.y);
 }

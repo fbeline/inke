@@ -8,42 +8,66 @@
 #include "io.h"
 #include "utils.h"
 
-typedef struct append_buffer {
+#define BLOCK_SIZE 16
+
+line_t *lalloc(usize size) {
+  line_t *lp;
   usize capacity;
-  usize size;
-  char *b;
-} abuf_t;
 
-abuf_t abuf_init(usize capacity) {
-  char *b = malloc(capacity);
-  if (b == NULL)
-    return (abuf_t){0};
+  capacity = (size + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1);
+  if (capacity == 0)
+    capacity = BLOCK_SIZE;
 
-  return (abuf_t){.capacity = capacity, .size = 0, .b = b};
+  if ((lp = (line_t*)malloc(sizeof(line_t) + capacity)) == NULL)
+    die("LALLOC OUT OF MEMORY");
+
+  lp->capacity = capacity;
+  lp->size = size;
+  lp->text[0] = '\0';
+
+  return lp;
 }
 
-void abuf_append_s(abuf_t *ab, const char *s, usize len) {
-  bool resize = false;
+line_t *lrealloc(line_t *lp, usize new_size) {
+  line_t *nlp;
+  usize new_capacity;
 
-  while (ab->capacity <= ab->size + len) {
-    ab->capacity *= 2;
-    resize = true;
+  new_capacity = (new_size + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1);
+  if (new_capacity == 0)
+    new_capacity = BLOCK_SIZE;
+
+  if ((nlp = (line_t*)realloc(lp, sizeof(line_t) + new_capacity)) == NULL)
+    die("LREALLOC OUT OF MEMORY");
+
+  nlp->capacity = new_capacity;
+  nlp->size = new_size;
+
+  return nlp;
+}
+
+line_t* line_append_s(line_t *lp, const char *str, usize len) {
+  usize old_size = lp->size;
+  usize new_size = lp->size + len;
+  if (new_size > lp->capacity)
+    lp = lrealloc(lp, new_size);
+
+  for(int i = 0, j = old_size; i < len; i++, j++) {
+    lp->text[j] = str[i];
   }
 
-  if (resize)
-    ab->b = nrealloc(ab->b, ab->capacity);
+  lp->text[new_size] = '\0';
+  lp->size = new_size;
 
-  memcpy(ab->b + ab->size, s, len);
-  ab->size += len;
-  ab->b[ab->size] = '\0';
-
+  return lp;
 }
 
-void abuf_append(abuf_t *ab, const char *s) {
-  abuf_append_s(ab, s, strlen(s));
+line_t* line_append(line_t *lp, const char *str) {
+  return line_append_s(lp, str, strlen(str));
 }
 
-void abuf_free(abuf_t *ab) { free(ab->b); }
+void line_free(line_t *lp) { 
+  free((char*) lp); 
+}
 
 void editor_delete_rows(editor_t *E, i32 start, i32 end) {
   E->dirty = true;
@@ -86,14 +110,14 @@ usize editor_rowlen(editor_t *E, i32 y) {
   return E->rows[y].size > 0 ? strlen(E->rows[y].chars) : 0;
 }
 
-char *editor_rows_to_string(row_t *rows, unsigned int size) {
-  abuf_t ab = abuf_init(256);
+line_t *editor_rows_to_string(row_t *rows, unsigned int size) {
+  line_t* ab = lalloc(0);
   for (int i = 0; i < size; i++) {
-    abuf_append(&ab, rows[i].chars);
-    abuf_append(&ab, "\n");
+    ab = line_append(ab, rows[i].chars);
+    ab = line_append(ab, "\n");
   }
 
-  return ab.b;
+  return ab;
 }
 
 void editor_insert_row_at(editor_t *E, usize n) {
@@ -211,29 +235,29 @@ void editor_delete_backward(editor_t *E, i32 x, i32 y) {
   E->dirty = true;
 }
 
-char *editor_text_between(editor_t *E, vec2_t start, vec2_t end) {
-  abuf_t ab = abuf_init(16);
+line_t *editor_text_between(editor_t *E, vec2_t start, vec2_t end) {
+  line_t* lp = lalloc(0);
 
   for (i32 i = start.y; i <= end.y; i++) {
     i32 xs = i == start.y ? start.x : 0;
     i32 xe = i == end.y ? end.x : editor_rowlen(E, i);
-    abuf_append_s(&ab, E->rows[i].chars + xs, xe - xs);
+    lp = line_append_s(lp, E->rows[i].chars + xs, xe - xs);
     if (i + 1 <= end.y) {
-      abuf_append(&ab, "\n");
+      lp = line_append(lp, "\n");
     }
   }
-  return ab.b;
+  return lp;
 }
 
-char *editor_cut_between(editor_t *E, vec2_t start, vec2_t end) {
-  abuf_t ab = abuf_init(16);
+line_t *editor_cut_between(editor_t *E, vec2_t start, vec2_t end) {
+  line_t *lp = lalloc(0);
 
   for (i32 i = start.y; i <= end.y; i++) {
     i32 xs = i == start.y ? start.x : 0;
     i32 xe = i == end.y ? end.x : editor_rowlen(E, i);
-    abuf_append_s(&ab, E->rows[i].chars + xs, xe - xs);
+    lp = line_append_s(lp, E->rows[i].chars + xs, xe - xs);
     if (i + 1 <= end.y) {
-      abuf_append(&ab, "\n");
+      lp = line_append(lp, "\n");
     }
     editor_delete_between(E, i, xs, xe);
   }
@@ -245,7 +269,7 @@ char *editor_cut_between(editor_t *E, vec2_t start, vec2_t end) {
   if (ldiff > 0)
     editor_move_line_up(E, end.y - ldiff + 1);
 
-  return ab.b;
+  return lp;
 }
 
 void editor_insert_text(editor_t* E, vec2_t pos, const char* strdata, usize dlen) {

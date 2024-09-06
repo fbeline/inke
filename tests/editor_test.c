@@ -107,11 +107,11 @@ int test_delete_char() {
 int test_text_between() {
   editor_t E = factory();
 
-  char* str = editor_text_between(&E, (vec2_t){4, 0}, (vec2_t){7, 0});
-  ASSERT_STRING_EQUAL("bar", str);
+  line_t* lp = editor_text_between(&E, (vec2_t){4, 0}, (vec2_t){7, 0});
+  ASSERT_STRING_EQUAL("bar", lp->text);
 
-  char* str2 = editor_text_between(&E, (vec2_t){4, 1}, (vec2_t){8, 1});
-  ASSERT_STRING_EQUAL("quux", str2);
+  lp = editor_text_between(&E, (vec2_t){4, 1}, (vec2_t){8, 1});
+  ASSERT_STRING_EQUAL("quux", lp->text);
 
   return 0;
 }
@@ -119,12 +119,12 @@ int test_text_between() {
 int test_cut_between() {
   editor_t E = factory();
 
-  char* str = editor_cut_between(&E, (vec2_t){4, 0}, (vec2_t){7, 0});
-  ASSERT_STRING_EQUAL("bar", str);
+  line_t *lp = editor_cut_between(&E, (vec2_t){4, 0}, (vec2_t){7, 0});
+  ASSERT_STRING_EQUAL("bar", lp->text);
   ASSERT_STRING_EQUAL("foo  baz", E.rows[0].chars);
 
-  char* str2 = editor_cut_between(&E, (vec2_t){4, 1}, (vec2_t){8, 1});
-  ASSERT_STRING_EQUAL("quux", str2);
+  lp = editor_cut_between(&E, (vec2_t){4, 1}, (vec2_t){8, 1});
+  ASSERT_STRING_EQUAL("quux", lp->text);
   ASSERT_STRING_EQUAL("qux  corge", E.rows[1].chars);
 
   return 0;
@@ -198,8 +198,12 @@ int test_editor_insert_text() {
 int test_rows_to_string() {
   editor_t E = factory();
 
-  char* str = editor_rows_to_string(E.rows, E.row_size);
-  ASSERT_STRING_EQUAL("foo bar baz\nqux quux corge\n", str);
+  printf("== TESTING ROWS TO STRING\n");
+
+  line_t* lp = editor_rows_to_string(E.rows, E.row_size);
+  ASSERT_STRING_EQUAL("foo bar baz\nqux quux corge\n", lp->text);
+
+  line_free(lp);
 
   return 0;
 }

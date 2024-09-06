@@ -5,9 +5,16 @@
 #define VERSION "0.0.1"
 
 typedef struct row_s {
-  usize size;
+  int capacity;
+  int size; 
   char* chars;
 } row_t;
+
+typedef struct line {
+  usize capacity;
+  usize size;
+  char text[];
+} line_t;
 
 typedef struct editor_s {
   unsigned char mode;
@@ -18,6 +25,12 @@ typedef struct editor_s {
   bool running;
   row_t* rows;
 } editor_t;
+
+line_t* line_append_s(line_t *lp, const char *str, usize len);
+
+line_t* line_append(line_t *lp, const char *str);
+
+void line_free(line_t *lp);
 
 void editor_move_line_up(editor_t* E, i32 y);
 
@@ -31,9 +44,9 @@ void editor_delete_char_at(editor_t* E, vec2_t pos);
 
 void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch);
 
-char* editor_text_between(editor_t* E, vec2_t start, vec2_t end);
+line_t* editor_text_between(editor_t* E, vec2_t start, vec2_t end);
 
-char* editor_cut_between(editor_t* E, vec2_t start, vec2_t end);
+line_t* editor_cut_between(editor_t* E, vec2_t start, vec2_t end);
 
 char editor_char_at(editor_t* E, i32 x, i32 y);
 
@@ -45,7 +58,7 @@ void editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata);
 
 void editor_insert_text(editor_t* E, vec2_t pos, const char* str, usize dlen);
 
-char* editor_rows_to_string(row_t* rows, unsigned int size);
+line_t* editor_rows_to_string(row_t* rows, unsigned int size);
 
 editor_t editor_init(const char* filename);
 
