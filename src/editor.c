@@ -76,20 +76,29 @@ void line_free(line_t *lp) {
   free((char*) lp);
 }
 
-void editor_delete_lines(line_t* lp, i32 size) {
-  if (lp->pl == NULL && lp->nl == NULL) {
-    lp->text[0] = '\0';
-    lp->size = 0;
-    return;
-  }
-
+void editor_delete_lines(editor_t *E, line_t* lp, i32 size) {
   line_t *lp1, *lp2 = lp;
   i32 i = 0;
   do {
     lp1 = lp2;
     lp2 = lp1->nl;
+
+    // last line
+    if (lp1->pl == NULL && lp1->nl == NULL) {
+      lp1->text[0] = '\0';
+      lp1->size = 0;
+      E->lines = lp1;
+      E->row_size = 1;
+      return;
+    }
+
     line_free(lp1);
-  } while(lp2 != NULL && i++ < size);
+  } while(lp2 != NULL && ++i < size);
+
+  if (lp == E->lines)
+    E->lines = lp2;
+
+  E->row_size -= size;
 }
 
 line_t *editor_rows_to_string(line_t *head, unsigned int size) {
@@ -137,20 +146,25 @@ char editor_char_at(line_t *lp, i32 x) {
   return lp->text[x];
 }
 
-void editor_move_line_up(editor_t *E, line_t *lp) {
-  if (lp == NULL || lp->pl == NULL) return;
+line_t *editor_move_line_up(editor_t *E, line_t *lp) {
+  if (lp == NULL || lp->pl == NULL) return NULL;
 
-  line_append(lp->pl, lp->text);
+  line_t *prev = line_append(lp->pl, lp->text);
   line_free(lp);
 
   E->dirty = true;
   E->row_size--;
+
+  return prev;
 }
 
 void editor_delete_char_at(line_t *lp, i32 x) {
-  memmove(lp->text + x - 1,
-          lp->text + x,
+  if (x < 0 || x >= lp->size || lp == NULL) return;
+
+  memmove(&lp->text[x],
+          &lp->text[x+1],
           lp->size - x + 1);
+
   lp->size--;
 }
 
@@ -182,17 +196,17 @@ void editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
 }
 
 void editor_break_line(editor_t *E, line_t *lp, i32 x) {
-  line_t *new_line = lalloc(lp->size - x);
+  line_t *new_line = lalloc(0);
   line_t *next_line = lp->nl;
+
+  new_line = line_append(new_line, lp->text + x);
+  lp->text[x] = '\0';
+  lp->size = x;
 
   if (next_line != NULL) next_line->pl = new_line;
   lp->nl = new_line;
   new_line->pl = lp;
   new_line->nl = next_line;
-
-  line_append(new_line, lp->text + x);
-  lp->text[x] = '\0';
-  lp->size -= x;
 
   E->dirty = true;
   E->row_size++;

@@ -53,55 +53,64 @@ int test_move_line_up() {
   ASSERT_EQUAL(2, E.row_size);
 
   // moveup second line
-  editor_move_line_up(&E, E.lines->nl);
+  E.lines = editor_move_line_up(&E, E.lines->nl);
   ASSERT_STRING_EQUAL("foo bar bazqux quux corge", E.lines->text);
   ASSERT_EQUAL(1, E.row_size);
 
   return 0;
 }
 
-/* int test_delete_rows() { */
-/*   editor_t E = factory(); */
+int test_delete_rows() {
+  editor_t E = factory();
 
-/*   editor_delete_rows(&E, 0, 0); */
-/*   ASSERT_EQUAL(E.row_size, 1); */
-/*   ASSERT_STRING_EQUAL("qux quux corge", E.rows[0].chars); */
+  // delete first line
+  editor_delete_lines(&E, E.lines, 1);
+  ASSERT_EQUAL(E.row_size, 1);
+  ASSERT_STRING_EQUAL("qux quux corge", E.lines->text);
 
-/*   editor_delete_rows(&E, 0, 0); */
-/*   ASSERT_EQUAL(E.row_size, 1); // min row size is 1 */
-/*   ASSERT_STRING_EQUAL("", E.rows[0].chars); */
+  // delete seconds and last line
+  editor_delete_lines(&E, E.lines, 1);
+  ASSERT_EQUAL(E.row_size, 1); // min row size is 1
+  ASSERT_STRING_EQUAL("", E.lines->text);
 
-/*   return 0; */
-/* } */
+  // delete all lines at once
+  editor_t E2 = factory();
+  editor_delete_lines(&E, E.lines, 2);
+  ASSERT_EQUAL(E.row_size, 1); // min row size is 1
+  ASSERT_STRING_EQUAL("", E.lines->text);
 
-/* int test_break_line() { */
-/*   editor_t E = factory(); */
+  return 0;
+}
 
-/*   editor_break_line(&E, 3, 0); */
-/*   ASSERT_EQUAL(E.row_size, 3); */
-/*   ASSERT_STRING_EQUAL("foo", E.rows[0].chars); */
-/*   ASSERT_STRING_EQUAL(" bar baz", E.rows[1].chars); */
+int test_break_line() {
+  editor_t E = factory();
 
-/*   return 0; */
-/* } */
+  editor_break_line(&E, E.lines, 3);
+  ASSERT_EQUAL(E.row_size, 3);
+  ASSERT_STRING_EQUAL("foo", E.lines->text);
+  ASSERT_EQUAL(3, (i32)E.lines->size);
+  ASSERT_STRING_EQUAL(" bar baz", E.lines->nl->text);
 
-/* int test_delete_char() { */
-/*   editor_t E = factory(); */
+  return 0;
+}
 
-/*   // first char */
-/*   editor_delete_char_at(&E, (vec2_t){0, 0}); */
-/*   ASSERT_STRING_EQUAL("oo bar baz", E.rows[0].chars); */
+int test_delete_char() {
+  editor_t E = factory();
 
-/*   // middle line */
-/*   editor_delete_char_at(&E, (vec2_t){4, 0}); */
-/*   ASSERT_STRING_EQUAL("oo ar baz", E.rows[0].chars); */
+  // first char
+  editor_delete_char_at(E.lines, 0);
+  ASSERT_STRING_EQUAL("oo bar baz", E.lines->text);
 
-/*   // last char */
-/*   editor_delete_char_at(&E, (vec2_t){strlen(E.rows[0].chars), 0}); */
-/*   ASSERT_STRING_EQUAL("oo ar ba", E.rows[0].chars); */
+  // middle line
+  editor_delete_char_at(E.lines, 3);
+  ASSERT_STRING_EQUAL("oo ar baz", E.lines->text);
 
-/*   return 0; */
-/* } */
+  // last char
+  editor_delete_char_at(E.lines, strlen(E.lines->text)-1);
+  ASSERT_STRING_EQUAL("oo ar ba", E.lines->text);
+
+  return 0;
+}
 
 /* int test_text_between() { */
 /*   editor_t E = factory(); */
@@ -212,9 +221,9 @@ int main() {
 
   result += test_insert_char_at();
   result += test_move_line_up();
-  /* result += test_delete_rows(); */
-  /* result += test_break_line(); */
-  /* result += test_delete_char(); */
+  result += test_delete_rows();
+  result += test_break_line();
+  result += test_delete_char();
   /* result += test_text_between(); */
   /* result += test_cut_between(); */
   /* result += test_char_at(); */

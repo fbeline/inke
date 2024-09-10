@@ -31,13 +31,13 @@ line_t* line_append(line_t *lp, const char *str);
 
 void line_free(line_t *lp);
 
-void editor_move_line_up(editor_t *E, line_t *lp);
+line_t *editor_move_line_up(editor_t *E, line_t *lp);
 
 void editor_delete_forward(line_t *lp, i32 x);
 
 void editor_delete_backward(line_t *lp, i32 x);
 
-void editor_delete_lines(line_t* lp, i32 size);
+void editor_delete_lines(editor_t *E, line_t* lp, i32 size);
 
 void editor_break_line(editor_t *E, line_t *lp, i32 x);
 

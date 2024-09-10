@@ -328,7 +328,7 @@ void cursor_delete_row(cursor_t* C) {
   char* strdata = strdup(C->clp->text);
   undo_push(LINEDELETE, (vec2_t){0, y}, *C, strdata);
 
-  editor_delete_lines(C->clp, 1);
+  editor_delete_lines(C->editor, C->clp, 1);
 
   if (ll) {
     cursor_up(C);
