@@ -138,83 +138,68 @@ int test_delete_char() {
 /*   return 0; */
 /* } */
 
-/* int test_char_at() { */
-/*   editor_t E = factory(); */
+int test_char_at() {
+  editor_t E = factory();
 
-/*   char ch1 = editor_char_at(&E, 4, 0); */
-/*   ASSERT_EQUAL('b', ch1); */
-/*   char ch2 = editor_char_at(&E, strlen(E.rows[1].chars)-1, 1); */
-/*   ASSERT_EQUAL('e', ch2); */
+  char ch1 = editor_char_at(E.lines, 4);
+  ASSERT_EQUAL('b', ch1);
+  char ch2 = editor_char_at(E.lines->nl, E.lines->nl->size-1);
+  ASSERT_EQUAL('e', ch2);
 
-/*   return 0; */
-/* } */
+  return 0;
+}
 
-/* int test_row_len() { */
-/*   editor_t E = factory(); */
+int test_insert_row_at() {
+  editor_t E = factory();
 
-/*   ASSERT_EQUAL(11, (i32)editor_rowlen(&E, 0)); */
+  editor_insert_row_at(&E, 0);
+  editor_insert_row_at(&E, 3);
+  ASSERT_EQUAL(4, E.row_size);
+  ASSERT_STRING_EQUAL("", E.lines->text);
+  ASSERT_STRING_EQUAL("foo bar baz", E.lines->nl->text);
+  ASSERT_STRING_EQUAL("qux quux corge", E.lines->nl->nl->text);
+  ASSERT_STRING_EQUAL("", E.lines->nl->nl->nl->text);
 
-/*   return 0; */
-/* } */
+  return 0;
+}
 
-/* int test_insert_row_at() { */
-/*   editor_t E = factory(); */
+int test_insert_row_with_data_at() {
+  editor_t E = factory();
 
-/*   // insert row at bof */
-/*   editor_insert_row_at(&E, 0); */
-/*   ASSERT_EQUAL(3, E.row_size); */
-/*   ASSERT_STRING_EQUAL("", E.rows[0].chars); */
+  editor_insert_row_with_data_at(&E, 0, "first row");
+  ASSERT_STRING_EQUAL("first row", E.lines->text);
 
-/*   // insert row at eof */
-/*   editor_insert_row_at(&E, E.row_size); */
-/*   ASSERT_EQUAL(4, E.row_size); */
-/*   ASSERT_STRING_EQUAL("", E.rows[E.row_size-1].chars); */
+  editor_insert_row_with_data_at(&E, 2, "middle row");
+  ASSERT_STRING_EQUAL("middle row", E.lines->nl->nl->text);
 
-/*   return 0; */
-/* } */
+  return 0;
+}
 
-/* int test_insert_row_with_data_at() { */
-/*   editor_t E = factory(); */
+int test_editor_insert_text() {
+  editor_t E = factory();
 
-/*   editor_insert_row_with_data_at(&E, 0, "first row"); */
-/*   ASSERT_STRING_EQUAL("first row", E.rows[0].chars); */
+  E.lines = editor_insert_text(E.lines, 0, "first ");
+  ASSERT_STRING_EQUAL("first foo bar baz", E.lines->text);
 
-/*   editor_insert_row_with_data_at(&E, 1, "middle row"); */
-/*   ASSERT_STRING_EQUAL("middle row", E.rows[1].chars); */
+  E.lines = editor_insert_text(E.lines, 6, "middle ");
+  ASSERT_STRING_EQUAL("first middle foo bar baz", E.lines->text);
 
-/*   editor_insert_row_with_data_at(&E, E.row_size, "last row"); */
-/*   ASSERT_STRING_EQUAL("last row", E.rows[E.row_size-1].chars); */
+  E.lines = editor_insert_text(E.lines, E.lines->size, " end");
+  ASSERT_STRING_EQUAL("first middle foo bar baz end", E.lines->text);
 
-/*   return 0; */
-/* } */
+  return 0;
+}
 
-/* int test_editor_insert_text() { */
-/*   editor_t E = factory(); */
+int test_rows_to_string() {
+  editor_t E = factory();
 
-/*   editor_insert_text(&E, (vec2_t){0, 0}, "first ", 6); */
-/*   ASSERT_STRING_EQUAL("first foo bar baz", E.rows[0].chars); */
+  line_t* lp = editor_rows_to_string(E.lines, E.row_size);
+  ASSERT_STRING_EQUAL("foo bar baz\nqux quux corge\n", lp->text);
 
-/*   editor_insert_text(&E, (vec2_t){6, 0}, "middle ", 7); */
-/*   ASSERT_STRING_EQUAL("first middle foo bar baz", E.rows[0].chars); */
+  line_free(lp);
 
-/*   editor_insert_text(&E, (vec2_t){strlen(E.rows[0].chars), 0}, " end", 4); */
-/*   ASSERT_STRING_EQUAL("first middle foo bar baz end", E.rows[0].chars); */
-
-/*   return 0; */
-/* } */
-
-/* int test_rows_to_string() { */
-/*   editor_t E = factory(); */
-
-/*   printf("== TESTING ROWS TO STRING\n"); */
-
-/*   line_t* lp = editor_rows_to_string(E.rows, E.row_size); */
-/*   ASSERT_STRING_EQUAL("foo bar baz\nqux quux corge\n", lp->text); */
-
-/*   line_free(lp); */
-
-/*   return 0; */
-/* } */
+  return 0;
+}
 
 int main() {
   int result = 0;
@@ -226,12 +211,11 @@ int main() {
   result += test_delete_char();
   /* result += test_text_between(); */
   /* result += test_cut_between(); */
-  /* result += test_char_at(); */
-  /* result += test_row_len(); */
-  /* result += test_insert_row_at(); */
-  /* result += test_insert_row_with_data_at(); */
-  /* result += test_editor_insert_text(); */
-  /* result += test_rows_to_string(); */
+  result += test_char_at();
+  result += test_insert_row_at();
+  result += test_insert_row_with_data_at();
+  result += test_editor_insert_text();
+  result += test_rows_to_string();
 
   return result;
 }

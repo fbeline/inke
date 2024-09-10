@@ -43,6 +43,8 @@ line_t *lrealloc(line_t *lp, usize new_size) {
 
   nlp->capacity = new_capacity;
   nlp->size = new_size;
+  if (nlp->nl != NULL) nlp->nl->pl = nlp;
+  if (nlp->pl != NULL) nlp->pl->nl = nlp;
 
   return nlp;
 }
@@ -114,28 +116,34 @@ line_t *editor_rows_to_string(line_t *head, unsigned int size) {
 }
 
 line_t* editor_insert_row_at(editor_t *E, usize y) {
-  line_t *pl = E->lines;
-  line_t *nl = NULL;
+  line_t *pl = NULL;
+  line_t *nl = E->lines;
 
-  for (i32 i = 0; i <= y; i++) {
-    if (pl->nl == NULL) break;
-    pl = pl->nl;
-    nl = pl->nl;
+  int i = 0;
+  while(++i <= y && nl != NULL) {
+    pl = nl;
+    nl = nl->nl;
   }
 
   line_t *lp = lalloc(0);
   lp->pl = pl;
   lp->nl = nl;
 
-  pl->nl = lp;
+  if (pl != NULL) pl->nl = lp;
   if (nl != NULL) nl->pl = lp;
+  if (y == 0) E->lines = lp;
 
-  return pl;
+  E->row_size++;
+  E->dirty = true;
+
+  return lp;
 }
 
 line_t* editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata) {
   line_t* lp = editor_insert_row_at(E, y);
-  line_append(lp, strdata);
+  lp = line_append(lp, strdata);
+  if (y == 0) E->lines = lp;
+
   return lp;
 }
 
@@ -261,16 +269,20 @@ line_t *editor_cut_between(editor_t *E, vec2_t start, vec2_t end) {
   return (line_t*){0};
 }
 
-void editor_insert_text(line_t* lp, i32 x, const char* strdata, usize dlen) {
-  if (strdata == NULL || dlen == 0 || lp == NULL) return;
+line_t *editor_insert_text(line_t* lp, i32 x, const char* strdata) {
+  if (x < 0 || strdata == NULL || lp == NULL) return lp;
+  x = MIN(x, (i32)lp->size);
 
-  char* aux = strdup(lp->text + lp->size);
-  lp->text[lp->size] = '\0';
+  char* aux = strdup(lp->text + x);
+  lp->text[x] = '\0';
+  lp->size = x;
 
-  line_append(lp, strdata);
-  line_append(lp, aux);
+  lp = line_append(lp, strdata);
+  lp = line_append(lp, aux);
 
   free(aux);
+
+  return lp;
 }
 
 static void editor_new_file(const char *filename, editor_t *E) {
