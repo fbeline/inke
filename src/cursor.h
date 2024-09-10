@@ -17,6 +17,7 @@ typedef struct cursor_s {
   i32 coloff, rowoff;
   u16 max_col, max_row;
   editor_t* editor;
+  line_t* clp;
 } cursor_t;
 
 cursor_t cursor_init(editor_t* E);

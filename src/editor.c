@@ -68,6 +68,11 @@ line_t* line_append(line_t *lp, const char *str) {
 }
 
 void line_free(line_t *lp) {
+  if (lp == NULL) return;
+
+  if (lp->pl != NULL) lp->pl->nl = lp->nl;
+  if (lp->nl != NULL) lp->nl->pl = lp->pl;
+
   free((char*) lp);
 }
 
@@ -125,136 +130,113 @@ line_t* editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata) {
   return lp;
 }
 
-// TODO: REFACTOR
-char editor_char_at(editor_t *E, i32 x, i32 y) {
-  if (y > E->row_size || x < 0 || x > editor_rowlen(E, y))
+char editor_char_at(line_t *lp, i32 x) {
+  if (lp == NULL || x > lp->size)
     return '\0';
 
-  return E->lines[y].text[x];
+  return lp->text[x];
 }
 
-void editor_move_line_up(editor_t *E, i32 y) {
-  if (y == 0)
-    return;
-  usize crow_len = editor_rowlen(E, y);
-  usize prow_len = editor_rowlen(E, y - 1);
+void editor_move_line_up(line_t *lp) {
+  if (lp == NULL || lp->pl == NULL) return;
 
-  line_t* prow = &E->lines[y-1];
-  line_t* crow = &E->lines[y];
-
-  if (crow_len + prow_len >= prow->size) {
-    prow->size += crow_len;
-    prow->text = nrealloc(prow->text, prow->size);
-  }
-
-  strcat(prow->text, crow->text);
-
-  editor_delete_rows(E, y, y);
+  line_append(lp->pl, lp->text);
+  line_free(lp);
 }
 
-
-void editor_delete_char_at(editor_t* E, vec2_t pos) {
-  usize len = editor_rowlen(E, pos.y);
-  memmove(E->lines[pos.y].text + pos.x - 1,
-          E->lines[pos.y].text + pos.x,
-          len - pos.x + 1);
+void editor_delete_char_at(line_t *lp, i32 x) {
+  memmove(lp->text + x - 1,
+          lp->text + x,
+          lp->size - x + 1);
+  lp->size--;
 }
 
 void editor_delete_between(editor_t* E, i32 y, i32 xs, i32 xe) {
-  usize olen = editor_rowlen(E, y);
-  if (xs == 0 && xe >= olen - 1) {
-    E->lines[y].text[0] = '\0';
-    return;
-  }
+  /* usize olen = editor_rowlen(E, y); */
+  /* if (xs == 0 && xe >= olen - 1) { */
+  /*   E->lines[y].text[0] = '\0'; */
+  /*   return; */
+  /* } */
 
-  usize dsize = olen - xe;
-  memmove(E->lines[y].text + xs, E->lines[y].text + xe, dsize);
-  E->lines[y].text[xs + dsize] = '\0';
+  /* usize dsize = olen - xe; */
+  /* memmove(E->lines[y].text + xs, E->lines[y].text + xe, dsize); */
+  /* E->lines[y].text[xs + dsize] = '\0'; */
 }
 
-void editor_insert_char_at(editor_t *E, i32 x, i32 y, char ch) {
-  line_t* row = &E->lines[y];
-  u32 len = editor_rowlen(E, y);
-  if (x < 0 || x > len)
+void editor_insert_char_at(line_t *lp, i32 x, char ch) {
+  if (x < 0 || x > lp->size)
     die("Invalid position x=%d", x);
 
-  if (len + 1 >= row->size) {
-    row->size += 8;
-    row->text = nrealloc(row->text, row->size);
-  }
-
-  usize tmpsize = len - x;
-  char *tmp = malloc(tmpsize);
-  if (!tmp) return;
-
-  memcpy(tmp, row->text + x, tmpsize);
-  memcpy(row->text + x + 1, tmp, tmpsize);
-  row->text[x] = ch;
-  row->text[len + 1] = '\0';
+  char *tmp = strdup(lp->text + x);
+  lp->size = lp->size + 1 - x;
+  lp->text[x + 1] = ch;
+  lp->text[x + 2] = '\0'; // out of index?
+  line_append(lp, tmp);
 
   free(tmp);
 }
 
-void editor_break_line(editor_t *E, i32 x, i32 y) {
-  editor_insert_row_at(E, y + 1);
+void editor_break_line(line_t *lp, i32 x) {
+  line_t *new_line = lalloc(lp->size - x);
+  line_t *next_line = lp->nl;
 
-  line_t* crow = &E->lines[y];
-  line_t* nrow = &E->lines[y + 1];
+  if (next_line != NULL) next_line->pl = new_line;
+  lp->nl = new_line;
+  new_line->pl = lp;
+  new_line->nl = next_line;
 
-  nrow->size = editor_rowlen(E, y) - x + 1;
-  nrow->text = reallocstrcpy(nrow->text, crow->text + x, nrow->size);
-
-  crow->text[x] = '\0';
-  E->dirty = true;
+  line_append(new_line, lp->text + x);
+  lp->text[x] = '\0';
+  lp->size -= x;
 }
 
-void editor_delete_forward(editor_t *E, i32 x, i32 y) {
-  E->lines[y].text[x] = '\0';
-  E->dirty = true;
+void editor_delete_forward(line_t *lp, i32 x) {
+  lp->text[x] = '\0';
 }
 
-void editor_delete_backward(editor_t *E, i32 x, i32 y) {
-  usize len = editor_rowlen(E, y) - x;
-  memmove(E->lines[y].text, E->lines[y].text + x, len);
-  E->lines[y].text[len] = '\0';
-  E->dirty = true;
+void editor_delete_backward(line_t *lp, i32 x) {
+  lp->size -= x;
+  memmove(lp->text, lp->text + x, lp->size);
+  lp->text[lp->size] = '\0';
 }
 
 line_t *editor_text_between(editor_t *E, vec2_t start, vec2_t end) {
-  line_t* lp = lalloc(0);
+  /* line_t* lp = lalloc(0); */
 
-  for (i32 i = start.y; i <= end.y; i++) {
-    i32 xs = i == start.y ? start.x : 0;
-    i32 xe = i == end.y ? end.x : editor_rowlen(E, i);
-    lp = line_append_s(lp, E->lines[i].text + xs, xe - xs);
-    if (i + 1 <= end.y) {
-      lp = line_append(lp, "\n");
-    }
-  }
-  return lp;
+  /* for (i32 i = start.y; i <= end.y; i++) { */
+  /*   i32 xs = i == start.y ? start.x : 0; */
+  /*   i32 xe = i == end.y ? end.x : editor_rowlen(E, i); */
+  /*   lp = line_append_s(lp, E->lines[i].text + xs, xe - xs); */
+  /*   if (i + 1 <= end.y) { */
+  /*     lp = line_append(lp, "\n"); */
+  /*   } */
+  /* } */
+  /* return lp; */
+  return (line_t*){0};
 }
 
 line_t *editor_cut_between(editor_t *E, vec2_t start, vec2_t end) {
-  line_t *lp = lalloc(0);
+  /* line_t *lp = lalloc(0); */
 
-  for (i32 i = start.y; i <= end.y; i++) {
-    i32 xs = i == start.y ? start.x : 0;
-    i32 xe = i == end.y ? end.x : editor_rowlen(E, i);
-    lp = line_append_s(lp, E->lines[i].text + xs, xe - xs);
-    if (i + 1 <= end.y) {
-      lp = line_append(lp, "\n");
-    }
-    editor_delete_between(E, i, xs, xe);
-  }
+  /* for (i32 i = start.y; i <= end.y; i++) { */
+  /*   i32 xs = i == start.y ? start.x : 0; */
+  /*   i32 xe = i == end.y ? end.x : editor_rowlen(E, i); */
+  /*   lp = line_append_s(lp, E->lines[i].text + xs, xe - xs); */
+  /*   if (i + 1 <= end.y) { */
+  /*     lp = line_append(lp, "\n"); */
+  /*   } */
+  /*   editor_delete_between(E, i, xs, xe); */
+  /* } */
 
-  i32 ldiff = end.y - start.y;
-  if (ldiff >= 2)
-    editor_delete_rows(E, start.y + 1, end.y - 1);
+  /* i32 ldiff = end.y - start.y; */
+  /* if (ldiff >= 2) */
+  /*   editor_delete_rows(E, start.y + 1, end.y - 1); */
 
-  if (ldiff > 0)
-    editor_move_line_up(E, end.y - ldiff + 1);
+  /* if (ldiff > 0) */
+  /*   editor_move_line_up(E, end.y - ldiff + 1); */
 
-  return lp;
+  /* return lp; */
+  return (line_t*){0};
 }
 
 void editor_insert_text(line_t* lp, i32 x, const char* strdata, usize dlen) {
