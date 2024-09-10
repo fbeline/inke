@@ -178,7 +178,7 @@ void cursor_break_line(cursor_t* C) {
 
   undo_push(LINEBREAK, (vec2_t){0, pos.y+1}, *C, NULL);
 
-  editor_break_line(C->clp, pos.x);
+  editor_break_line(C->editor, C->clp, pos.x);
   C->editor->row_size++;
   cursor_down(C);
   cursor_bol(C);
@@ -220,7 +220,7 @@ void cursor_remove_char(cursor_t* C) {
   if (pos.x == 0 && pos.y > 0) {
     usize prlen = C->clp->pl->size;
     undo_push(LINEUP, (vec2_t){prlen, pos.y-1}, *C, NULL);
-    editor_move_line_up(C->clp);
+    editor_move_line_up(C->editor, C->clp);
     cursor_up(C);
     C->x = MIN(C->max_col, prlen);
     C->coloff = MAX(0, (i32)prlen - C->x);
@@ -243,7 +243,7 @@ void cursor_remove_char(cursor_t* C) {
 
 void cursor_insert_char(cursor_t* C, int ch) {
   vec2_t pos = cursor_position(C);
-  editor_insert_char_at(C->clp, pos.x, ch);
+  editor_insert_char_at(C->editor, C->clp, pos.x, ch);
 
   undo_push(ADD, (vec2_t){pos.x + 1, pos.y}, *C, NULL);
 

@@ -30,15 +30,15 @@ int test_insert_char_at() {
   editor_t E = factory();
 
   // bol
-  editor_insert_char_at(E.lines, 0, 'a');
+  editor_insert_char_at(&E, E.lines, 0, 'a');
   ASSERT_STRING_EQUAL("afoo bar baz", E.lines->text);
 
   // middle
-  editor_insert_char_at(E.lines, 5, 'b');
+  editor_insert_char_at(&E, E.lines, 5, 'b');
   ASSERT_STRING_EQUAL("afoo bbar baz", E.lines->text);
 
   // eol
-  editor_insert_char_at(E.lines, 13, 'y');
+  editor_insert_char_at(&E, E.lines, 13, 'y');
   ASSERT_STRING_EQUAL("afoo bbar bazy", E.lines->text);
 
   return 0;
@@ -48,14 +48,14 @@ int test_move_line_up() {
   editor_t E = factory();
 
   // moveup first line
-  editor_move_line_up(E.lines);
+  editor_move_line_up(&E, E.lines);
   ASSERT_STRING_EQUAL("foo bar baz", E.lines->text);
-  /* ASSERT_EQUAL(2, E.row_size); */
+  ASSERT_EQUAL(2, E.row_size);
 
   // moveup second line
-  editor_move_line_up(E.lines->nl);
+  editor_move_line_up(&E, E.lines->nl);
   ASSERT_STRING_EQUAL("foo bar bazqux quux corge", E.lines->text);
-  /* ASSERT_EQUAL(1, E.row_size); */
+  ASSERT_EQUAL(1, E.row_size);
 
   return 0;
 }

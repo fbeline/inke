@@ -137,11 +137,14 @@ char editor_char_at(line_t *lp, i32 x) {
   return lp->text[x];
 }
 
-void editor_move_line_up(line_t *lp) {
+void editor_move_line_up(editor_t *E, line_t *lp) {
   if (lp == NULL || lp->pl == NULL) return;
 
   line_append(lp->pl, lp->text);
   line_free(lp);
+
+  E->dirty = true;
+  E->row_size--;
 }
 
 void editor_delete_char_at(line_t *lp, i32 x) {
@@ -163,7 +166,7 @@ void editor_delete_between(editor_t* E, i32 y, i32 xs, i32 xe) {
   /* E->lines[y].text[xs + dsize] = '\0'; */
 }
 
-void editor_insert_char_at(line_t *lp, i32 x, char ch) {
+void editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
   if (x < 0 || x > lp->size)
     die("Invalid position x=%d", x);
 
@@ -173,10 +176,12 @@ void editor_insert_char_at(line_t *lp, i32 x, char ch) {
   lp->text[x + 1] = '\0'; // out of index?
   line_append(lp, tmp);
 
+  E->dirty = true;
+
   free(tmp);
 }
 
-void editor_break_line(line_t *lp, i32 x) {
+void editor_break_line(editor_t *E, line_t *lp, i32 x) {
   line_t *new_line = lalloc(lp->size - x);
   line_t *next_line = lp->nl;
 
@@ -188,6 +193,9 @@ void editor_break_line(line_t *lp, i32 x) {
   line_append(new_line, lp->text + x);
   lp->text[x] = '\0';
   lp->size -= x;
+
+  E->dirty = true;
+  E->row_size++;
 }
 
 void editor_delete_forward(line_t *lp, i32 x) {
