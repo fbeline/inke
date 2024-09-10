@@ -168,9 +168,9 @@ void editor_insert_char_at(line_t *lp, i32 x, char ch) {
     die("Invalid position x=%d", x);
 
   char *tmp = strdup(lp->text + x);
-  lp->size = lp->size + 1 - x;
-  lp->text[x + 1] = ch;
-  lp->text[x + 2] = '\0'; // out of index?
+  lp->size = x + 1;
+  lp->text[x] = ch;
+  lp->text[x + 1] = '\0'; // out of index?
   line_append(lp, tmp);
 
   free(tmp);

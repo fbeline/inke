@@ -23,6 +23,8 @@ typedef struct editor_s {
   line_t* lines;
 } editor_t;
 
+line_t *lalloc(usize size);
+
 line_t* line_append_s(line_t *lp, const char *str, usize len);
 
 line_t* line_append(line_t *lp, const char *str);
