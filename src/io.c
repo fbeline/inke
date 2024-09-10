@@ -20,7 +20,7 @@ static int io_file_write(const char* filename, const char* buf) {
 }
 
 int io_write_buffer(editor_t* E) {
-  line_t* lp = editor_rows_to_string(E->rows, E->row_size);
+  line_t* lp = editor_rows_to_string(E->lines, E->row_size);
 
   if (io_file_write(E->filename, lp->text) != 0) return 1;
 

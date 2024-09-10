@@ -46,22 +46,22 @@ void undo(cursor_t* C) {
 
   switch (undo->type) {
     case ADD:
-      editor_delete_char_at(E, undo->pos);
+      /* editor_delete_char_at(E, undo->pos); */
       break;
     case BACKSPACE:
-      editor_insert_char_at(E, undo->pos.x, undo->pos.y, undo->strdata[0]);
+      /* editor_insert_char_at(E, undo->pos.x, undo->pos.y, undo->strdata[0]); */
       break;
     case LINEUP:
-      editor_break_line(E, undo->pos.x, undo->pos.y);
+      /* editor_break_line(E, undo->pos.x, undo->pos.y); */
       break;
     case LINEBREAK:
-      editor_move_line_up(E, undo->pos.y);
+      /* editor_move_line_up(E, undo->pos.y); */
       break;
     case LINEDELETE:
       editor_insert_row_with_data_at(E, undo->pos.y, undo->strdata);
       break;
     case DELETE_FORWARD:
-      editor_insert_text(E, undo->pos, undo->strdata, strlen(undo->strdata));
+      /* editor_insert_text(E, undo->pos, undo->strdata, strlen(undo->strdata)); */
       break;
     case CUT:
       cursor_set(C, &undo->cursor);

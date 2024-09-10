@@ -34,9 +34,9 @@ static void render_draw_region(cursor_t* C, render_t* R) {
   vec2_t pe = rp.y > cp.y ? rp : cp;
   pe.y = MIN((i32)R->nrow + 1, pe.y);
   for (i32 i = ps.y; i <= pe.y; i++) {
-    i32 xs = i == ps.y ? ps.x : 0;
-    i32 xe = i == pe.y ? pe.x : editor_rowlen(C->editor, i + C->rowoff);
-    render_highlight_line(R, i, xs, xe);
+    /* i32 xs = i == ps.y ? ps.x : 0; */
+    /* i32 xe = i == pe.y ? pe.x : editor_rowlen(C->editor, i + C->rowoff); */
+    /* render_highlight_line(R, i, xs, xe); */
   }
 }
 
@@ -160,20 +160,25 @@ static void render_draw_vertical_bar(render_t* R) {
 
 static void render_draw_lines(cursor_t* C, render_t* R) {
   editor_t* E = C->editor;
+  line_t *lp = E->lines;
+  i32 counter = 0;
+  do {
+    if (lp->nl == NULL) break;
+    lp = lp->nl;
+  } while(counter++ < C->rowoff);
+
   for (usize i = 0; i + C->rowoff < E->row_size; i++) {
     f32 y = R->font_line_spacing * i + R->margin_top;
 
     if (i > R->nrow) break;
 
     char vrow[512] = {0};
-    row_t row = E->rows[i + C->rowoff];
-    i64 row_len = strlen(row.chars);
-    i64 vrow_len = MIN(row_len - C->coloff, (i32)R->ncol);
+    i64 vrow_len = MIN((i32)lp->size - C->coloff, (i32)R->ncol);
 
     if (vrow_len <= 0)
       continue;
 
-    memcpy(vrow, row.chars + C->coloff, vrow_len);
+    memcpy(vrow, lp->text + C->coloff, vrow_len);
     DrawTextEx(R->font,
                vrow,
                (Vector2){R->margin_left, y},
