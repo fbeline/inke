@@ -10,11 +10,10 @@
 
 #define BLOCK_SIZE 16
 
-line_t *lalloc(usize size) {
+line_t *lalloc(usize capacity) {
   line_t *lp;
-  usize capacity;
 
-  capacity = (size + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1);
+  capacity = (capacity + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1);
   if (capacity == 0)
     capacity = BLOCK_SIZE;
 
@@ -22,7 +21,7 @@ line_t *lalloc(usize size) {
     die("LALLOC OUT OF MEMORY");
 
   lp->capacity = capacity;
-  lp->size = size;
+  lp->size = 0;
   lp->text[0] = '\0';
   lp->nl = NULL;
   lp->pl = NULL;
@@ -295,7 +294,7 @@ static void editor_new_file(const char *filename, editor_t *E) {
 int editor_open_file(const char *filename, editor_t *E) {
   FILE *fp;
   char buffer[1024];
-  usize rows_capacity = 0, rows_size = 0;
+  usize rows_size = 0;
 
   fp = fopen(filename, "r");
   if (fp == NULL) {
@@ -316,7 +315,7 @@ int editor_open_file(const char *filename, editor_t *E) {
     }
 
     // build line
-    line_t* line = lalloc(strlen(buffer));
+    line_t* line = lalloc(len);
     line = line_append(line, buffer);
 
     if (lp_tail == NULL) {
@@ -325,15 +324,14 @@ int editor_open_file(const char *filename, editor_t *E) {
       continue;
     }
 
-    lp_tail->nl = line;
     line->pl = lp_tail;
+    lp_tail->nl = line;
     lp_tail = line;
   }
 
   fclose(fp);
 
   E->row_size = rows_size;
-  E->row_capacity = rows_capacity;
   strcpy(E->filename, filename);
 
   if (rows_size == 0) editor_new_file(filename, E);

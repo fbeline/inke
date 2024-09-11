@@ -161,22 +161,20 @@ static void render_draw_vertical_bar(render_t* R) {
 static void render_draw_lines(cursor_t* C, render_t* R) {
   editor_t* E = C->editor;
   line_t *lp = E->lines;
+
   i32 counter = 0;
-  do {
+  while (lp != NULL && counter++ < C->rowoff){
     if (lp->nl == NULL) break;
     lp = lp->nl;
-  } while(counter++ < C->rowoff);
+  };
 
   for (usize i = 0; i + C->rowoff < E->row_size; i++) {
-    f32 y = R->font_line_spacing * i + R->margin_top;
+    if (lp == NULL || i > R->nrow) break;
 
-    if (i > R->nrow) break;
+    f32 y = R->font_line_spacing * i + R->margin_top;
 
     char vrow[512] = {0};
     i64 vrow_len = MIN((i32)lp->size - C->coloff, (i32)R->ncol);
-
-    if (vrow_len <= 0)
-      continue;
 
     memcpy(vrow, lp->text + C->coloff, vrow_len);
     DrawTextEx(R->font,
@@ -185,6 +183,8 @@ static void render_draw_lines(cursor_t* C, render_t* R) {
                R->font_size,
                0,
                DARKGRAY);
+
+    lp = lp->nl;
   }
 }
 
