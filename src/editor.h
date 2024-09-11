@@ -43,7 +43,7 @@ void editor_break_line(editor_t *E, line_t *lp, i32 x);
 
 void editor_delete_char_at(line_t *lp, i32 x);
 
-void editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch);
+line_t* editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch);
 
 line_t* editor_text_between(editor_t* E, vec2_t start, vec2_t end);
 

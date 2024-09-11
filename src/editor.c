@@ -187,19 +187,23 @@ void editor_delete_between(editor_t* E, i32 y, i32 xs, i32 xe) {
   /* E->lines[y].text[xs + dsize] = '\0'; */
 }
 
-void editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
+line_t *editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
   if (x < 0 || x > lp->size)
     die("Invalid position x=%d", x);
+
+  bool is_head = lp == E->lines;
 
   char *tmp = strdup(lp->text + x);
   lp->size = x + 1;
   lp->text[x] = ch;
   lp->text[x + 1] = '\0'; // out of index?
-  line_append(lp, tmp);
+  lp = line_append(lp, tmp);
+  if (is_head) E->lines = lp;
 
   E->dirty = true;
-
   free(tmp);
+
+  return lp;
 }
 
 void editor_break_line(editor_t *E, line_t *lp, i32 x) {
