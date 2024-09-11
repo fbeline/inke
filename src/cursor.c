@@ -231,7 +231,7 @@ void cursor_remove_char(cursor_t* C) {
   char strdata[2] = { editor_char_at(C->clp, undo_pos.x), '\0' };
   undo_push(BACKSPACE, undo_pos, *C, strdata);
 
-  editor_delete_char_at(C->clp, pos.x);
+  editor_delete_char_at(C->clp, pos.x-1);
 
   if (C->x == 0 && C->coloff > 0)
     C->coloff--;
@@ -314,9 +314,9 @@ void cursor_page_down(cursor_t* C) {
 
 void cursor_delete_forward(cursor_t* C) {
   vec2_t pos = cursor_position(C);
-  line_t *lp = editor_text_between(C->editor, pos, (vec2_t){C->clp->size, pos.y});
-  undo_push(DELETE_FORWARD, pos, *C, lp->text);
-  line_free(lp);
+  /* line_t *lp = editor_text_between(C->editor, pos, (vec2_t){C->clp->size, pos.y}); */
+  /* undo_push(DELETE_FORWARD, pos, *C, lp->text); */
+  /* line_free(lp); */
 
   editor_delete_forward(C->clp, pos.x);
 }
@@ -329,6 +329,7 @@ void cursor_delete_row(cursor_t* C) {
   undo_push(LINEDELETE, (vec2_t){0, y}, *C, strdata);
 
   editor_delete_lines(C->editor, C->clp, 1);
+  C->clp = C->editor->lines;
 
   if (ll) {
     cursor_up(C);
