@@ -29,58 +29,27 @@ vec2_t cursor_position(cursor_t* cursor) {
 void cursor_region_start(cursor_t* C) {
   if (!C->region.active) {
     C->region.active = true;
-    C->region.vpos = (vec2_t){C->x, C->y};
+    C->region.lp = C->clp;
+    C->region.offset = C->x;
     memcpy(C->region.cursor, C, sizeof(cursor_t));
   } else {
     cursor_clear_region(C);
   }
 }
 
-static void cursor_region_calc(cursor_t* C, vec2_t* start, vec2_t* end, cursor_t* result) {
-  if (start == NULL || end == NULL) die("Error on region calc\n");
-
-  vec2_t cp = cursor_position(C);
-  vec2_t rp = { C->region.cursor->x + C->region.cursor->coloff,
-                C->region.cursor->y + C->region.cursor->rowoff };
-
-  if (rp.y <= cp.y) {
-    *start = rp;
-    *end = cp;
-    if (result) *result = *C->region.cursor;
-  } else {
-    *start = cp;
-    *end = rp;
-    if (result) *result = *C;
-  }
-}
-
 char* cursor_region_text(cursor_t* C) {
   if (!C->region.active) return NULL;
 
-  vec2_t ps, pe;
-  cursor_region_calc(C, &ps, &pe, NULL);
-
-  line_t *lp = editor_text_between(C->editor, ps, pe);
-  char *result = strdup(lp->text);
-  line_free(lp);
-  return result;
+  return editor_text_between(C->region.lp, C->region.offset, C->region.size);
 }
 
 char* cursor_region_kill(cursor_t* C) {
   if (!C->region.active) return NULL;
 
-  vec2_t ps, pe;
-  cursor_t cursor = {0};
-  cursor_region_calc(C, &ps, &pe, &cursor);
+  /* undo_push(CUT, ps, cursor, strdata); */
+  /* cursor_set(C, &cursor); */
 
-  line_t *lp = editor_cut_between(C->editor, ps, pe);
-  char* strdata = strdup(lp->text);
-  line_free(lp);
-
-  undo_push(CUT, ps, cursor, strdata);
-  cursor_set(C, &cursor);
-
-  return strdata;
+  return editor_kill_between(C->editor, C->region.lp, C->region.offset, C->region.size);
 }
 
 void cursor_clear_region(cursor_t* C) {
@@ -120,7 +89,7 @@ void cursor_down(cursor_t* C) {
     C->y++;
   } else {
     C->rowoff++;
-    C->region.vpos.y--;
+    /* C->region.vpos.y--; */
   }
 
   if (pos.x > C->clp->size) {
@@ -135,7 +104,7 @@ void cursor_up(cursor_t* C) {
 
   if (C->y == 0 && C->rowoff > 0) {
     C->rowoff--;
-    C->region.vpos.y++;
+    /* C->region.vpos.y++; */
   } else {
     C->y--;
   }

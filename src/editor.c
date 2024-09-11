@@ -9,6 +9,7 @@
 #include "utils.h"
 
 #define BLOCK_SIZE 16
+#define TBUFFER_SIZE (1 << 16)  // 64 KB (2^16 bytes)
 
 line_t *lalloc(usize capacity) {
   line_t *lp;
@@ -229,43 +230,42 @@ void editor_delete_backward(line_t *lp, i32 x) {
   lp->text[lp->size] = '\0';
 }
 
-line_t *editor_text_between(editor_t *E, vec2_t start, vec2_t end) {
-  /* line_t* lp = lalloc(0); */
+char *editor_text_between(line_t *lp, i32 offset, i32 size) {
+  char result[TBUFFER_SIZE];
 
-  /* for (i32 i = start.y; i <= end.y; i++) { */
-  /*   i32 xs = i == start.y ? start.x : 0; */
-  /*   i32 xe = i == end.y ? end.x : editor_rowlen(E, i); */
-  /*   lp = line_append_s(lp, E->lines[i].text + xs, xe - xs); */
-  /*   if (i + 1 <= end.y) { */
-  /*     lp = line_append(lp, "\n"); */
-  /*   } */
-  /* } */
-  /* return lp; */
-  return (line_t*){0};
+  i32 i = 0, j = 0;
+  while(lp != NULL && size-- > 0) {
+    result[i++] = lp->text[(j++) + offset];
+    if (j + offset >= lp->size) {
+      j = 0;
+      offset = 0;
+      lp = lp->next;
+      result[i++] = '\n';
+    }
+  }
+  result[i] = '\0';
+
+  return strdup(result);
 }
 
-line_t *editor_cut_between(editor_t *E, vec2_t start, vec2_t end) {
-  /* line_t *lp = lalloc(0); */
+char *editor_kill_between(editor_t* E, line_t *lp, i32 offset, i32 size) {
+  char *result = editor_text_between(lp, offset, size);
 
-  /* for (i32 i = start.y; i <= end.y; i++) { */
-  /*   i32 xs = i == start.y ? start.x : 0; */
-  /*   i32 xe = i == end.y ? end.x : editor_rowlen(E, i); */
-  /*   lp = line_append_s(lp, E->lines[i].text + xs, xe - xs); */
-  /*   if (i + 1 <= end.y) { */
-  /*     lp = line_append(lp, "\n"); */
-  /*   } */
-  /*   editor_delete_between(E, i, xs, xe); */
-  /* } */
+  if (lp->size <= offset + size) {
+    while(lp != NULL && size > 0) {
+      size = size + offset - lp->size;
+      lp->text[offset] = '\0';
+      offset = 0;
+      lp = lp->next;
+    }
+    return result;
+  }
 
-  /* i32 ldiff = end.y - start.y; */
-  /* if (ldiff >= 2) */
-  /*   editor_delete_rows(E, start.y + 1, end.y - 1); */
+  for (int i = 0; i < size; i++) {
+    editor_delete_char_at(lp, offset);
+  }
 
-  /* if (ldiff > 0) */
-  /*   editor_move_line_up(E, end.y - ldiff + 1); */
-
-  /* return lp; */
-  return (line_t*){0};
+  return result;
 }
 
 line_t *editor_insert_text(line_t* lp, i32 x, const char* strdata) {

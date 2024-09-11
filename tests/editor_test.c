@@ -112,31 +112,31 @@ int test_delete_char() {
   return 0;
 }
 
-/* int test_text_between() { */
-/*   editor_t E = factory(); */
+int test_text_between() {
+  editor_t E = factory();
 
-/*   line_t* lp = editor_text_between(&E, (vec2_t){4, 0}, (vec2_t){7, 0}); */
-/*   ASSERT_STRING_EQUAL("bar", lp->text); */
+  char *text = editor_text_between(E.lines, 4, 3);
+  ASSERT_STRING_EQUAL("bar", text);
 
-/*   lp = editor_text_between(&E, (vec2_t){4, 1}, (vec2_t){8, 1}); */
-/*   ASSERT_STRING_EQUAL("quux", lp->text); */
+  char *text2 = editor_text_between(E.lines, 4, 10);
+  ASSERT_STRING_EQUAL("bar baz\nqux", text2);
 
-/*   return 0; */
-/* } */
+  return 0;
+}
 
-/* int test_cut_between() { */
-/*   editor_t E = factory(); */
+int test_kill_between() {
+  editor_t E = factory();
 
-/*   line_t *lp = editor_cut_between(&E, (vec2_t){4, 0}, (vec2_t){7, 0}); */
-/*   ASSERT_STRING_EQUAL("bar", lp->text); */
-/*   ASSERT_STRING_EQUAL("foo  baz", E.rows[0].chars); */
+  char *text = editor_kill_between(&E, E.lines, 4, 3);
+  ASSERT_STRING_EQUAL("bar", text);
+  ASSERT_STRING_EQUAL("foo  baz", E.lines->text);
 
-/*   lp = editor_cut_between(&E, (vec2_t){4, 1}, (vec2_t){8, 1}); */
-/*   ASSERT_STRING_EQUAL("quux", lp->text); */
-/*   ASSERT_STRING_EQUAL("qux  corge", E.rows[1].chars); */
+  /* lp = editor_cut_between(&E, (vec2_t){4, 1}, (vec2_t){8, 1}); */
+  /* ASSERT_STRING_EQUAL("quux", lp->text); */
+  /* ASSERT_STRING_EQUAL("qux  corge", E.rows[1].chars); */
 
-/*   return 0; */
-/* } */
+  return 0;
+}
 
 int test_char_at() {
   editor_t E = factory();
@@ -209,8 +209,8 @@ int main() {
   result += test_delete_rows();
   result += test_break_line();
   result += test_delete_char();
-  /* result += test_text_between(); */
-  /* result += test_cut_between(); */
+  result += test_text_between();
+  result += test_kill_between();
   result += test_char_at();
   result += test_insert_row_at();
   result += test_insert_row_with_data_at();

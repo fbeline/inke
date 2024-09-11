@@ -18,6 +18,11 @@ typedef float f32;
 typedef double f64;
 typedef size_t usize;
 
+#define FALSE   0
+#define TRUE    1
+#define ABORT   2		/* Death, ^G, abort, etc.       */
+#define FAILED  3		/* not-quite fatal false return */
+
 typedef struct vec2_s {
   i32 x, y;
 } vec2_t;
