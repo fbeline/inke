@@ -20,8 +20,8 @@ editor_t factory() {
   line_t* l2 = lalloc(0);
   line_append(l2, "qux quux corge");
 
-  e.lines->nl = l2;
-  l2->pl = e.lines;
+  e.lines->next = l2;
+  l2->prev = e.lines;
 
   return e;
 }
@@ -53,7 +53,7 @@ int test_move_line_up() {
   ASSERT_EQUAL(2, E.row_size);
 
   // moveup second line
-  E.lines = editor_move_line_up(&E, E.lines->nl);
+  E.lines = editor_move_line_up(&E, E.lines->next);
   ASSERT_STRING_EQUAL("foo bar bazqux quux corge", E.lines->text);
   ASSERT_EQUAL(1, E.row_size);
 
@@ -89,7 +89,7 @@ int test_break_line() {
   ASSERT_EQUAL(E.row_size, 3);
   ASSERT_STRING_EQUAL("foo", E.lines->text);
   ASSERT_EQUAL(3, (i32)E.lines->size);
-  ASSERT_STRING_EQUAL(" bar baz", E.lines->nl->text);
+  ASSERT_STRING_EQUAL(" bar baz", E.lines->next->text);
 
   return 0;
 }
@@ -143,7 +143,7 @@ int test_char_at() {
 
   char ch1 = editor_char_at(E.lines, 4);
   ASSERT_EQUAL('b', ch1);
-  char ch2 = editor_char_at(E.lines->nl, E.lines->nl->size-1);
+  char ch2 = editor_char_at(E.lines->next, E.lines->next->size-1);
   ASSERT_EQUAL('e', ch2);
 
   return 0;
@@ -156,9 +156,9 @@ int test_insert_row_at() {
   editor_insert_row_at(&E, 3);
   ASSERT_EQUAL(4, E.row_size);
   ASSERT_STRING_EQUAL("", E.lines->text);
-  ASSERT_STRING_EQUAL("foo bar baz", E.lines->nl->text);
-  ASSERT_STRING_EQUAL("qux quux corge", E.lines->nl->nl->text);
-  ASSERT_STRING_EQUAL("", E.lines->nl->nl->nl->text);
+  ASSERT_STRING_EQUAL("foo bar baz", E.lines->next->text);
+  ASSERT_STRING_EQUAL("qux quux corge", E.lines->next->next->text);
+  ASSERT_STRING_EQUAL("", E.lines->next->next->next->text);
 
   return 0;
 }
@@ -170,7 +170,7 @@ int test_insert_row_with_data_at() {
   ASSERT_STRING_EQUAL("first row", E.lines->text);
 
   editor_insert_row_with_data_at(&E, 2, "middle row");
-  ASSERT_STRING_EQUAL("middle row", E.lines->nl->nl->text);
+  ASSERT_STRING_EQUAL("middle row", E.lines->next->next->text);
 
   return 0;
 }

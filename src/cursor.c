@@ -113,8 +113,8 @@ void cursor_eol(cursor_t* C) {
 
 void cursor_down(cursor_t* C) {
   vec2_t pos = cursor_position(C);
-  if (C->clp->nl == NULL) return;
-  C->clp = C->clp->nl;
+  if (C->clp->next == NULL) return;
+  C->clp = C->clp->next;
 
   if (C->y < C->max_row) {
     C->y++;
@@ -130,8 +130,8 @@ void cursor_down(cursor_t* C) {
 
 void cursor_up(cursor_t* C) {
   i32 y = raw_y(C);
-  if (y <= 0 || C->clp->pl == NULL) return;
-  C->clp = C->clp->pl;
+  if (y <= 0 || C->clp->prev == NULL) return;
+  C->clp = C->clp->prev;
 
   if (C->y == 0 && C->rowoff > 0) {
     C->rowoff--;
@@ -216,7 +216,7 @@ void cursor_remove_char(cursor_t* C) {
 
   if (pos.x == 0 && pos.y == 0) return;
   if (pos.x == 0 && pos.y > 0) {
-    usize prlen = C->clp->pl->size;
+    usize prlen = C->clp->prev->size;
     undo_push(LINEUP, (vec2_t){prlen, pos.y-1}, *C, NULL);
     editor_move_line_up(C->editor, C->clp);
     cursor_up(C);
@@ -324,7 +324,7 @@ void cursor_delete_row(cursor_t* C) {
   char* strdata = strdup(C->clp->text);
   undo_push(LINEDELETE, (vec2_t){0, y}, *C, strdata);
 
-  line_t *lp = C->clp->nl != NULL ? C->clp->nl : C->clp;
+  line_t *lp = C->clp->next != NULL ? C->clp->next : C->clp;
   editor_delete_lines(C->editor, C->clp, 1);
   C->clp = lp;
 
@@ -344,8 +344,8 @@ void cursor_eof(cursor_t* C) {
     C->y = E->row_size - 1;
     C->rowoff = 0;
   }
-  while(C->clp->nl != NULL)
-    C->clp = C->clp->nl;
+  while(C->clp->next != NULL)
+    C->clp = C->clp->next;
   cursor_eol(C);
 }
 
@@ -353,8 +353,8 @@ void cursor_bof(cursor_t* C) {
   cursor_bol(C);
   C->y = 0;
   C->rowoff = 0;
-  while(C->clp->pl != NULL)
-    C->clp = C->clp->pl;
+  while(C->clp->prev != NULL)
+    C->clp = C->clp->prev;
 }
 
 cursor_t cursor_init(editor_t* E) {

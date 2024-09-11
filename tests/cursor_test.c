@@ -20,8 +20,8 @@ editor_t editor_factory() {
   line_t* l2 = lalloc(0);
   line_append(l2, "qux quux corge");
 
-  e.lines->nl = l2;
-  l2->pl = e.lines;
+  e.lines->next = l2;
+  l2->prev = e.lines;
 
   return e;
 }
@@ -103,7 +103,7 @@ static int test_eol(void) {
 
 static int test_eof(void) {
   cursor_t C = factory();
-  i32 len = C.clp->nl->size;
+  i32 len = C.clp->next->size;
 
   cursor_eof(&C);
   ASSERT_EQUAL(1, C.y);
@@ -225,7 +225,7 @@ static int test_insert_text(void) {
 
   /* cursor_insert_text(&C, "line1\nline2 "); */
   /* ASSERT_STRING_EQUAL("foo line1", C.clp->text); */
-  /* ASSERT_STRING_EQUAL("line2 bar baz", C.clp->nl->text); */
+  /* ASSERT_STRING_EQUAL("line2 bar baz", C.clp->next->text); */
   /* ASSERT_EQUAL(3, C.editor->row_size); */
 
   return 0;
@@ -294,7 +294,7 @@ int test_break_line(void) {
 
   C.x = 3;
   cursor_break_line(&C);
-  ASSERT_STRING_EQUAL("foo", C.clp->pl->text);
+  ASSERT_STRING_EQUAL("foo", C.clp->prev->text);
   ASSERT_STRING_EQUAL(" bar baz", C.clp->text);
 
   return 0;

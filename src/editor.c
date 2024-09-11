@@ -23,8 +23,8 @@ line_t *lalloc(usize capacity) {
   lp->capacity = capacity;
   lp->size = 0;
   lp->text[0] = '\0';
-  lp->nl = NULL;
-  lp->pl = NULL;
+  lp->next = NULL;
+  lp->prev = NULL;
 
   return lp;
 }
@@ -42,8 +42,8 @@ line_t *lrealloc(line_t *lp, usize new_size) {
 
   nlp->capacity = new_capacity;
   nlp->size = new_size;
-  if (nlp->nl != NULL) nlp->nl->pl = nlp;
-  if (nlp->pl != NULL) nlp->pl->nl = nlp;
+  if (nlp->next != NULL) nlp->next->prev = nlp;
+  if (nlp->prev != NULL) nlp->prev->next = nlp;
 
   return nlp;
 }
@@ -71,8 +71,8 @@ line_t* line_append(line_t *lp, const char *str) {
 void line_free(line_t *lp) {
   if (lp == NULL) return;
 
-  if (lp->pl != NULL) lp->pl->nl = lp->nl;
-  if (lp->nl != NULL) lp->nl->pl = lp->pl;
+  if (lp->prev != NULL) lp->prev->next = lp->next;
+  if (lp->next != NULL) lp->next->prev = lp->prev;
 
   free((char*) lp);
 }
@@ -82,10 +82,10 @@ void editor_delete_lines(editor_t *E, line_t* lp, i32 size) {
   i32 i = 0;
   do {
     lp1 = lp2;
-    lp2 = lp1->nl;
+    lp2 = lp1->next;
 
     // last line
-    if (lp1->pl == NULL && lp1->nl == NULL) {
+    if (lp1->prev == NULL && lp1->next == NULL) {
       lp1->text[0] = '\0';
       lp1->size = 0;
       E->lines = lp1;
@@ -108,7 +108,7 @@ line_t *editor_rows_to_string(line_t *head, unsigned int size) {
   while (lp != NULL) {
     ab = line_append(ab, lp->text);
     ab = line_append(ab, "\n");
-    lp = lp->nl;
+    lp = lp->next;
   }
 
   return ab;
@@ -121,15 +121,15 @@ line_t* editor_insert_row_at(editor_t *E, usize y) {
   int i = 0;
   while(++i <= y && nl != NULL) {
     pl = nl;
-    nl = nl->nl;
+    nl = nl->next;
   }
 
   line_t *lp = lalloc(0);
-  lp->pl = pl;
-  lp->nl = nl;
+  lp->prev = pl;
+  lp->next = nl;
 
-  if (pl != NULL) pl->nl = lp;
-  if (nl != NULL) nl->pl = lp;
+  if (pl != NULL) pl->next = lp;
+  if (nl != NULL) nl->prev = lp;
   if (y == 0) E->lines = lp;
 
   E->row_size++;
@@ -154,9 +154,9 @@ char editor_char_at(line_t *lp, i32 x) {
 }
 
 line_t *editor_move_line_up(editor_t *E, line_t *lp) {
-  if (lp == NULL || lp->pl == NULL) return NULL;
+  if (lp == NULL || lp->prev == NULL) return NULL;
 
-  line_t *prev = line_append(lp->pl, lp->text);
+  line_t *prev = line_append(lp->prev, lp->text);
   line_free(lp);
 
   E->dirty = true;
@@ -196,7 +196,7 @@ line_t *editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
   char *tmp = strdup(lp->text + x);
   lp->size = x + 1;
   lp->text[x] = ch;
-  lp->text[x + 1] = '\0'; // out of index?
+  lp->text[lp->size] = '\0'; // out of index?
   lp = line_append(lp, tmp);
   if (is_head) E->lines = lp;
 
@@ -208,16 +208,16 @@ line_t *editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
 
 void editor_break_line(editor_t *E, line_t *lp, i32 x) {
   line_t *new_line = lalloc(0);
-  line_t *next_line = lp->nl;
+  line_t *next_line = lp->next;
 
   new_line = line_append(new_line, lp->text + x);
   lp->text[x] = '\0';
   lp->size = x;
 
-  if (next_line != NULL) next_line->pl = new_line;
-  lp->nl = new_line;
-  new_line->pl = lp;
-  new_line->nl = next_line;
+  if (next_line != NULL) next_line->prev = new_line;
+  lp->next = new_line;
+  new_line->prev = lp;
+  new_line->next = next_line;
 
   E->dirty = true;
   E->row_size++;
@@ -328,8 +328,8 @@ int editor_open_file(const char *filename, editor_t *E) {
       continue;
     }
 
-    line->pl = lp_tail;
-    lp_tail->nl = line;
+    line->prev = lp_tail;
+    lp_tail->next = line;
     lp_tail = line;
   }
 

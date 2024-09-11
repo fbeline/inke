@@ -164,8 +164,8 @@ static void render_draw_lines(cursor_t* C, render_t* R) {
 
   i32 counter = 0;
   while (lp != NULL && counter++ < C->rowoff){
-    if (lp->nl == NULL) break;
-    lp = lp->nl;
+    if (lp->next == NULL) break;
+    lp = lp->next;
   };
 
   for (usize i = 0; i + C->rowoff < E->row_size; i++) {
@@ -184,7 +184,7 @@ static void render_draw_lines(cursor_t* C, render_t* R) {
                0,
                DARKGRAY);
 
-    lp = lp->nl;
+    lp = lp->next;
   }
 }
 

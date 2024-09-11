@@ -5,8 +5,8 @@
 #define VERSION "0.0.1"
 
 typedef struct line {
-  struct line *nl;
-  struct line *pl;
+  struct line *next;
+  struct line *prev;
 
   usize capacity;
   usize size;
