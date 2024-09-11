@@ -29,23 +29,19 @@ line_t *lalloc(usize capacity) {
   return lp;
 }
 
-line_t *lrealloc(line_t *lp, usize new_size) {
-  line_t *nlp;
-  usize new_capacity;
+line_t *lrealloc(line_t *lp, usize capacity) {
+  capacity = (capacity + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1);
+  if (capacity == 0)
+    capacity = BLOCK_SIZE;
 
-  new_capacity = (new_size + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1);
-  if (new_capacity == 0)
-    new_capacity = BLOCK_SIZE;
-
-  if ((nlp = (line_t*)realloc(lp, sizeof(line_t) + new_capacity)) == NULL)
+  if ((lp = (line_t*)realloc(lp, sizeof(line_t) + capacity)) == NULL)
     die("LREALLOC OUT OF MEMORY");
 
-  nlp->capacity = new_capacity;
-  nlp->size = new_size;
-  if (nlp->next != NULL) nlp->next->prev = nlp;
-  if (nlp->prev != NULL) nlp->prev->next = nlp;
+  lp->capacity = capacity;
+  if (lp->next != NULL) lp->next->prev = lp;
+  if (lp->prev != NULL) lp->prev->next = lp;
 
-  return nlp;
+  return lp;
 }
 
 line_t* line_append_s(line_t *lp, const char *str, usize len) {
