@@ -175,11 +175,9 @@ void cursor_left(cursor_t* C) {
 
 void cursor_break_line(cursor_t* C) {
   vec2_t pos = cursor_position(C);
-
   undo_push(LINEBREAK, (vec2_t){0, pos.y+1}, *C, NULL);
 
   editor_break_line(C->editor, C->clp, pos.x);
-  C->editor->row_size++;
   cursor_down(C);
   cursor_bol(C);
 }
@@ -252,8 +250,6 @@ void cursor_insert_char(cursor_t* C, int ch) {
     C->coloff++;
     C->x = C->max_col;
   }
-
-  C->editor->dirty = true;
 }
 
 void cursor_insert_text(cursor_t* C, const char* text) {
