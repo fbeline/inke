@@ -365,6 +365,57 @@ int test_delete_row(void) {
 /*   return 0; */
 /* } */
 
+int test_region_eol_bol() {
+  cursor_t C = factory();
+
+  cursor_region_start(&C);
+  cursor_eol(&C);
+  ASSERT_EQUAL((i32)C.clp->size, C.region.size);
+
+  cursor_bol(&C);
+  ASSERT_EQUAL(0, C.region.size);
+
+  return 0;
+}
+
+int test_region_line_down_up() {
+  cursor_t C = factory();
+
+  C.x = 3;
+  cursor_region_start(&C);
+  cursor_down(&C);
+  ASSERT_EQUAL(11, C.region.size);
+
+  cursor_up(&C);
+  ASSERT_EQUAL(0, C.region.size);
+
+  return 0;
+}
+
+int test_region_left_right() {
+  cursor_t C = factory();
+
+  C.x = 2;
+  cursor_region_start(&C);
+  ASSERT_EQUAL(2, C.region.offset);
+  ASSERT_EQUAL(0, C.region.size);
+
+  // testing right
+  for(int i = 0; i < 5; i++) {
+    cursor_right(&C);
+    ASSERT_EQUAL(i + 1, C.region.size);
+  }
+
+  // testing left
+  i32 size = C.region.size;
+  for(int i = 0; i < 4; i++) {
+    cursor_left(&C);
+    ASSERT_EQUAL(--size, C.region.size);
+  }
+
+  return 0;
+}
+
 int main() {
   int result = 0;
 
@@ -386,6 +437,9 @@ int main() {
   result += test_break_line();
   result += test_delete_forward();
   result += test_delete_row();
+  result += test_region_eol_bol();
+  result += test_region_line_down_up();
+  result += test_region_left_right();
   /* result += test_region_text(); */
   /* result += test_region_kill(); */
 

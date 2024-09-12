@@ -69,8 +69,8 @@ char cursor_char(cursor_t* C) {
   return editor_char_at(C->clp, raw_x(C));
 }
 
-void cursor_bol(cursor_t* C) {
-  if (C->region.active) {
+void __cursor_bol(cursor_t* C, bool region) {
+  if (region) {
     i32 x = raw_x(C);
     C->region.size -= x;
   }
@@ -79,7 +79,11 @@ void cursor_bol(cursor_t* C) {
   C->coloff = 0;
 }
 
-void cursor_eol(cursor_t* C) {
+void cursor_bol(cursor_t* C) {
+  __cursor_bol(C, C->region.active);
+}
+
+static void __cursor_eol(cursor_t* C, bool region) {
   i32 len = C->clp->size;
   i32 oldx = raw_x(C);
   if (len > C->max_col) {
@@ -89,12 +93,15 @@ void cursor_eol(cursor_t* C) {
     C->x = len;
   }
 
-  if (C->region.active) {
+  if (region)
     C->region.size += raw_x(C) - oldx;
-  }
 }
 
-void cursor_down(cursor_t* C) {
+static void cursor_eol(cursor_t* C) {
+  __cursor_eol(C, C->region.active);
+}
+
+static void __cursor_down(cursor_t* C, bool region) {
   vec2_t pos = cursor_position(C);
   if (C->clp->next == NULL) return;
   line_t* p_lp = C->clp;
@@ -106,16 +113,18 @@ void cursor_down(cursor_t* C) {
     C->rowoff++;
   }
 
-  if (pos.x > C->clp->size) {
-    cursor_eol(C);
-  }
+  if (pos.x > C->clp->size)
+    __cursor_eol(C, false);
 
-  if (C->region.active) {
+  if (region)
     C->region.size += raw_x(C) + (p_lp->size - pos.x);
-  }
 }
 
-void cursor_up(cursor_t* C) {
+void cursor_down(cursor_t* C) {
+  __cursor_down(C, C->region.active);
+}
+
+static void __cursor_up(cursor_t* C, bool region) {
   i32 oldx = raw_x(C);
 
   if (raw_y(C) <= 0 || C->clp->prev == NULL) return;
@@ -128,13 +137,15 @@ void cursor_up(cursor_t* C) {
     C->y--;
   }
 
-  if (raw_x(C) > C->clp->size) {
-    cursor_eol(C);
-  }
+  if (raw_x(C) > C->clp->size)
+    __cursor_eol(C, false);
 
-  if (C->region.active) {
-    C->region.size -= oldx - (C->clp->size - raw_x(C));
-  }
+  if (region)
+    C->region.size = C->region.size - oldx - (C->clp->size - raw_x(C));
+}
+
+void cursor_up(cursor_t* C) {
+  __cursor_up(C, C->region.active);
 }
 
 void cursor_right(cursor_t* C) {
@@ -144,8 +155,9 @@ void cursor_right(cursor_t* C) {
   if (pos.x < len && C->x == C->max_col) {
     C->coloff++;
   } else if (pos.x >= len) {
-    cursor_down(C);
-    cursor_bol(C);
+    __cursor_down(C, false);
+    __cursor_bol(C, false);
+    C->region.size--; // do not increase last (blank) x position
   } else {
     C->x++;
   }
@@ -158,8 +170,9 @@ void cursor_left(cursor_t* C) {
   if (pos.x == 0 && pos.y == 0) {
     return;
   } else if (pos.x == 0 && pos.y > 0) {
-    cursor_up(C);
-    cursor_eol(C);
+    __cursor_up(C, false);
+    __cursor_eol(C, false);
+    C->region.size++; // do not decrement first x position
   } else if (C->x == 0 && C->coloff > 0) {
     C->coloff--;
   } else {
