@@ -248,15 +248,33 @@ char *editor_text_between(line_t *lp, i32 offset, i32 size) {
   return strdup(result);
 }
 
+// TODO: FIX MINOR BUGS
+// do not delete first line of file
 char *editor_kill_between(editor_t* E, line_t *lp, i32 offset, i32 size) {
   char *result = editor_text_between(lp, offset, size);
 
+  line_t *head = lp;
   if (lp->size <= offset + size) {
     while(lp != NULL && size > 0) {
-      size = size + offset - lp->size;
-      lp->text[offset] = '\0';
+      if (offset > 0) {
+        lp->text[offset] = '\0';
+        size = size - (lp->size - offset);
+        lp->size = offset;
+        lp = lp->next;
+      } else if (offset == 0 && lp->size < offset + size) {
+        line_t *aux = lp;
+        size -= lp->size;
+        lp = lp->next;
+        line_free(aux);
+        E->row_size--;
+      } else {
+        line_append(head, lp->text + size);
+        line_free(lp);
+        E->row_size--;
+        lp = NULL;
+      }
+
       offset = 0;
-      lp = lp->next;
     }
     return result;
   }

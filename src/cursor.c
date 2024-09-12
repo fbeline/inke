@@ -49,7 +49,7 @@ char* cursor_region_kill(cursor_t* C) {
 
   char *strdata = editor_kill_between(C->editor, C->region.lp, C->region.offset, C->region.size);
   /* undo_push(CUT, ps, cursor, strdata); */
-  /* cursor_set(C, &cursor); */
+  cursor_set(C, C->region.cursor);
 
   return strdata;
 }
@@ -97,7 +97,7 @@ static void __cursor_eol(cursor_t* C, bool region) {
     C->region.size += raw_x(C) - oldx;
 }
 
-static void cursor_eol(cursor_t* C) {
+void cursor_eol(cursor_t* C) {
   __cursor_eol(C, C->region.active);
 }
 
@@ -262,7 +262,7 @@ void cursor_insert_char(cursor_t* C, int ch) {
 }
 
 void cursor_insert_text(cursor_t* C, const char* text) {
-  /* editor_insert_text(C->clp, raw_x(C), text); */
+  editor_insert_text(C->clp, raw_x(C), text);
 }
 
 void cursor_page_up(cursor_t* C) {

@@ -131,9 +131,9 @@ int test_kill_between() {
   ASSERT_STRING_EQUAL("bar", text);
   ASSERT_STRING_EQUAL("foo  baz", E.lines->text);
 
-  /* lp = editor_cut_between(&E, (vec2_t){4, 1}, (vec2_t){8, 1}); */
-  /* ASSERT_STRING_EQUAL("quux", lp->text); */
-  /* ASSERT_STRING_EQUAL("qux  corge", E.rows[1].chars); */
+  editor_t E2 = factory();
+  char *text2 = editor_kill_between(&E2, E2.lines, 4, 11);
+  ASSERT_STRING_EQUAL("foo quux corge", E2.lines->text);
 
   return 0;
 }
