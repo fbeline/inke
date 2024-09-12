@@ -37,9 +37,19 @@ static void render_draw_region(cursor_t* C, render_t* R) {
 
   if (lp->size >= C->region.size + C->region.offset) {
     render_highlight_line(R, y, C->region.offset, C->region.offset + C->region.size);
+    return;
   }
 
-  // TODO: MULTLINE
+  i32 offset = C->region.offset;
+  i32 size = C->region.size;
+  while(lp != NULL && size > 0) {
+    render_highlight_line(R, y, offset, MIN((i32)lp->size, size));
+    size -= (lp->size - offset);
+    offset = 0;
+    lp = lp->next;
+    y++;
+  }
+
 }
 
 static void render_draw_cursor(cursor_t* C, render_t* R) {
