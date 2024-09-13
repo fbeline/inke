@@ -20,6 +20,12 @@ void cursor_set(cursor_t* dest, cursor_t* src) {
   dest->y = src->y;
   dest->coloff = src->coloff;
   dest->rowoff = src->rowoff;
+
+  dest->clp = dest->editor->lines;
+  usize max = dest->y + dest->rowoff;
+  for (usize i = 0; i < max; i++) {
+    dest->clp = dest->clp->next;
+  }
 }
 
 vec2_t cursor_position(cursor_t* cursor) {
@@ -185,11 +191,12 @@ void cursor_left(cursor_t* C) {
 
 void cursor_break_line(cursor_t* C) {
   vec2_t pos = cursor_position(C);
-  undo_push(LINEBREAK, (vec2_t){0, pos.y+1}, *C, NULL);
 
   editor_break_line(C->editor, C->clp, pos.x);
   cursor_down(C);
   cursor_bol(C);
+
+  undo_push(LINEBREAK, *C, NULL);
 }
 
 void cursor_move_word_forward(cursor_t* C) {
@@ -227,17 +234,14 @@ void cursor_remove_char(cursor_t* C) {
   if (pos.x == 0 && pos.y == 0) return;
   if (pos.x == 0 && pos.y > 0) {
     usize prlen = C->clp->prev->size;
-    undo_push(LINEUP, (vec2_t){prlen, pos.y-1}, *C, NULL);
     editor_move_line_up(C->editor, C->clp);
     cursor_up(C);
     C->x = MIN(C->max_col, prlen);
     C->coloff = MAX(0, (i32)prlen - C->x);
+
+    undo_push(LINEUP, *C, NULL);
     return;
   }
-
-  vec2_t undo_pos = {pos.x - 1, pos.y};
-  char strdata[2] = { editor_char_at(C->clp, undo_pos.x), '\0' };
-  undo_push(BACKSPACE, undo_pos, *C, strdata);
 
   editor_delete_char_at(C->clp, pos.x-1);
 
@@ -247,19 +251,22 @@ void cursor_remove_char(cursor_t* C) {
     C->x--;
 
   C->editor->dirty = true;
+
+  char strdata[2] = { editor_char_at(C->clp, pos.x - 1), '\0' };
+  undo_push(BACKSPACE, *C, strdata);
 }
 
 void cursor_insert_char(cursor_t* C, int ch) {
   vec2_t pos = cursor_position(C);
   C->clp = editor_insert_char_at(C->editor, C->clp, pos.x, ch);
 
-  undo_push(ADD, (vec2_t){pos.x + 1, pos.y}, *C, NULL);
-
   C->x++;
   if (C->x > C->max_col) {
     C->coloff++;
     C->x = C->max_col;
   }
+
+  undo_push(ADD, *C, NULL);
 }
 
 void cursor_insert_text(cursor_t* C, const char* text) {
@@ -292,7 +299,7 @@ void cursor_delete_row(cursor_t* C) {
   bool ll = C->editor->row_size - (y + 1) == 0; //last line
 
   char* strdata = strdup(C->clp->text);
-  undo_push(LINEDELETE, (vec2_t){0, y}, *C, strdata);
+  undo_push(LINEDELETE, *C, strdata);
 
   line_t *lp = C->clp->next != NULL ? C->clp->next : C->clp;
   editor_delete_lines(C->editor, C->clp, 1);
