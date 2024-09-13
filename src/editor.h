@@ -10,7 +10,7 @@ typedef struct line {
 
   usize capacity;
   usize size;
-  char text[1];
+  char *text;
 } line_t;
 
 typedef struct editor_s {
