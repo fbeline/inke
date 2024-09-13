@@ -178,14 +178,20 @@ int test_insert_row_with_data_at() {
 int test_editor_insert_text() {
   editor_t E = factory();
 
-  E.lines = editor_insert_text(E.lines, 0, "first ");
+  editor_insert_text(&E, E.lines, 0, "first ");
   ASSERT_STRING_EQUAL("first foo bar baz", E.lines->text);
 
-  E.lines = editor_insert_text(E.lines, 6, "middle ");
+  editor_insert_text(&E, E.lines, 6, "middle ");
   ASSERT_STRING_EQUAL("first middle foo bar baz", E.lines->text);
 
-  E.lines = editor_insert_text(E.lines, E.lines->size, " end");
+  editor_insert_text(&E, E.lines, E.lines->size, " end");
   ASSERT_STRING_EQUAL("first middle foo bar baz end", E.lines->text);
+
+  editor_t E2 = factory();
+  editor_insert_text(&E2, E2.lines, 4, "testing\nmultiline ");
+  ASSERT_STRING_EQUAL(E2.lines->text, "foo testing");
+  ASSERT_STRING_EQUAL(E2.lines->next->text, "multiline bar baz");
+  ASSERT_EQUAL(3, E2.row_size);
 
   return 0;
 }

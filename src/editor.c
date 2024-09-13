@@ -271,21 +271,38 @@ char *editor_kill_between(editor_t* E, line_t *lp, i32 offset, i32 size) {
   return result;
 }
 
-// TODO: IMPL FOR MULTLINE
-line_t *editor_insert_text(line_t* lp, i32 x, const char* strdata) {
-  if (x < 0 || strdata == NULL || lp == NULL) return lp;
+void editor_insert_text(editor_t *E, line_t* lp, i32 x, const char* strdata) {
+  if (x < 0 || strdata == NULL || lp == NULL) return;
   x = MIN(x, (i32)lp->size);
 
-  char* aux = strdup(lp->text + x);
+  char* strtail = strdup(lp->text + x);
   lp->text[x] = '\0';
   lp->size = x;
 
-  line_append(lp, strdata);
+  i32 offset = 0, i = 0, j = 0;
+  char aux[TBUFFER_SIZE];
+  char ch;
+  while ((ch = strdata[i++]) != '\0') {
+    if (ch != '\n') {
+      aux[j++] = ch;
+      continue;
+    }
+
+    aux[j] = '\0';
+    line_append(lp, aux);
+    j = 0;
+    aux[0] = '\0';
+    line_t *nlp = lalloc(16);
+    nlp->prev = lp;
+    nlp->next = lp->next;
+    lp->next->prev = nlp;
+    lp->next = nlp;
+    lp = nlp;
+    E->row_size++;
+  }
+  aux[j] = '\0';
   line_append(lp, aux);
-
-  free(aux);
-
-  return lp;
+  line_append(lp, strtail);
 }
 
 static void editor_new_file(const char *filename, editor_t *E) {

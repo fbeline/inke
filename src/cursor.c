@@ -263,7 +263,7 @@ void cursor_insert_char(cursor_t* C, int ch) {
 }
 
 void cursor_insert_text(cursor_t* C, const char* text) {
-  editor_insert_text(C->clp, raw_x(C), text);
+  editor_insert_text(C->editor, C->clp, raw_x(C), text);
 }
 
 void cursor_page_up(cursor_t* C) {
