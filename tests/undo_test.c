@@ -64,9 +64,32 @@ static int test_undo_add(void) {
   return 0;
 }
 
+static int test_undo_backspace(void) {
+  cursor_t C = factory();
+
+  cursor_eol(&C);
+  cursor_remove_char(&C);
+  cursor_remove_char(&C);
+  ASSERT_STRING_EQUAL("foo bar b", C.clp->text);
+
+  undo(&C);
+  ASSERT_STRING_EQUAL("foo bar ba", C.clp->text);
+  undo(&C);
+  ASSERT_STRING_EQUAL("foo bar baz", C.clp->text);
+
+  // lineup
+  cursor_down(&C);
+  cursor_bol(&C);
+  cursor_remove_char(&C);
+  ASSERT_STRING_EQUAL("foo bar bazqux quux corge", C.clp->text);
+
+  return 0;
+}
+
 int main() {
   int result = 0;
   result += test_undo_add();
+  result += test_undo_backspace();
 
   return result;
 }

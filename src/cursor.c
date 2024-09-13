@@ -230,12 +230,16 @@ void cursor_move_word_backward(cursor_t* C) {
 
 void cursor_remove_char(cursor_t* C) {
   vec2_t pos = cursor_position(C);
+  char strdata[2] = { editor_char_at(C->clp, pos.x - 1), '\0' };
 
   if (pos.x == 0 && pos.y == 0) return;
   if (pos.x == 0 && pos.y > 0) {
     usize prlen = C->clp->prev->size;
-    editor_move_line_up(C->editor, C->clp);
-    cursor_up(C);
+    C->clp = editor_move_line_up(C->editor, C->clp);
+
+    if (C->y == 0 && C->rowoff > 0) C->rowoff--;
+    else C->y--;
+
     C->x = MIN(C->max_col, prlen);
     C->coloff = MAX(0, (i32)prlen - C->x);
 
@@ -251,8 +255,6 @@ void cursor_remove_char(cursor_t* C) {
     C->x--;
 
   C->editor->dirty = true;
-
-  char strdata[2] = { editor_char_at(C->clp, pos.x - 1), '\0' };
   undo_push(BACKSPACE, *C, strdata);
 }
 
