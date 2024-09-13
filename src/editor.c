@@ -239,7 +239,7 @@ char *editor_kill_between(editor_t* E, line_t *lp, i32 offset, i32 size) {
   line_t *head = lp;
   if (lp->size < offset + size) {
     while(lp != NULL && size > 0) {
-      if (offset > 0 && lp == head) {
+      if (lp == head) {
         lp->text[offset] = '\0';
         size = size - (lp->size - offset);
         lp->size = offset;
