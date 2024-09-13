@@ -72,7 +72,8 @@ void line_free(line_t *lp) {
   if (lp->prev != NULL) lp->prev->next = lp->next;
   if (lp->next != NULL) lp->next->prev = lp->prev;
 
-  free((char*) lp);
+  free(lp->text);
+  free(lp);
 }
 
 void editor_delete_lines(editor_t *E, line_t* lp, i32 size) {
