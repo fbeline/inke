@@ -270,6 +270,7 @@ char *editor_kill_between(editor_t* E, line_t *lp, i32 offset, i32 size) {
   return result;
 }
 
+// TODO: IMPL FOR MULTLINE
 line_t *editor_insert_text(line_t* lp, i32 x, const char* strdata) {
   if (x < 0 || strdata == NULL || lp == NULL) return lp;
   x = MIN(x, (i32)lp->size);
