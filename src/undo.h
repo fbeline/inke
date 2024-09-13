@@ -22,5 +22,3 @@ undo_t* undo_pop(void);
 void undo(cursor_t* C);
 
 void undo_free(undo_t* undo);
-
-

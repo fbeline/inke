@@ -4,9 +4,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define UNDO_OFF 0
+#define UNDO_ON  1
+
 static undo_t* undo_head = NULL;
+static int undo_state = UNDO_ON;
 
 void undo_push(undo_type type, cursor_t cursor, const char* data) {
+  if (undo_state == UNDO_OFF) return;
+
   undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
   undo->type = type;
   undo->cursor = cursor;
@@ -44,6 +50,7 @@ void undo(cursor_t* C) {
   if (undo == NULL) return;
 
   cursor_set(C, &undo->cursor);
+  undo_state = UNDO_OFF;
   switch (undo->type) {
     case ADD:
       cursor_remove_char(C);
@@ -75,6 +82,7 @@ void undo(cursor_t* C) {
       return;
   }
 
+  undo_state = UNDO_ON;
   undo_free(undo);
 }
 
