@@ -14,7 +14,7 @@
 line_t *lalloc(usize capacity) {
   line_t *lp;
 
-  capacity = (capacity + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1);
+  capacity = (capacity + BLOCK_SIZE) & ~(BLOCK_SIZE - 1);
   if (capacity == 0)
     capacity = BLOCK_SIZE;
 
@@ -34,7 +34,7 @@ line_t *lalloc(usize capacity) {
 }
 
 line_t *lrealloc(line_t *lp, usize capacity) {
-  capacity = (capacity + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1);
+  capacity = (capacity + BLOCK_SIZE) & ~(BLOCK_SIZE - 1);
   if (capacity == 0)
     capacity = BLOCK_SIZE;
 
