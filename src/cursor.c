@@ -54,9 +54,8 @@ char* cursor_region_kill(cursor_t* C) {
   if (!C->region.active) return NULL;
 
   char *strdata = editor_kill_between(C->editor, C->region.lp, C->region.offset, C->region.size);
-  /* undo_push(CUT, ps, cursor, strdata); */
   cursor_set(C, C->region.cursor);
-  C->clp = C->region.lp;
+  undo_push(CUT, *C, strdata);
 
   return strdata;
 }

@@ -46,10 +46,11 @@ void undo_free(undo_t* undo) {
 void undo(cursor_t* C) {
   editor_t* E = C->editor;
   undo_t* undo = undo_pop();
-
   if (undo == NULL) return;
 
   cursor_set(C, &undo->cursor);
+  C->region.active = false;
+
   undo_state = UNDO_OFF;
   switch (undo->type) {
     case ADD:
@@ -78,8 +79,6 @@ void undo(cursor_t* C) {
       break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
-      undo_free(undo);
-      return;
   }
 
   undo_state = UNDO_ON;

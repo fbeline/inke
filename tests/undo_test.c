@@ -100,11 +100,32 @@ static int test_undo_delete_forward(void) {
   return 0;
 }
 
+static int test_undo_cut(void) {
+  cursor_t C = factory();
+
+  C.x = 3;
+  cursor_region_start(&C);
+  cursor_down(&C);
+  cursor_region_kill(&C);
+  cursor_clear_region(&C);
+
+  ASSERT_STRING_EQUAL("foo quux corge", C.clp->text);
+  ASSERT_EQUAL(1, C.editor->row_size);
+
+  undo(&C);
+  ASSERT_STRING_EQUAL("foo bar baz", C.clp->text);
+  ASSERT_STRING_EQUAL("qux quux corge", C.clp->next->text);
+  ASSERT_EQUAL(2, C.editor->row_size);
+
+  return 0;
+}
+
 int main() {
   int result = 0;
   result += test_undo_add();
   result += test_undo_backspace();
   result += test_undo_delete_forward();
+  result += test_undo_cut();
 
   return result;
 }
