@@ -76,6 +76,20 @@ void line_free(line_t *lp) {
   free(lp);
 }
 
+static line_t *editor_create_line_after(editor_t *E, line_t* lp, usize capacity) {
+  line_t *nlp = lalloc(capacity);
+
+  nlp->prev = lp;
+  nlp->next = lp->next;
+
+  if (nlp->next) nlp->next->prev = nlp;
+  if (nlp->prev) nlp->prev->next = nlp;
+
+  E->row_size++;
+
+  return nlp;
+}
+
 void editor_delete_lines(editor_t *E, line_t* lp, i32 size) {
   line_t *lp1, *lp2 = lp;
   i32 i = 0;
@@ -294,13 +308,7 @@ void editor_insert_text(editor_t *E, line_t* lp, i32 x, const char* strdata) {
     line_append(lp, aux);
     j = 0;
     aux[0] = '\0';
-    line_t *nlp = lalloc(16);
-    nlp->prev = lp;
-    nlp->next = lp->next;
-    lp->next->prev = nlp;
-    lp->next = nlp;
-    lp = nlp;
-    E->row_size++;
+    lp = editor_create_line_after(E, lp, 16);
   }
   aux[j] = '\0';
   line_append(lp, aux);
