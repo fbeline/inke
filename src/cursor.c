@@ -288,12 +288,13 @@ void cursor_page_down(cursor_t* C) {
 }
 
 void cursor_delete_forward(cursor_t* C) {
-  vec2_t pos = cursor_position(C);
-  /* line_t *lp = editor_text_between(C->editor, pos, (vec2_t){C->clp->size, pos.y}); */
-  /* undo_push(DELETE_FORWARD, pos, *C, lp->text); */
-  /* line_free(lp); */
+  i32 x = raw_x(C);
 
-  editor_delete_forward(C->clp, pos.x);
+  char *text = editor_text_between(C->clp, x, C->clp->size - x);
+  undo_push(DELETE_FORWARD, *C, text);
+  free(text);
+
+  editor_delete_forward(C->clp, x);
 }
 
 void cursor_delete_row(cursor_t* C) {

@@ -86,10 +86,25 @@ static int test_undo_backspace(void) {
   return 0;
 }
 
+static int test_undo_delete_forward(void) {
+  cursor_t C = factory();
+
+  C.x = 4;
+  cursor_delete_forward(&C);
+  ASSERT_STRING_EQUAL("foo ", C.clp->text);
+
+  undo(&C);
+  ASSERT_STRING_EQUAL("foo bar baz", C.clp->text);
+  ASSERT_STRING_EQUAL("qux quux corge", C.clp->next->text);
+
+  return 0;
+}
+
 int main() {
   int result = 0;
   result += test_undo_add();
   result += test_undo_backspace();
+  result += test_undo_delete_forward();
 
   return result;
 }

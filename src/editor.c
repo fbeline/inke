@@ -225,8 +225,10 @@ char *editor_text_between(line_t *lp, i32 offset, i32 size) {
     if (j + offset >= lp->size) {
       j = 0;
       offset = 0;
-      lp = lp->next;
-      result[i++] = '\n';
+      if (size > 0) {
+        lp = lp->next;
+        result[i++] = '\n';
+      }
     }
   }
   result[i] = '\0';
