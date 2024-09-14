@@ -38,7 +38,7 @@ line_t *lrealloc(line_t *lp, usize capacity) {
   if (capacity == 0)
     capacity = BLOCK_SIZE;
 
-  if ((lp->text = realloc(lp->text,  capacity)) == NULL)
+  if ((lp->text = realloc(lp->text, capacity)) == NULL)
     die("LREALLOC OUT OF MEMORY");
 
   lp->capacity = capacity;
@@ -192,7 +192,7 @@ line_t *editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
     die("Invalid position x=%d", x);
 
   lp->size++;
-  if (lp->size > lp->capacity) lp = lrealloc(lp, lp->size);
+  if (lp->size >= lp->capacity) lp = lrealloc(lp, lp->size);
 
   memmove(lp->text + x + 1, lp->text + x, lp->size - x - 1);
   lp->text[x] = ch;

@@ -188,7 +188,9 @@ static void render_draw_lines(cursor_t* C, render_t* R) {
     char vrow[512] = {0};
     i64 vrow_len = MIN((i32)lp->size - C->coloff, (i32)R->ncol);
 
-    memcpy(vrow, lp->text + C->coloff, vrow_len);
+    if (vrow_len > 0)
+      memcpy(vrow, lp->text + C->coloff, vrow_len);
+
     DrawTextEx(R->font,
                vrow,
                (Vector2){R->margin_left, y},
