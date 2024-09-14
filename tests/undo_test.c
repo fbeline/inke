@@ -135,6 +135,20 @@ static int test_undo_line_break(void) {
   return 0;
 }
 
+static int test_undo_line_delete(void) {
+  cursor_t C = factory();
+
+  cursor_delete_row(&C);
+  ASSERT_STRING_EQUAL("qux quux corge", C.clp->text);
+  ASSERT_EQUAL(1, (i32)C.editor->row_size);
+
+  undo(&C);
+  ASSERT_STRING_EQUAL("foo bar baz", C.clp->text);
+  ASSERT_EQUAL(2, (i32)C.editor->row_size);
+
+  return 0;
+}
+
 int main() {
   int result = 0;
   result += test_undo_add();
@@ -142,6 +156,7 @@ int main() {
   result += test_undo_delete_forward();
   result += test_undo_cut();
   result += test_undo_line_break();
+  result += test_undo_line_delete();
 
   return result;
 }

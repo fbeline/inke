@@ -43,6 +43,13 @@ void undo_free(undo_t* undo) {
   free(undo);
 }
 
+static void undo_line_delete(cursor_t *C, undo_t *undo) {
+  i32 y = C->y + C->rowoff;
+  C->clp = editor_insert_row_with_data_at(C->editor, y, undo->strdata);
+
+  if (y == 0) C->editor->lines = C->clp;
+}
+
 void undo(cursor_t* C) {
   editor_t* E = C->editor;
   undo_t* undo = undo_pop();
@@ -66,7 +73,7 @@ void undo(cursor_t* C) {
       cursor_move_line_up(C);
       break;
     case LINEDELETE:
-      /* editor_insert_row_with_data_at(E, undo->pos.y, undo->strdata); */
+      undo_line_delete(C, undo);
       break;
     case DELETE_FORWARD:
       cursor_insert_text(C, undo->strdata);
