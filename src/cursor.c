@@ -227,21 +227,29 @@ void cursor_move_word_backward(cursor_t* C) {
   } while(!(ch1 !=  ' ' && ch2 == ' '));
 }
 
+void cursor_move_line_up(cursor_t *C) {
+  if (C->clp->prev == NULL) return;
+
+  line_t* lp;
+  usize prlen = C->clp->prev->size;
+  if ((lp = editor_move_line_up(C->editor, C->clp)) == NULL) return;
+
+  C->clp = lp;
+
+  if (C->y == 0 && C->rowoff > 0) C->rowoff--;
+  else C->y--;
+
+  C->x = MIN(C->max_col, prlen);
+  C->coloff = MAX(0, (i32)prlen - C->x);
+}
+
 void cursor_remove_char(cursor_t* C) {
   vec2_t pos = cursor_position(C);
   char strdata[2] = { editor_char_at(C->clp, pos.x - 1), '\0' };
 
   if (pos.x == 0 && pos.y == 0) return;
   if (pos.x == 0 && pos.y > 0) {
-    usize prlen = C->clp->prev->size;
-    C->clp = editor_move_line_up(C->editor, C->clp);
-
-    if (C->y == 0 && C->rowoff > 0) C->rowoff--;
-    else C->y--;
-
-    C->x = MIN(C->max_col, prlen);
-    C->coloff = MAX(0, (i32)prlen - C->x);
-
+    cursor_move_line_up(C);
     undo_push(LINEUP, *C, NULL);
     return;
   }

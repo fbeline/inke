@@ -53,6 +53,8 @@ void cursor_move_word_forward(cursor_t* cursor);
 
 void cursor_move_word_backward(cursor_t* cursor);
 
+void cursor_move_line_up(cursor_t *C);
+
 void cursor_remove_char(cursor_t* cursor);
 
 void cursor_insert_char(cursor_t* cursor, int c);

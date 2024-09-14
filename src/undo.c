@@ -63,7 +63,7 @@ void undo(cursor_t* C) {
       cursor_break_line(C);
       break;
     case LINEBREAK:
-      /* editor_move_line_up(E, undo->lp); */
+      cursor_move_line_up(C);
       break;
     case LINEDELETE:
       /* editor_insert_row_with_data_at(E, undo->pos.y, undo->strdata); */

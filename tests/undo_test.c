@@ -120,12 +120,28 @@ static int test_undo_cut(void) {
   return 0;
 }
 
+static int test_undo_line_break(void) {
+  cursor_t C = factory();
+  C.x = 3;
+  cursor_break_line(&C);
+  ASSERT_EQUAL(3, C.editor->row_size);
+  ASSERT_STRING_EQUAL(" bar baz", C.clp->text);
+  ASSERT_STRING_EQUAL("foo", C.clp->prev->text);
+
+  undo(&C);
+  ASSERT_EQUAL(2, C.editor->row_size);
+  ASSERT_STRING_EQUAL("foo bar baz", C.clp->text);
+
+  return 0;
+}
+
 int main() {
   int result = 0;
   result += test_undo_add();
   result += test_undo_backspace();
   result += test_undo_delete_forward();
   result += test_undo_cut();
+  result += test_undo_line_break();
 
   return result;
 }
