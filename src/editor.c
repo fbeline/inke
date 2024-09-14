@@ -191,14 +191,13 @@ line_t *editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
   if (x < 0 || x > lp->size)
     die("Invalid position x=%d", x);
 
-  char *tmp = strdup(lp->text + x);
-  lp->size = x + 1;
+  lp->size++;
+  if (lp->size > lp->capacity) lp = lrealloc(lp, lp->size);
+
+  memmove(lp->text + x + 1, lp->text + x, lp->size - x - 1);
   lp->text[x] = ch;
-  lp->text[lp->size] = '\0'; // out of index?
-  line_append(lp, tmp);
 
   E->dirty = true;
-  free(tmp);
 
   return lp;
 }

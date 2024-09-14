@@ -266,14 +266,8 @@ void cursor_remove_char(cursor_t* C) {
 }
 
 void cursor_insert_char(cursor_t* C, int ch) {
-  vec2_t pos = cursor_position(C);
-  C->clp = editor_insert_char_at(C->editor, C->clp, pos.x, ch);
-
-  C->x++;
-  if (C->x > C->max_col) {
-    C->coloff++;
-    C->x = C->max_col;
-  }
+  editor_insert_char_at(C->editor, C->clp, raw_x(C), ch);
+  cursor_right(C);
 
   undo_push(ADD, *C, NULL);
 }
