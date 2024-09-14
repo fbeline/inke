@@ -196,6 +196,7 @@ line_t *editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
 
   memmove(lp->text + x + 1, lp->text + x, lp->size - x - 1);
   lp->text[x] = ch;
+  lp->text[lp->size] = '\0';
 
   E->dirty = true;
 
@@ -203,6 +204,8 @@ line_t *editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
 }
 
 void editor_break_line(editor_t *E, line_t *lp, i32 x) {
+  if (lp == NULL || x > lp->size) return;
+
   line_t *new_line = lalloc(16);
   line_t *next_line = lp->next;
 
