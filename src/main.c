@@ -15,7 +15,7 @@ void Init(const char* filename) {
 
 int main(int argc, char **argv) {
   if (argc < 2) {
-    printf("usage: olive [file path]\n");
+    printf("usage: inke [file path]\n");
     exit(1);
   }
 

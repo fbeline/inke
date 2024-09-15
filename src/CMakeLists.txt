@@ -1,6 +1,6 @@
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_executable(olive
+add_executable(inke
   main.c
   types.h
   io.h io.c
@@ -11,9 +11,9 @@ add_executable(olive
   editor.h editor.c)
 
 if(WIN32)
-  target_link_libraries(olive)
+  target_link_libraries(inke)
 endif()
 
 if(UNIX)
-  target_link_libraries(olive -fsanitize=undefined,address)
+  target_link_libraries(inke -fsanitize=undefined,address)
 endif()

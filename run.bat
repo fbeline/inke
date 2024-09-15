@@ -12,7 +12,7 @@ echo Copying compile_commands...
 copy .\build\compile_commands.json .
 
 echo Running ...
-.\build\olive.exe notes.txt
+.\build\inke.exe notes.txt
 
 if errorlevel 1 (
     echo Failed to run test.

@@ -70,7 +70,3 @@ static inline bool in_range32(u32 val, u32 start, u32 len) {
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
 
 void die(const char* msg, ...);
-
-void *nrealloc(void *section, usize size);
-
-void *reallocstrcpy(char *dest, char *src, usize size);

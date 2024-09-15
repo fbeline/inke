@@ -7,4 +7,4 @@ if [ $? -ne 0 ]; then
 fi
 
 cp ./build/compile_commands.json .
-./build/olive notes.txt
+./build/inke notes.txt
