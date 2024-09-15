@@ -15,5 +15,5 @@ if(WIN32)
 endif()
 
 if(UNIX)
-  target_link_libraries(inke -fsanitize=undefined,address)
+  target_link_libraries(inke -fsanitize=undefined,address -Wall -Wextra -pedantic)
 endif()
