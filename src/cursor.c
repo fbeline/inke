@@ -97,6 +97,7 @@ static void __cursor_eol(cursor_t* C, bool region) {
     C->coloff = len - C->max_col;
   } else {
     C->x = len;
+    C->coloff = 0;
   }
 
   if (region)
