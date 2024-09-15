@@ -1,5 +1,3 @@
-#include <ctype.h>
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -8,6 +6,7 @@
 
 #include "editor.h"
 #include "cursor.h"
+#include "input.h"
 #include "utils.h"
 
 static editor_t E = {0};
@@ -39,6 +38,20 @@ static void enable_raw_mode(void) {
     die("tcsetattr");
 }
 
+void draw(void) {
+  int y;
+  for (y = 0; y < 24; y++) {
+    write(STDOUT_FILENO, "~\r\n", 3);
+  }
+}
+
+void refresh_screen(void) {
+  write(STDOUT_FILENO, "\x1b[2J", 4);
+  write(STDOUT_FILENO, "\x1b[H", 3);
+
+  draw();
+}
+
 int main(int argc, char **argv) {
   if (argc < 2) {
     printf("usage: inke [file path]\n");
@@ -48,15 +61,9 @@ int main(int argc, char **argv) {
   Init(argv[1]);
   enable_raw_mode();
 
-  while (1) {
-    char c = '\0';
-    if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) die("read");
-    if (iscntrl(c)) {
-      printf("%d\r\n", c);
-    } else {
-      printf("%d ('%c')\r\n", c, c);
-    }
-    if (c == 'q') break;
+  for(;;) {
+    refresh_screen();
+    input_process_keys(&C);
   }
 
   return 0;

@@ -4,7 +4,9 @@ add_executable(inke
   main.c
   types.h
   io.h io.c
+  vt100.h vt100.c
   utils.h utils.c
+  input.h input.c
   undo.h undo.c
   mode.h mode.c
   cursor.h cursor.c
