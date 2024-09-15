@@ -7,16 +7,18 @@ struct cursor_s;
 
 typedef struct region_s {
   bool active;
-  vec2_t vpos;
   struct cursor_s *cursor;
+  line_t *lp;
+  i32 offset, size; 
 } region_t;
 
 typedef struct cursor_s {
   i32 x, y;
   region_t region;
   i32 coloff, rowoff;
-  u16 max_col, max_row;
+  u32 max_col, max_row;
   editor_t* editor;
+  line_t* clp;
 } cursor_t;
 
 cursor_t cursor_init(editor_t* E);
@@ -50,6 +52,8 @@ void cursor_page_down(cursor_t* cursor);
 void cursor_move_word_forward(cursor_t* cursor);
 
 void cursor_move_word_backward(cursor_t* cursor);
+
+void cursor_move_line_up(cursor_t *C);
 
 void cursor_remove_char(cursor_t* cursor);
 

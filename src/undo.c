@@ -4,12 +4,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static undo_t* undo_head = NULL;
+#define UNDO_OFF 0
+#define UNDO_ON  1
 
-void undo_push(undo_type type, vec2_t pos, cursor_t cursor, const char* data) {
+static undo_t* undo_head = NULL;
+static int undo_state = UNDO_ON;
+
+void undo_push(undo_type type, cursor_t cursor, const char* data) {
+  if (undo_state == UNDO_OFF) return;
+
   undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
   undo->type = type;
-  undo->pos = pos;
   undo->cursor = cursor;
   undo->next = undo_head;
   undo->strdata = NULL;
@@ -38,46 +43,53 @@ void undo_free(undo_t* undo) {
   free(undo);
 }
 
+static void undo_line_delete(cursor_t *C, undo_t *undo) {
+  i32 y = C->y + C->rowoff;
+  C->clp = editor_insert_row_with_data_at(C->editor, y, undo->strdata);
+
+  if (y == 0) C->editor->lines = C->clp;
+}
+
 void undo(cursor_t* C) {
   editor_t* E = C->editor;
   undo_t* undo = undo_pop();
-
   if (undo == NULL) return;
 
+  cursor_set(C, &undo->cursor);
+  C->region.active = false;
+
+  undo_state = UNDO_OFF;
   switch (undo->type) {
     case ADD:
-      editor_delete_char_at(E, undo->pos);
+      cursor_remove_char(C);
       break;
     case BACKSPACE:
-      editor_insert_char_at(E, undo->pos.x, undo->pos.y, undo->strdata[0]);
+      cursor_insert_char(C, undo->strdata[0]);
       break;
     case LINEUP:
-      editor_break_line(E, undo->pos.x, undo->pos.y);
+      cursor_break_line(C);
       break;
     case LINEBREAK:
-      editor_move_line_up(E, undo->pos.y);
+      cursor_move_line_up(C);
       break;
     case LINEDELETE:
-      editor_insert_row_with_data_at(E, undo->pos.y, undo->strdata);
+      undo_line_delete(C, undo);
       break;
     case DELETE_FORWARD:
-      editor_insert_text(E, undo->pos, undo->strdata, strlen(undo->strdata));
+      cursor_insert_text(C, undo->strdata);
       break;
     case CUT:
-      cursor_set(C, &undo->cursor);
       cursor_insert_text(C, undo->strdata);
       break;
     case PASTE:
-      line_t *lp = editor_cut_between(C->editor, cursor_position(&undo->cursor), undo->pos);
-      free(lp);
+      // TODO: FIX it to discard new line size
+      editor_kill_between(C->editor, C->clp, C->x + C->coloff, atoi(undo->strdata));
       break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
-      undo_free(undo);
-      return;
   }
 
-  cursor_set(C, &undo->cursor);
+  undo_state = UNDO_ON;
   undo_free(undo);
 }
 

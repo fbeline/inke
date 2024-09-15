@@ -14,15 +14,14 @@ editor_t factory() {
     .running = true,
   };
 
-  e.rows = malloc(sizeof(row_t) * 2);
+  e.lines = lalloc(0);
+  line_append(e.lines, "foo bar baz");
 
-  char* t1 = "foo bar baz";
-  e.rows[0].size = strlen(t1);
-  e.rows[0].chars = strdup(t1);
+  line_t* l2 = lalloc(0);
+  line_append(l2, "qux quux corge");
 
-  char* t2 = "qux quux corge";
-  e.rows[1].size = strlen(t2);
-  e.rows[1].chars = strdup(t2);
+  e.lines->next = l2;
+  l2->prev = e.lines;
 
   return e;
 }
@@ -31,16 +30,16 @@ int test_insert_char_at() {
   editor_t E = factory();
 
   // bol
-  editor_insert_char_at(&E, 0, 0, 'a');
-  ASSERT_STRING_EQUAL("afoo bar baz", E.rows[0].chars);
+  editor_insert_char_at(&E, E.lines, 0, 'a');
+  ASSERT_STRING_EQUAL("afoo bar baz", E.lines->text);
 
   // middle
-  editor_insert_char_at(&E, 5, 0, 'b');
-  ASSERT_STRING_EQUAL("afoo bbar baz", E.rows[0].chars);
+  editor_insert_char_at(&E, E.lines, 5, 'b');
+  ASSERT_STRING_EQUAL("afoo bbar baz", E.lines->text);
 
   // eol
-  editor_insert_char_at(&E, 13, 0, 'y');
-  ASSERT_STRING_EQUAL("afoo bbar bazy", E.rows[0].chars);
+  editor_insert_char_at(&E, E.lines, 13, 'y');
+  ASSERT_STRING_EQUAL("afoo bbar bazy", E.lines->text);
 
   return 0;
 }
@@ -49,13 +48,13 @@ int test_move_line_up() {
   editor_t E = factory();
 
   // moveup first line
-  editor_move_line_up(&E, 0);
-  ASSERT_STRING_EQUAL("foo bar baz", E.rows[0].chars);
+  editor_move_line_up(&E, E.lines);
+  ASSERT_STRING_EQUAL("foo bar baz", E.lines->text);
   ASSERT_EQUAL(2, E.row_size);
 
   // moveup second line
-  editor_move_line_up(&E, 1);
-  ASSERT_STRING_EQUAL("foo bar bazqux quux corge", E.rows[0].chars);
+  E.lines = editor_move_line_up(&E, E.lines->next);
+  ASSERT_STRING_EQUAL("foo bar bazqux quux corge", E.lines->text);
   ASSERT_EQUAL(1, E.row_size);
 
   return 0;
@@ -64,13 +63,21 @@ int test_move_line_up() {
 int test_delete_rows() {
   editor_t E = factory();
 
-  editor_delete_rows(&E, 0, 0);
+  // delete first line
+  editor_delete_lines(&E, E.lines, 1);
   ASSERT_EQUAL(E.row_size, 1);
-  ASSERT_STRING_EQUAL("qux quux corge", E.rows[0].chars);
+  ASSERT_STRING_EQUAL("qux quux corge", E.lines->text);
 
-  editor_delete_rows(&E, 0, 0);
+  // delete seconds and last line
+  editor_delete_lines(&E, E.lines, 1);
   ASSERT_EQUAL(E.row_size, 1); // min row size is 1
-  ASSERT_STRING_EQUAL("", E.rows[0].chars);
+  ASSERT_STRING_EQUAL("", E.lines->text);
+
+  // delete all lines at once
+  editor_t E2 = factory();
+  editor_delete_lines(&E, E.lines, 2);
+  ASSERT_EQUAL(E.row_size, 1); // min row size is 1
+  ASSERT_STRING_EQUAL("", E.lines->text);
 
   return 0;
 }
@@ -78,10 +85,11 @@ int test_delete_rows() {
 int test_break_line() {
   editor_t E = factory();
 
-  editor_break_line(&E, 3, 0);
+  editor_break_line(&E, E.lines, 3);
   ASSERT_EQUAL(E.row_size, 3);
-  ASSERT_STRING_EQUAL("foo", E.rows[0].chars);
-  ASSERT_STRING_EQUAL(" bar baz", E.rows[1].chars);
+  ASSERT_STRING_EQUAL("foo", E.lines->text);
+  ASSERT_EQUAL(3, (i32)E.lines->size);
+  ASSERT_STRING_EQUAL(" bar baz", E.lines->next->text);
 
   return 0;
 }
@@ -90,16 +98,16 @@ int test_delete_char() {
   editor_t E = factory();
 
   // first char
-  editor_delete_char_at(&E, (vec2_t){0, 0});
-  ASSERT_STRING_EQUAL("oo bar baz", E.rows[0].chars);
+  editor_delete_char_at(E.lines, 0);
+  ASSERT_STRING_EQUAL("oo bar baz", E.lines->text);
 
   // middle line
-  editor_delete_char_at(&E, (vec2_t){4, 0});
-  ASSERT_STRING_EQUAL("oo ar baz", E.rows[0].chars);
+  editor_delete_char_at(E.lines, 3);
+  ASSERT_STRING_EQUAL("oo ar baz", E.lines->text);
 
   // last char
-  editor_delete_char_at(&E, (vec2_t){strlen(E.rows[0].chars), 0});
-  ASSERT_STRING_EQUAL("oo ar ba", E.rows[0].chars);
+  editor_delete_char_at(E.lines, strlen(E.lines->text)-1);
+  ASSERT_STRING_EQUAL("oo ar ba", E.lines->text);
 
   return 0;
 }
@@ -107,25 +115,25 @@ int test_delete_char() {
 int test_text_between() {
   editor_t E = factory();
 
-  line_t* lp = editor_text_between(&E, (vec2_t){4, 0}, (vec2_t){7, 0});
-  ASSERT_STRING_EQUAL("bar", lp->text);
+  char *text = editor_text_between(E.lines, 4, 3);
+  ASSERT_STRING_EQUAL("bar", text);
 
-  lp = editor_text_between(&E, (vec2_t){4, 1}, (vec2_t){8, 1});
-  ASSERT_STRING_EQUAL("quux", lp->text);
+  char *text2 = editor_text_between(E.lines, 4, 10);
+  ASSERT_STRING_EQUAL("bar baz\nqux", text2);
 
   return 0;
 }
 
-int test_cut_between() {
+int test_kill_between() {
   editor_t E = factory();
 
-  line_t *lp = editor_cut_between(&E, (vec2_t){4, 0}, (vec2_t){7, 0});
-  ASSERT_STRING_EQUAL("bar", lp->text);
-  ASSERT_STRING_EQUAL("foo  baz", E.rows[0].chars);
+  char *text = editor_kill_between(&E, E.lines, 4, 3);
+  ASSERT_STRING_EQUAL("bar", text);
+  ASSERT_STRING_EQUAL("foo  baz", E.lines->text);
 
-  lp = editor_cut_between(&E, (vec2_t){4, 1}, (vec2_t){8, 1});
-  ASSERT_STRING_EQUAL("quux", lp->text);
-  ASSERT_STRING_EQUAL("qux  corge", E.rows[1].chars);
+  editor_t E2 = factory();
+  char *text2 = editor_kill_between(&E2, E2.lines, 4, 11);
+  ASSERT_STRING_EQUAL("foo quux corge", E2.lines->text);
 
   return 0;
 }
@@ -133,18 +141,10 @@ int test_cut_between() {
 int test_char_at() {
   editor_t E = factory();
 
-  char ch1 = editor_char_at(&E, 4, 0);
+  char ch1 = editor_char_at(E.lines, 4);
   ASSERT_EQUAL('b', ch1);
-  char ch2 = editor_char_at(&E, strlen(E.rows[1].chars)-1, 1);
+  char ch2 = editor_char_at(E.lines->next, E.lines->next->size-1);
   ASSERT_EQUAL('e', ch2);
-
-  return 0;
-}
-
-int test_row_len() {
-  editor_t E = factory();
-
-  ASSERT_EQUAL(11, (i32)editor_rowlen(&E, 0));
 
   return 0;
 }
@@ -152,15 +152,13 @@ int test_row_len() {
 int test_insert_row_at() {
   editor_t E = factory();
 
-  // insert row at bof
   editor_insert_row_at(&E, 0);
-  ASSERT_EQUAL(3, E.row_size);
-  ASSERT_STRING_EQUAL("", E.rows[0].chars);
-
-  // insert row at eof
-  editor_insert_row_at(&E, E.row_size);
+  editor_insert_row_at(&E, 3);
   ASSERT_EQUAL(4, E.row_size);
-  ASSERT_STRING_EQUAL("", E.rows[E.row_size-1].chars);
+  ASSERT_STRING_EQUAL("", E.lines->text);
+  ASSERT_STRING_EQUAL("foo bar baz", E.lines->next->text);
+  ASSERT_STRING_EQUAL("qux quux corge", E.lines->next->next->text);
+  ASSERT_STRING_EQUAL("", E.lines->next->next->next->text);
 
   return 0;
 }
@@ -169,13 +167,10 @@ int test_insert_row_with_data_at() {
   editor_t E = factory();
 
   editor_insert_row_with_data_at(&E, 0, "first row");
-  ASSERT_STRING_EQUAL("first row", E.rows[0].chars);
+  ASSERT_STRING_EQUAL("first row", E.lines->text);
 
-  editor_insert_row_with_data_at(&E, 1, "middle row");
-  ASSERT_STRING_EQUAL("middle row", E.rows[1].chars);
-
-  editor_insert_row_with_data_at(&E, E.row_size, "last row");
-  ASSERT_STRING_EQUAL("last row", E.rows[E.row_size-1].chars);
+  editor_insert_row_with_data_at(&E, 2, "middle row");
+  ASSERT_STRING_EQUAL("middle row", E.lines->next->next->text);
 
   return 0;
 }
@@ -183,14 +178,20 @@ int test_insert_row_with_data_at() {
 int test_editor_insert_text() {
   editor_t E = factory();
 
-  editor_insert_text(&E, (vec2_t){0, 0}, "first ", 6);
-  ASSERT_STRING_EQUAL("first foo bar baz", E.rows[0].chars);
+  editor_insert_text(&E, E.lines, 0, "first ");
+  ASSERT_STRING_EQUAL("first foo bar baz", E.lines->text);
 
-  editor_insert_text(&E, (vec2_t){6, 0}, "middle ", 7);
-  ASSERT_STRING_EQUAL("first middle foo bar baz", E.rows[0].chars);
+  editor_insert_text(&E, E.lines, 6, "middle ");
+  ASSERT_STRING_EQUAL("first middle foo bar baz", E.lines->text);
 
-  editor_insert_text(&E, (vec2_t){strlen(E.rows[0].chars), 0}, " end", 4);
-  ASSERT_STRING_EQUAL("first middle foo bar baz end", E.rows[0].chars);
+  editor_insert_text(&E, E.lines, E.lines->size, " end");
+  ASSERT_STRING_EQUAL("first middle foo bar baz end", E.lines->text);
+
+  editor_t E2 = factory();
+  editor_insert_text(&E2, E2.lines, 4, "testing\nmultiline ");
+  ASSERT_STRING_EQUAL(E2.lines->text, "foo testing");
+  ASSERT_STRING_EQUAL(E2.lines->next->text, "multiline bar baz");
+  ASSERT_EQUAL(3, E2.row_size);
 
   return 0;
 }
@@ -198,9 +199,7 @@ int test_editor_insert_text() {
 int test_rows_to_string() {
   editor_t E = factory();
 
-  printf("== TESTING ROWS TO STRING\n");
-
-  line_t* lp = editor_rows_to_string(E.rows, E.row_size);
+  line_t* lp = editor_rows_to_string(E.lines, E.row_size);
   ASSERT_STRING_EQUAL("foo bar baz\nqux quux corge\n", lp->text);
 
   line_free(lp);
@@ -217,9 +216,8 @@ int main() {
   result += test_break_line();
   result += test_delete_char();
   result += test_text_between();
-  result += test_cut_between();
+  result += test_kill_between();
   result += test_char_at();
-  result += test_row_len();
   result += test_insert_row_at();
   result += test_insert_row_with_data_at();
   result += test_editor_insert_text();

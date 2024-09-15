@@ -28,16 +28,28 @@ static void render_highlight_line(render_t* R, i32 y, i32 xs, i32 xe) {
 static void render_draw_region(cursor_t* C, render_t* R) {
   if (!C->region.active) return;
 
-  vec2_t cp = {C->x, C->y};
-  vec2_t rp = C->region.vpos;
-  vec2_t ps = rp.y <= cp.y ? rp : cp;
-  vec2_t pe = rp.y > cp.y ? rp : cp;
-  pe.y = MIN((i32)R->nrow + 1, pe.y);
-  for (i32 i = ps.y; i <= pe.y; i++) {
-    i32 xs = i == ps.y ? ps.x : 0;
-    i32 xe = i == pe.y ? pe.x : editor_rowlen(C->editor, i + C->rowoff);
-    render_highlight_line(R, i, xs, xe);
+  i32 y = 0;
+  line_t *lp = C->editor->lines;
+  while(lp != C->region.lp && lp != NULL) {
+    y++;
+    lp = lp->next;
   }
+
+  if (lp->size >= C->region.size + C->region.offset) {
+    render_highlight_line(R, y, C->region.offset, C->region.offset + C->region.size);
+    return;
+  }
+
+  i32 offset = C->region.offset;
+  i32 size = C->region.size;
+  while(lp != NULL && size > 0) {
+    render_highlight_line(R, y, offset, MIN((i32)lp->size, size));
+    size -= (lp->size - offset);
+    offset = 0;
+    lp = lp->next;
+    y++;
+  }
+
 }
 
 static void render_draw_cursor(cursor_t* C, render_t* R) {
@@ -160,26 +172,33 @@ static void render_draw_vertical_bar(render_t* R) {
 
 static void render_draw_lines(cursor_t* C, render_t* R) {
   editor_t* E = C->editor;
+  line_t *lp = E->lines;
+
+  i32 counter = 0;
+  while (lp != NULL && counter++ < C->rowoff){
+    if (lp->next == NULL) break;
+    lp = lp->next;
+  };
+
   for (usize i = 0; i + C->rowoff < E->row_size; i++) {
+    if (lp == NULL || i > R->nrow) break;
+
     f32 y = R->font_line_spacing * i + R->margin_top;
 
-    if (i > R->nrow) break;
-
     char vrow[512] = {0};
-    row_t row = E->rows[i + C->rowoff];
-    i64 row_len = strlen(row.chars);
-    i64 vrow_len = MIN(row_len - C->coloff, (i32)R->ncol);
+    i64 vrow_len = MIN((i32)lp->size - C->coloff, (i32)R->ncol);
 
-    if (vrow_len <= 0)
-      continue;
+    if (vrow_len > 0)
+      memcpy(vrow, lp->text + C->coloff, vrow_len);
 
-    memcpy(vrow, row.chars + C->coloff, vrow_len);
     DrawTextEx(R->font,
                vrow,
                (Vector2){R->margin_left, y},
                R->font_size,
                0,
                DARKGRAY);
+
+    lp = lp->next;
   }
 }
 

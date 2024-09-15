@@ -4,16 +4,13 @@
 
 #define VERSION "0.0.1"
 
-typedef struct row_s {
-  int capacity;
-  int size; 
-  char* chars;
-} row_t;
-
 typedef struct line {
+  struct line *next;
+  struct line *prev;
+
   usize capacity;
   usize size;
-  char text[];
+  char *text;
 } line_t;
 
 typedef struct editor_s {
@@ -23,8 +20,10 @@ typedef struct editor_s {
   bool dirty;
   bool new_file;
   bool running;
-  row_t* rows;
+  line_t* lines;
 } editor_t;
+
+line_t *lalloc(usize capacity);
 
 line_t* line_append_s(line_t *lp, const char *str, usize len);
 
@@ -32,33 +31,33 @@ line_t* line_append(line_t *lp, const char *str);
 
 void line_free(line_t *lp);
 
-void editor_move_line_up(editor_t* E, i32 y);
+line_t *editor_move_line_up(editor_t *E, line_t *lp);
 
-void editor_delete_forward(editor_t* E, i32 x, i32 y);
+void editor_delete_forward(line_t *lp, i32 x);
 
-void editor_delete_rows(editor_t* E, i32 start, i32 end);
+void editor_delete_backward(line_t *lp, i32 x);
 
-void editor_break_line(editor_t* E, i32 x, i32 y);
+void editor_delete_lines(editor_t *E, line_t* lp, i32 size);
 
-void editor_delete_char_at(editor_t* E, vec2_t pos);
+void editor_break_line(editor_t *E, line_t *lp, i32 x);
 
-void editor_insert_char_at(editor_t* E, i32 x, i32 y, char ch);
+void editor_delete_char_at(line_t *lp, i32 x);
 
-line_t* editor_text_between(editor_t* E, vec2_t start, vec2_t end);
+line_t* editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch);
 
-line_t* editor_cut_between(editor_t* E, vec2_t start, vec2_t end);
+char* editor_text_between(line_t *lp, i32 offset, i32 size);
 
-char editor_char_at(editor_t* E, i32 x, i32 y);
+char* editor_kill_between(editor_t* E, line_t *lp, i32 offset, i32 size);
 
-usize editor_rowlen(editor_t* E, i32 y);
+char editor_char_at(line_t *lp, i32 x);
 
-void editor_insert_row_at(editor_t* E, usize n);
+line_t* editor_insert_row_at(editor_t* E, usize n);
 
-void editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata);
+line_t* editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata);
 
-void editor_insert_text(editor_t* E, vec2_t pos, const char* str, usize dlen);
+void editor_insert_text(editor_t *E, line_t* lp, i32 x, const char* str);
 
-line_t* editor_rows_to_string(row_t* rows, unsigned int size);
+line_t* editor_rows_to_string(line_t* lines, unsigned int size);
 
 editor_t editor_init(const char* filename);
 
