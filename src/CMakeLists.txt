@@ -5,6 +5,7 @@ add_executable(inke
   types.h
   io.h io.c
   vt100.h vt100.c
+  terminal.h terminal.c
   utils.h utils.c
   input.h input.c
   undo.h undo.c
