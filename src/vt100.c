@@ -18,6 +18,10 @@ void tt_flush(void) {
   if (status != 0 && errno != EAGAIN) exit(errno);
 }
 
+void tt_puts(char *buf) {
+  fputs(buf, stdout);
+}
+
 static void tt_putc(char c) {
 	fputc(c, stdout);
 }
@@ -35,9 +39,25 @@ static void vt_csi(void) {
   tt_putc(OPEN_BRACKET);
 }
 
+void vt_erase_display(void) {
+  tt_putc(ESC);
+  tt_putc(OPEN_BRACKET);
+  tt_putc('2');
+  tt_putc('J');
+}
+
+void vt_set_cursor_position(i32 x, i32 y) {
+  tt_putc(ESC);
+  tt_putc(OPEN_BRACKET);
+  tt_puti(x);
+  tt_putc(DELIMITER);
+  tt_puti(y);
+  tt_putc('H');
+}
+
 void vt_clear_screen(void) {
-  write(STDOUT_FILENO, "\x1b[2J", 4);
-  write(STDOUT_FILENO, "\x1b[H", 3);
+  vt_erase_display();
+  vt_set_cursor_position(0, 0);
 }
 
 void vt_cursor_forward(i32 pn) {
@@ -56,6 +76,14 @@ void vt_cursor_down(i32 pn) {
   tt_putc(OPEN_BRACKET);
   tt_puti(pn);
   tt_putc('B');
+}
+
+void vt_hide_cursor(void) {
+  tt_puts("\x1b[?25l");
+}
+
+void vt_show_cursor(void) {
+  tt_puts("\x1b[?25h");
 }
 
 i32 vt_cursor_position(int *rows, int *cols) {

@@ -6,6 +6,7 @@
 #include <sys/ioctl.h>
 
 #include "utils.h"
+#include "vt100.h"
 
 static term_t T;
 
@@ -29,18 +30,22 @@ static void enable_raw_mode(term_t *T) {
     die("tcsetattr");
 }
 
-static void draw(term_t* T) {
+static void term_draw(term_t *T, cursor_t *C) {
   int y;
-  for (y = 0; y < T->rows; y++) {
-    write(STDOUT_FILENO, "~\r\n", 3);
+  line_t *lp = C->editor->lines;
+  line_t *buffer = lalloc(32);
+
+  for (y = 0; y < T->rows && lp != NULL; y++) {
+    line_append(buffer, lp->text);
+    if (y < T->rows - 1) {
+      line_append(buffer, "\r\n");
+    }
+    lp = lp->next;
   }
-}
 
-static void refresh_screen(term_t *T) {
-  write(STDOUT_FILENO, "\x1b[2J", 4);
-  write(STDOUT_FILENO, "\x1b[H", 3);
+  tt_puts(buffer->text);
 
-  draw(T);
+  line_free(buffer);
 }
 
 static i32 term_get_size(term_t *T) {
@@ -60,5 +65,14 @@ void term_init(void) {
 }
 
 void term_render(cursor_t *C) {
-  refresh_screen(&T);
+  vt_erase_display();
+  vt_set_cursor_position(0, 0);
+  vt_hide_cursor();
+  tt_flush();
+
+  term_draw(&T, C);
+
+  vt_show_cursor();
+  vt_set_cursor_position(C->x, C->y);
+  tt_flush();
 }
