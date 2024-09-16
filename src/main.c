@@ -6,7 +6,6 @@
 #include "cursor.h"
 #include "input.h"
 #include "terminal.h"
-#include "utils.h"
 
 static editor_t E = {0};
 static cursor_t C = {0};

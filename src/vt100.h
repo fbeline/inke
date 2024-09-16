@@ -14,6 +14,8 @@ void vt_hide_cursor(void);
 
 void vt_erase_display(void);
 
+void vt_erase_line(void);
+
 void vt_clear_screen(void);
 
 void vt_cursor_forward(i32 pn);

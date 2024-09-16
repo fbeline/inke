@@ -82,6 +82,10 @@ void vt_hide_cursor(void) {
   tt_puts("\x1b[?25l");
 }
 
+void vt_erase_line(void) {
+  tt_puts("\x1b[K");
+}
+
 void vt_show_cursor(void) {
   tt_puts("\x1b[?25h");
 }

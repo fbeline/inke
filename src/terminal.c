@@ -36,6 +36,7 @@ static void term_draw(term_t *T, cursor_t *C) {
   line_t *buffer = lalloc(32);
 
   for (y = 0; y < T->rows && lp != NULL; y++) {
+    vt_erase_line();
     line_append(buffer, lp->text);
     if (y < T->rows - 1) {
       line_append(buffer, "\r\n");
@@ -61,18 +62,22 @@ static i32 term_get_size(term_t *T) {
 
 void term_init(void) {
   enable_raw_mode(&T);
+  vt_erase_display();
   if (term_get_size(&T) == -1) die("term_get_size");
 }
 
 void term_render(cursor_t *C) {
-  vt_erase_display();
+  C->max_col = T.cols;
+  C->max_row = T.rows;
+
   vt_set_cursor_position(0, 0);
   vt_hide_cursor();
   tt_flush();
 
   term_draw(&T, C);
 
+  vec2_t pos = cursor_position(C);
+  vt_set_cursor_position(pos.y + 1, pos.x + 1);
   vt_show_cursor();
-  vt_set_cursor_position(C->x, C->y);
   tt_flush();
 }
