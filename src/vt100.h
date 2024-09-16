@@ -9,3 +9,5 @@ void vt_clear_screen(void);
 void vt_cursor_forward(i32 pn);
 
 void vt_cursor_down(i32 pn);
+
+i32 vt_cursor_position(int *rows, int *cols);
