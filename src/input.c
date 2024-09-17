@@ -1,16 +1,19 @@
 #include "input.h"
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
 
+#include "cursor.h"
 #include "utils.h"
 #include "vt100.h"
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 enum keys {
+  BACKSPACE = 127,
   ARROW_LEFT = 1000,
   ARROW_RIGHT,
   ARROW_UP,
@@ -54,7 +57,7 @@ static i32 input_read_key() {
           case 'C': return ARROW_RIGHT;
           case 'D': return ARROW_LEFT;
         }
-      } 
+      }
     } else if (seq[0] == 'O') {
       switch (seq[1]) {
         case 'H': return HOME_KEY;
@@ -71,6 +74,9 @@ static i32 input_read_key() {
 void input_process_keys(cursor_t* C) {
   i32 c = input_read_key();
   switch (c) {
+    case BACKSPACE:
+      cursor_remove_char(C);
+      break;
     case CTRL_KEY('p'):
     case ARROW_UP:
       cursor_up(C);
@@ -104,6 +110,9 @@ void input_process_keys(cursor_t* C) {
     case CTRL_KEY('q'):
       vt_clear_screen();
       exit(0);
+      break;
+    default:
+      if (isprint(c)) cursor_insert_char(C, c);
       break;
   }
 }
