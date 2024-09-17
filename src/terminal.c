@@ -1,7 +1,8 @@
 #include "terminal.h"
 
-#include <stdio.h>
 #include <unistd.h>
+#include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
 
@@ -10,14 +11,24 @@
 
 static term_t T;
 
-static void disable_raw_mode(void) {
+void disable_raw_mode(void) {
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &T.oterm) == -1)
     die("tcsetattr");
 }
 
+void signal_handler(int signum) {
+  disable_raw_mode();
+  die("Caught signal %d, exiting...", signum);
+}
+
 static void enable_raw_mode(term_t *T) {
   if (tcgetattr(STDIN_FILENO, &T->oterm) == -1) die("tcgetattr");
+
   atexit(disable_raw_mode);
+  signal(SIGTERM, signal_handler);
+  signal(SIGSEGV, signal_handler);
+  signal(SIGABRT, signal_handler);
+
   struct termios raw = T->oterm;
   raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
   raw.c_oflag &= ~(OPOST);
