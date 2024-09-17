@@ -10,9 +10,10 @@
 #include "utils.h"
 #include "vt100.h"
 
-#define CTRL_KEY(k) ((k) & 0x1f)
-#define META 0x20000000
-#define META_KEY(k) (META | (k))
+#define NBINDS  256
+#define CONTROL 0x10000000
+#define META    0x20000000
+#define CTLX    0x40000000
 
 enum keys {
   TAB = 9,
@@ -29,6 +30,51 @@ enum keys {
   DEL_KEY
 };
 
+typedef void (*key_func_t)(cursor_t *C);
+
+typedef struct keytab {
+  i32 code;
+  key_func_t fp;
+} keytab_t;
+
+static keytab_t keytabs[NBINDS] = {
+  { HOME_KEY , cursor_bol },
+  { END_KEY , cursor_eol },
+  { PAGE_DOWN, cursor_page_down },
+  { PAGE_UP, cursor_page_up },
+  { ARROW_LEFT, cursor_left },
+  { ARROW_RIGHT, cursor_right },
+  { ARROW_UP, cursor_up },
+  { ARROW_DOWN, cursor_down },
+  { BACKSPACE, cursor_remove_char },
+  { DEL_KEY, cursor_remove_char },
+  { ENTER, cursor_break_line },
+
+  { CONTROL | 'H', cursor_remove_char },
+  { CONTROL | 'A', cursor_bol },
+  { CONTROL | 'E', cursor_eol },
+  { CONTROL | 'K', cursor_delete_forward },
+  { CONTROL | 'N', cursor_down },
+  { CONTROL | 'P', cursor_up },
+
+  { META | 'f', cursor_move_word_forward },
+  { META | 'b', cursor_move_word_backward },
+
+  { 0, NULL}
+};
+
+static key_func_t get_kfp(int c) {
+	keytab_t *ktp = &keytabs[0];
+
+	while (ktp->fp != NULL) {
+		if (ktp->code == c)
+			return ktp->fp;
+		++ktp;
+	}
+
+	return NULL;
+}
+
 static i32 input_read_key() {
   i32 nread;
   char c;
@@ -38,9 +84,11 @@ static i32 input_read_key() {
 
   if (c == '\x1b') {
     char seq[3];
+
     if (read(STDIN_FILENO, &seq[0], 1) != 1) return '\x1b';
-    if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
+
     if (seq[0] == '[') {
+      if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
       if (seq[1] >= '0' && seq[1] <= '9') {
         if (read(STDIN_FILENO, &seq[2], 1) != 1) return '\x1b';
         if (seq[2] == '~') {
@@ -63,13 +111,20 @@ static i32 input_read_key() {
         }
       }
     } else if (seq[0] == 'O') {
+      if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
       switch (seq[1]) {
         case 'H': return HOME_KEY;
         case 'F': return END_KEY;
       }
 
       return '\x1b';
+    } else if (seq[0] >= ' ' && seq[0] <= '~') {
+      return META | seq[0];
     }
+  }
+
+  if (c >= 0x00 && c <= 0x1F) {
+    return CONTROL | (c + '@');
   }
 
   return c;
@@ -77,63 +132,17 @@ static i32 input_read_key() {
 
 void input_process_keys(cursor_t* C) {
   i32 c = input_read_key();
-  switch (c) {
-    case CTRL_KEY('h'):
-    case BACKSPACE:
-      cursor_remove_char(C);
-      break;
-    case CTRL_KEY('k'):
-      cursor_delete_forward(C);
-      break;
-    case ENTER:
-      cursor_break_line(C);
-      break;
-    case META_KEY('f'):
-      cursor_move_word_forward(C);
-      break;
-    case META_KEY('b'):
-      cursor_move_word_backward(C);
-      break;
-    case CTRL_KEY('p'):
-    case ARROW_UP:
-      cursor_up(C);
-      break;
-    case CTRL_KEY('n'):
-    case ARROW_DOWN:
-      cursor_down(C);
-      break;
-    case CTRL_KEY('f'):
-    case ARROW_RIGHT:
-      cursor_right(C);
-      break;
-    case CTRL_KEY('b'):
-    case ARROW_LEFT:
-      cursor_left(C);
-      break;
-    case PAGE_UP:
-      cursor_page_up(C);
-      break;
-    case PAGE_DOWN:
-      cursor_page_down(C);
-      break;
-    case CTRL_KEY('a'):
-    case HOME_KEY:
-      cursor_bol(C);
-      break;
-    case CTRL_KEY('e'):
-    case END_KEY:
-      cursor_eol(C);
-      break;
-    case CTRL_KEY('q'):
-      vt_clear_screen();
-      exit(0);
-      break;
-    case TAB:
-      cursor_insert_char(C, ' ');
-      cursor_insert_char(C, ' ');
-      break;
-    default:
-      if (isprint(c)) cursor_insert_char(C, c);
-      break;
+  key_func_t kfp;
+
+  if ((kfp = get_kfp(c)) != NULL) {
+    kfp(C);
+    return;
+  } 
+
+  if (c == TAB) {
+    cursor_insert_char(C, ' ');
+    cursor_insert_char(C, ' ');
+  } else if (c >= 32 && c <= 126) {
+    cursor_insert_char(C, c);
   }
 }
