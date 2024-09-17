@@ -11,8 +11,12 @@
 #include "vt100.h"
 
 #define CTRL_KEY(k) ((k) & 0x1f)
+#define META 0x20000000
+#define META_KEY(k) (META | (k))
 
 enum keys {
+  TAB = 9,
+  ENTER = 13,
   BACKSPACE = 127,
   ARROW_LEFT = 1000,
   ARROW_RIGHT,
@@ -74,8 +78,21 @@ static i32 input_read_key() {
 void input_process_keys(cursor_t* C) {
   i32 c = input_read_key();
   switch (c) {
+    case CTRL_KEY('h'):
     case BACKSPACE:
       cursor_remove_char(C);
+      break;
+    case CTRL_KEY('k'):
+      cursor_delete_forward(C);
+      break;
+    case ENTER:
+      cursor_break_line(C);
+      break;
+    case META_KEY('f'):
+      cursor_move_word_forward(C);
+      break;
+    case META_KEY('b'):
+      cursor_move_word_backward(C);
       break;
     case CTRL_KEY('p'):
     case ARROW_UP:
@@ -110,6 +127,10 @@ void input_process_keys(cursor_t* C) {
     case CTRL_KEY('q'):
       vt_clear_screen();
       exit(0);
+      break;
+    case TAB:
+      cursor_insert_char(C, ' ');
+      cursor_insert_char(C, ' ');
       break;
     default:
       if (isprint(c)) cursor_insert_char(C, c);
