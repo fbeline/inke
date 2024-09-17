@@ -26,8 +26,7 @@ static void enable_raw_mode(term_t *T) {
   raw.c_cc[VMIN] = 0;
   raw.c_cc[VTIME] = 1;
 
-  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1)
-    die("tcsetattr");
+  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
 static void term_draw(term_t *T, cursor_t *C) {
@@ -35,16 +34,20 @@ static void term_draw(term_t *T, cursor_t *C) {
   line_t *lp = C->editor->lines;
   line_t *buffer = lalloc(32);
 
-  for (y = 0; y < T->rows && lp != NULL; y++) {
-    vt_erase_line();
-    line_append(buffer, lp->text);
-    if (y < T->rows - 1) {
-      line_append(buffer, "\r\n");
-    }
+  for (i32 i = 0; i < C->rowoff && lp->next != NULL; i++) {
     lp = lp->next;
   }
 
-  tt_puts(buffer->text);
+  for (y = 0; y < T->rows && lp != NULL; y++) {
+    i32 size = (i32)lp->size - C->coloff;
+    size = CLAMP(size, 0, T->cols);
+    line_append_s(buffer, lp->text + C->coloff, size);
+    lp = lp->next;
+
+    if (y < T->rows - 1) line_append(buffer, "\r\n");
+  }
+
+  write(STDOUT_FILENO, buffer->text, buffer->size);
 
   line_free(buffer);
 }
@@ -70,6 +73,7 @@ void term_render(cursor_t *C) {
   C->max_col = T.cols;
   C->max_row = T.rows;
 
+  vt_erase_display();
   vt_set_cursor_position(0, 0);
   vt_hide_cursor();
   tt_flush();

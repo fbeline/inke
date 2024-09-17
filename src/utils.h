@@ -64,6 +64,18 @@ static inline bool in_range32(u32 val, u32 start, u32 len) {
 })
 
 /**
+ * CLAMP - limit a value between a minimum and maximum range
+ * @value: the value to be clamped
+ * @min: the minimum allowable value
+ * @max: the maximum allowable value
+ *
+ * This macro returns @value limited to the range between @min and @max.
+ * If @value is less than @min, the result is @min. If @value is greater
+ * than @max, the result is @max. Otherwise, it returns @value.
+ */
+#define CLAMP(value, min, max) (MAX(MIN((value), (max)), (min)))
+
+/**
  * ARRAY_SIZE - get the number of elements in array @arr
  * @arr: array to be sized
  */

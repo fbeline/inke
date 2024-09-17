@@ -343,6 +343,10 @@ cursor_t cursor_init(editor_t* E) {
   cursor_t C = {0};
   C.editor = E;
   C.clp = E->lines;
+  C.coloff = 0;
+  C.rowoff = 0;
+  C.x = 0;
+  C.y = 0;
   C.region.cursor = (cursor_t*)malloc(sizeof(cursor_t));
 
   return C;
