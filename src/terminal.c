@@ -50,6 +50,7 @@ static void term_draw(term_t *T, cursor_t *C) {
   }
 
   for (y = 0; y < T->rows && lp != NULL; y++) {
+    line_append(buffer, "\x1b[K"); // erase line
     i32 size = (i32)lp->size - C->coloff;
     size = CLAMP(size, 0, T->cols);
     line_append_s(buffer, lp->text + C->coloff, size);
@@ -84,7 +85,6 @@ void term_render(cursor_t *C) {
   C->max_col = T.cols;
   C->max_row = T.rows;
 
-  vt_erase_display();
   vt_set_cursor_position(0, 0);
   vt_hide_cursor();
   tt_flush();
