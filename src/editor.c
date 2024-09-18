@@ -224,6 +224,7 @@ void editor_break_line(editor_t *E, line_t *lp, i32 x) {
 
 void editor_delete_forward(line_t *lp, i32 x) {
   lp->text[x] = '\0';
+  lp->size = x;
 }
 
 void editor_delete_backward(line_t *lp, i32 x) {

@@ -125,7 +125,7 @@ static i32 input_read_key() {
     }
   }
 
-  if (c >= 0x00 && c <= 0x1F) {
+  if (c >= 0x00 && c <= 0x1F && c != ENTER_KEY) {
     return CONTROL | (c + '@');
   }
 
