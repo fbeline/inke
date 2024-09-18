@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 
+#include "mode.h"
 #include "utils.h"
 #include "vt100.h"
 
@@ -61,7 +62,8 @@ static void term_draw_status_bar(term_t *T, cursor_t *C, line_t *buffer) {
   for (i32 i = len; i < T->cols; i++)
     line_append(buffer, " ");
 
-  line_append(buffer, "\x1b[m");
+  line_append(buffer, "\r\n\x1b[K\x1b[m");
+  line_append(buffer, mode_get_message());
 
   free(status);
 }
@@ -101,7 +103,7 @@ static i32 term_get_size(term_t *T) {
     return -1;
   } else {
     T->cols = ws.ws_col;
-    T->rows = ws.ws_row - 1;
+    T->rows = ws.ws_row - 2;
     return 0;
   }
 }
@@ -110,6 +112,11 @@ void term_init(void) {
   enable_raw_mode(&T);
   vt_erase_display();
   if (term_get_size(&T) == -1) die("term_get_size");
+}
+
+void term_restore(void) {
+  vt_erase_display();
+  disable_raw_mode();
 }
 
 void term_render(cursor_t *C) {

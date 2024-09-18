@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "cursor.h"
+#include "mode.h"
 #include "utils.h"
 #include "vt100.h"
 
@@ -136,22 +137,33 @@ static i32 input_read_key() {
   return c;
 }
 
-void input_process_keys(cursor_t* C) {
-  i32 c = input_read_key();
+static void process_insert_mode(cursor_t *C, i32 ch) {
   key_func_t kfp;
-
-  if ((kfp = get_kfp(c)) != NULL) {
+  if ((kfp = get_kfp(ch)) != NULL) {
     kfp(C);
     return;
   }
 
-  if (c == 'q'){
-    vt_clear_screen();
-    exit(0);
-  } else if (c == TAB_KEY) {
+  if (ch == 'q'){
+    if (C->editor->dirty)
+      return mode_set_exit_save(C->editor);
+    C->editor->running = false;
+  } else if (ch == TAB_KEY) {
     cursor_insert_char(C, ' ');
     cursor_insert_char(C, ' ');
-  } else if (c >= 32 && c <= 126) {
-    cursor_insert_char(C, c);
+  } else if (ch >= 32 && ch <= 126) {
+    cursor_insert_char(C, ch);
+  }
+}
+
+void input_process_keys(cursor_t* C) {
+  i32 ch = input_read_key();
+  switch (g_mode) {
+    case MODE_INSERT:
+      process_insert_mode(C, ch);
+      break;
+    case MODE_CMD_CHAR:
+      g_cmd_func(C->editor, ch);
+      break;
   }
 }

@@ -25,9 +25,13 @@ int main(int argc, char **argv) {
   Init(argv[1]);
 
   for(;;) {
+    if (!E.running) break;
+
     term_render(&C);
     input_process_keys(&C);
   }
+
+  term_restore();
 
   return 0;
 }
