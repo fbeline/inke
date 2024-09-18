@@ -23,6 +23,9 @@ typedef size_t usize;
 #define ABORT   2		/* Death, ^G, abort, etc.       */
 #define FAILED  3		/* not-quite fatal false return */
 
+#define CONTROL 0x10000000
+#define META    0x20000000
+
 typedef struct vec2_s {
   i32 x, y;
 } vec2_t;

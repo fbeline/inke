@@ -6,15 +6,13 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "types.h"
 #include "cursor.h"
 #include "mode.h"
 #include "utils.h"
 #include "vt100.h"
 
 #define NBINDS  256
-#define CONTROL 0x10000000
-#define META    0x20000000
-#define CTLX    0x40000000
 
 enum keys {
   TAB_KEY = 9,
@@ -51,6 +49,7 @@ static keytab_t keytabs[NBINDS] = {
   { DEL_KEY, cursor_remove_char },
   { ENTER_KEY, cursor_break_line },
 
+  { CONTROL | 'X', mode_set_ctrl_x },
   { CONTROL | 'H', cursor_remove_char },
   { CONTROL | 'A', cursor_bol },
   { CONTROL | 'E', cursor_eol },
@@ -144,11 +143,7 @@ static void process_insert_mode(cursor_t *C, i32 ch) {
     return;
   }
 
-  if (ch == 'q'){
-    if (C->editor->dirty)
-      return mode_set_exit_save(C->editor);
-    C->editor->running = false;
-  } else if (ch == TAB_KEY) {
+  if (ch == TAB_KEY) {
     cursor_insert_char(C, ' ');
     cursor_insert_char(C, ' ');
   } else if (ch >= 32 && ch <= 126) {
@@ -163,7 +158,7 @@ void input_process_keys(cursor_t* C) {
       process_insert_mode(C, ch);
       break;
     case MODE_CMD_CHAR:
-      g_cmd_func(C->editor, ch);
+      g_cmd_func(C, ch);
       break;
   }
 }

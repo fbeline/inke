@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+
+#include "types.h"
 #include "io.h"
 #include "utils.h"
 #include "vt100.h"
@@ -23,9 +25,9 @@ char* mode_get_message(void) {
   return message;
 }
 
-static void mode_cmd_nop(editor_t* E, char r) { }
+static void mode_cmd_nop(cursor_t *C, int ch) { }
 
-static void mode_cmd_not_found(editor_t* E, char r) {
+static void mode_cmd_not_found(cursor_t* C, int ch) {
   mode_set_message("keybind not defined");
   g_mode = MODE_INSERT;
 }
@@ -38,15 +40,15 @@ void mode_cmd_clean(void) {
   tt_flush();
 }
 
-static void mode_exit_save(editor_t* E, char r) {
+static void mode_exit_save(cursor_t* C, int ch) {
   char *buf;
-  switch (r) {
+  switch (ch) {
     case 'y':
-      io_write_buffer(E);
-      E->running = false;
+      io_write_buffer(C->editor);
+      C->editor->running = false;
       break;
     case 'n':
-      E->running = false;
+      C->editor->running = false;
       break;
     case 'c':
       mode_cmd_clean();
@@ -54,7 +56,7 @@ static void mode_exit_save(editor_t* E, char r) {
   }
 }
 
-void mode_set_exit_save(editor_t* E) {
+void mode_set_exit_save(cursor_t* C) {
   vt_hide_cursor();
   tt_flush();
   mode_set_message("Save file? (y/n or [c]ancel)");
@@ -62,9 +64,19 @@ void mode_set_exit_save(editor_t* E) {
   g_cmd_func = mode_exit_save;
 }
 
-void mode_set_ctrl_x(void) {
+static void mode_cmd_ctrl_x(cursor_t* C, int ch) {
+  if (ch == (CONTROL | 'C')) {
+    if (C->editor->dirty) mode_set_exit_save(C);
+    else C->editor->running = false;
+  } else if (ch == (CONTROL | 'S')) {
+    mode_cmd_clean();
+    io_write_buffer(C->editor);
+  }
+}
+
+void mode_set_ctrl_x(cursor_t *C) {
   mode_set_message("C-x");
-  g_mode = MODE_CMD;
-  g_cmd_func = mode_cmd_not_found;
+  g_mode = MODE_CMD_CHAR;
+  g_cmd_func = mode_cmd_ctrl_x;
 }
 
