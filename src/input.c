@@ -16,8 +16,8 @@
 #define CTLX    0x40000000
 
 enum keys {
-  TAB = 9,
-  ENTER = 13,
+  TAB_KEY = 9,
+  ENTER_KEY = 13,
   BACKSPACE = 127,
   ARROW_LEFT = 1000,
   ARROW_RIGHT,
@@ -38,8 +38,8 @@ typedef struct keytab {
 } keytab_t;
 
 static keytab_t keytabs[NBINDS] = {
-  { HOME_KEY , cursor_bol },
-  { END_KEY , cursor_eol },
+  { HOME_KEY, cursor_bol },
+  { END_KEY, cursor_eol },
   { PAGE_DOWN, cursor_page_down },
   { PAGE_UP, cursor_page_up },
   { ARROW_LEFT, cursor_left },
@@ -48,7 +48,7 @@ static keytab_t keytabs[NBINDS] = {
   { ARROW_DOWN, cursor_down },
   { BACKSPACE, cursor_remove_char },
   { DEL_KEY, cursor_remove_char },
-  { ENTER, cursor_break_line },
+  { ENTER_KEY, cursor_break_line },
 
   { CONTROL | 'H', cursor_remove_char },
   { CONTROL | 'A', cursor_bol },
@@ -59,6 +59,8 @@ static keytab_t keytabs[NBINDS] = {
 
   { META | 'f', cursor_move_word_forward },
   { META | 'b', cursor_move_word_backward },
+  { META | '>', cursor_eof },
+  { META | '<', cursor_bof },
 
   { 0, NULL}
 };
@@ -137,12 +139,12 @@ void input_process_keys(cursor_t* C) {
   if ((kfp = get_kfp(c)) != NULL) {
     kfp(C);
     return;
-  } 
+  }
 
   if (c == 'q'){
     vt_clear_screen();
     exit(0);
-  } else if (c == TAB) {
+  } else if (c == TAB_KEY) {
     cursor_insert_char(C, ' ');
     cursor_insert_char(C, ' ');
   } else if (c >= 32 && c <= 126) {
