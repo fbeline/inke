@@ -9,7 +9,7 @@ typedef struct region_s {
   bool active;
   struct cursor_s *cursor;
   line_t *lp;
-  i32 offset, size; 
+  i32 offset, size;
 } region_t;
 
 typedef struct cursor_s {
@@ -76,3 +76,5 @@ void cursor_break_line(cursor_t* cursor);
 void cursor_delete_forward(cursor_t* cursor);
 
 void cursor_delete_row(cursor_t* cursor);
+
+void cursor_undo(cursor_t* cursor);

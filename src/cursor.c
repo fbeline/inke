@@ -342,6 +342,11 @@ void cursor_bof(cursor_t* C) {
     C->clp = C->clp->prev;
 }
 
+
+void cursor_undo(cursor_t* C) {
+  undo(C);
+}
+
 cursor_t cursor_init(editor_t* E) {
   cursor_t C = {0};
   C.editor = E;

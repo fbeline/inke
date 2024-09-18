@@ -56,6 +56,7 @@ static keytab_t keytabs[NBINDS] = {
   { CONTROL | 'K', cursor_delete_forward },
   { CONTROL | 'N', cursor_down },
   { CONTROL | 'P', cursor_up },
+  { CONTROL | '/', cursor_undo },
 
   { META | 'f', cursor_move_word_forward },
   { META | 'b', cursor_move_word_backward },
@@ -126,6 +127,9 @@ static i32 input_read_key() {
   }
 
   if (c >= 0x00 && c <= 0x1F && c != ENTER_KEY) {
+    if (c == 0x1F)
+      return CONTROL | '/';
+
     return CONTROL | (c + '@');
   }
 
