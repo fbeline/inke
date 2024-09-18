@@ -40,14 +40,30 @@ static void enable_raw_mode(term_t *T) {
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
-static void term_draw_status_bar(term_t *T, line_t *buffer) {
-  line_append(buffer, "\x1b[K");
-  line_append(buffer, "\x1b[7m");
+static void term_draw_status_bar(term_t *T, cursor_t *C, line_t *buffer) {
+  line_append(buffer, "\x1b[K\x1b[7m");
 
-  for (i32 i = 0; i < T->cols; i++)
+  char *status;
+  if ((status = malloc(T->cols + 1)) == NULL) die("out of memory");
+
+  i32 len = snprintf(status,
+                     T->cols + 1, "%.20s %s%*s%d,%d",
+                     C->editor->filename,
+                     C->editor->dirty ? "[+]" : "",
+                     T->cols - 20,
+                     "",
+                     C->x + 1,
+                     C->y + 1
+                     );
+
+  line_append(buffer, status);
+
+  for (i32 i = len; i < T->cols; i++)
     line_append(buffer, " ");
 
   line_append(buffer, "\x1b[m");
+
+  free(status);
 }
 
 static void term_draw(term_t *T, cursor_t *C) {
@@ -59,16 +75,20 @@ static void term_draw(term_t *T, cursor_t *C) {
     lp = lp->next;
   }
 
-  for (y = 0; y < T->rows && lp != NULL; y++) {
-    line_append(buffer, "\x1b[K"); // erase line
-    i32 size = (i32)lp->size - C->coloff;
-    size = CLAMP(size, 0, T->cols);
-    line_append_s(buffer, lp->text + C->coloff, size);
+  for (y = 0; y < T->rows; y++) {
+    line_append(buffer, "\x1b[K");
+
+    if (lp != NULL) {
+      i32 size = (i32)lp->size - C->coloff;
+      size = CLAMP(size, 0, T->cols);
+      line_append_s(buffer, lp->text + C->coloff, size);
+      lp = lp->next;
+    }
+
     line_append(buffer, "\r\n");
-    lp = lp->next;
   }
 
-  term_draw_status_bar(T, buffer);
+  term_draw_status_bar(T, C, buffer);
 
   write(STDOUT_FILENO, buffer->text, buffer->size);
 
