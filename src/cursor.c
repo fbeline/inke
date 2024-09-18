@@ -292,6 +292,9 @@ void cursor_page_down(cursor_t* C) {
 void cursor_delete_forward(cursor_t* C) {
   i32 x = raw_x(C);
 
+  if (x == 0 || C->clp->size == 0)
+    return cursor_delete_row(C);
+
   char *text = editor_text_between(C->clp, x, C->clp->size - x);
   undo_push(DELETE_FORWARD, *C, text);
   free(text);
