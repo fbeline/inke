@@ -40,6 +40,16 @@ static void enable_raw_mode(term_t *T) {
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
+static void term_draw_status_bar(term_t *T, line_t *buffer) {
+  line_append(buffer, "\x1b[K");
+  line_append(buffer, "\x1b[7m");
+
+  for (i32 i = 0; i < T->cols; i++)
+    line_append(buffer, " ");
+
+  line_append(buffer, "\x1b[m");
+}
+
 static void term_draw(term_t *T, cursor_t *C) {
   int y;
   line_t *lp = C->editor->lines;
@@ -54,10 +64,11 @@ static void term_draw(term_t *T, cursor_t *C) {
     i32 size = (i32)lp->size - C->coloff;
     size = CLAMP(size, 0, T->cols);
     line_append_s(buffer, lp->text + C->coloff, size);
+    line_append(buffer, "\r\n");
     lp = lp->next;
-
-    if (y < T->rows - 1) line_append(buffer, "\r\n");
   }
+
+  term_draw_status_bar(T, buffer);
 
   write(STDOUT_FILENO, buffer->text, buffer->size);
 
@@ -70,7 +81,7 @@ static i32 term_get_size(term_t *T) {
     return -1;
   } else {
     T->cols = ws.ws_col;
-    T->rows = ws.ws_row;
+    T->rows = ws.ws_row - 1;
     return 0;
   }
 }
@@ -82,17 +93,14 @@ void term_init(void) {
 }
 
 void term_render(cursor_t *C) {
-  C->max_col = T.cols;
-  C->max_row = T.rows;
-
+  cursor_set_max(C, T.cols, T.rows - 1);
   vt_set_cursor_position(0, 0);
   vt_hide_cursor();
   tt_flush();
 
   term_draw(&T, C);
 
-  vec2_t pos = cursor_position(C);
-  vt_set_cursor_position(pos.y + 1, pos.x + 1);
+  vt_set_cursor_position(C->y + 1, C->x + 1);
   vt_show_cursor();
   tt_flush();
 }

@@ -139,7 +139,10 @@ void input_process_keys(cursor_t* C) {
     return;
   } 
 
-  if (c == TAB) {
+  if (c == 'q'){
+    vt_clear_screen();
+    exit(0);
+  } else if (c == TAB) {
     cursor_insert_char(C, ' ');
     cursor_insert_char(C, ' ');
   } else if (c >= 32 && c <= 126) {
