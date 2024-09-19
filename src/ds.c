@@ -20,14 +20,18 @@ static ds_t *dsrealloc(ds_t *ds, size_t len) {
 }
 
 ds_t *dsnewlen(size_t len) {
-  size_t alloc = dscalcalloc(len);
   ds_t *ds;
 
   if ((ds = (ds_t*)malloc(sizeof(ds_t))) == NULL)
     exit(1);
 
-  if ((ds->buf = malloc(len)) == NULL)
+  ds->alloc = dscalcalloc(len);
+  ds->len = 0;
+
+  if ((ds->buf = malloc(ds->alloc)) == NULL)
     exit(1);
+
+  ds->buf[0] = '\0';
 
   return ds;
 }
@@ -52,6 +56,7 @@ ds_t *dscat(ds_t *ds, const char *t) {
     ds = dsrealloc(ds, ds->len);
 
   strncat(ds->buf, t, tlen);
+  ds->buf[ds->len] = '\0';
 
   return ds;
 }

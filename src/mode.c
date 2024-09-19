@@ -1,15 +1,11 @@
 #include "mode.h"
 
-#include <stdlib.h>
-#include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
 
 #include "types.h"
 #include "globals.h"
 #include "io.h"
-#include "utils.h"
-#include "vt100.h"
 
 static char message[256] = {0};
 
@@ -35,8 +31,6 @@ void mode_cmd_clean(void) {
   mode_set_message("");
   g_mode = MODE_INSERT;
   g_cmd_func = mode_cmd_nop;
-  vt_show_cursor();
-  tt_flush();
 }
 
 static void mode_exit_save(cursor_t* C, int ch) {
@@ -56,8 +50,6 @@ static void mode_exit_save(cursor_t* C, int ch) {
 }
 
 void mode_set_exit_save(cursor_t* C) {
-  vt_hide_cursor();
-  tt_flush();
   mode_set_message("Save file? (y/n or [c]ancel)");
   g_mode = MODE_CMD_CHAR;
   g_cmd_func = mode_exit_save;

@@ -6,9 +6,10 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 
+#include "ds.h"
 #include "mode.h"
 #include "utils.h"
-#include "vt100.h"
+#include "vt.h"
 
 static term_t T;
 
@@ -41,8 +42,9 @@ static void enable_raw_mode(term_t *T) {
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
-static void term_draw_status_bar(term_t *T, cursor_t *C, line_t *buffer) {
-  line_append(buffer, "\x1b[K\x1b[7m");
+static void term_draw_status_bar(term_t *T, cursor_t *C) {
+  vt_erase_line();
+  vt_puts("\x1b[7m");
 
   char *status;
   if ((status = malloc(T->cols + 1)) == NULL) die("out of memory");
@@ -57,13 +59,13 @@ static void term_draw_status_bar(term_t *T, cursor_t *C, line_t *buffer) {
                      C->y + 1
                      );
 
-  line_append(buffer, status);
+  vt_puts(status);
 
   for (i32 i = len; i < T->cols; i++)
-    line_append(buffer, " ");
+    vt_puts(" ");
 
-  line_append(buffer, "\r\n\x1b[K\x1b[m");
-  line_append(buffer, mode_get_message());
+  vt_puts("\r\n\x1b[K\x1b[m");
+  vt_puts(mode_get_message());
 
   free(status);
 }
@@ -71,30 +73,25 @@ static void term_draw_status_bar(term_t *T, cursor_t *C, line_t *buffer) {
 static void term_draw(term_t *T, cursor_t *C) {
   int y;
   line_t *lp = C->editor->lines;
-  line_t *buffer = lalloc(32);
 
   for (i32 i = 0; i < C->rowoff && lp->next != NULL; i++) {
     lp = lp->next;
   }
 
   for (y = 0; y < T->rows; y++) {
-    line_append(buffer, "\x1b[K");
+    vt_erase_line();
 
     if (lp != NULL) {
       i32 size = (i32)lp->size - C->coloff;
       size = CLAMP(size, 0, T->cols);
-      line_append_s(buffer, lp->text + C->coloff, size);
+      vt_puts(lp->text + C->coloff);
       lp = lp->next;
     }
 
-    line_append(buffer, "\r\n");
+    vt_puts("\r\n");
   }
 
-  term_draw_status_bar(T, C, buffer);
-
-  write(STDOUT_FILENO, buffer->text, buffer->size);
-
-  line_free(buffer);
+  term_draw_status_bar(T, C);
 }
 
 static i32 term_get_size(term_t *T) {
@@ -110,7 +107,7 @@ static i32 term_get_size(term_t *T) {
 
 void term_init(void) {
   enable_raw_mode(&T);
-  vt_erase_display();
+  vt_init();
   if (term_get_size(&T) == -1) die("term_get_size");
 }
 
@@ -123,11 +120,11 @@ void term_render(cursor_t *C) {
   cursor_set_max(C, T.cols, T.rows - 1);
   vt_set_cursor_position(0, 0);
   vt_hide_cursor();
-  tt_flush();
 
   term_draw(&T, C);
 
   vt_set_cursor_position(C->y + 1, C->x + 1);
   vt_show_cursor();
-  tt_flush();
+
+  vt_flush();
 }

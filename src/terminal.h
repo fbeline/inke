@@ -1,7 +1,7 @@
 #pragma once
 
 #include <termios.h>
-#include "cursor.h"
+#include "types.h"
 
 typedef struct term_s {
   struct termios oterm;

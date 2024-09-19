@@ -11,7 +11,6 @@
 #include "cursor.h"
 #include "mode.h"
 #include "utils.h"
-#include "vt100.h"
 
 static keytab_t keytabs[NBINDS] = {
   { HOME_KEY, cursor_bol },

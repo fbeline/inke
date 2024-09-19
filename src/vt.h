@@ -1,10 +1,10 @@
 #pragma once
 
-#include "utils.h"
+#include "types.h"
 
-void tt_flush(void);
+void vt_flush(void);
 
-void tt_puts(char *buf);
+void vt_puts(char *str, ...);
 
 void vt_set_cursor_position(i32 x, i32 y);
 
@@ -23,3 +23,5 @@ void vt_cursor_forward(i32 pn);
 void vt_cursor_down(i32 pn);
 
 i32 vt_cursor_position(int *rows, int *cols);
+
+void vt_init(void);

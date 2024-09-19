@@ -6,7 +6,7 @@ add_executable(inke
   ds.h ds.c
   globals.h globals.c
   io.h io.c
-  vt100.h vt100.c
+  vt.h vt.c
   terminal.h terminal.c
   utils.h utils.c
   input.h input.c
