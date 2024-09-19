@@ -6,12 +6,11 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "globals.h"
 #include "io.h"
 #include "utils.h"
 #include "vt100.h"
 
-u8 g_mode = MODE_INSERT;
-cmd_func_t g_cmd_func = NULL;
 static char message[256] = {0};
 
 void mode_set_message(const char* msg, ...) {
@@ -45,10 +44,10 @@ static void mode_exit_save(cursor_t* C, int ch) {
   switch (ch) {
     case 'y':
       io_write_buffer(C->editor);
-      C->editor->running = false;
+      g_running = false;
       break;
     case 'n':
-      C->editor->running = false;
+      g_running = false;
       break;
     case 'c':
       mode_cmd_clean();
@@ -67,7 +66,7 @@ void mode_set_exit_save(cursor_t* C) {
 static void mode_cmd_ctrl_x(cursor_t* C, int ch) {
   if (ch == (CONTROL | 'C')) {
     if (C->editor->dirty) mode_set_exit_save(C);
-    else C->editor->running = false;
+    else g_running = false;
   } else if (ch == (CONTROL | 'S')) {
     mode_cmd_clean();
     io_write_buffer(C->editor);

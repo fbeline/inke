@@ -8,10 +8,8 @@ editor_t editor_factory() {
     .mode = 0,
     .filename = "foo.txt",
     .row_size = 2,
-    .row_capacity = 2,
     .dirty = false,
-    .new_file = false,
-    .running = true,
+    .new_file = false
   };
 
   e.lines = lalloc(0);

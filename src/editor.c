@@ -375,7 +375,7 @@ int editor_open_file(const char *filename, editor_t *E) {
 }
 
 editor_t editor_init(const char *filename) {
-  editor_t E = {.running = true};
+  editor_t E = {0};
 
   if (IO_FILE_EXISTS(filename)) {
     editor_open_file(filename, &E);

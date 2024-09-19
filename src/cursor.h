@@ -3,24 +3,6 @@
 #include "types.h"
 #include "editor.h"
 
-struct cursor_s;
-
-typedef struct region_s {
-  bool active;
-  struct cursor_s *cursor;
-  line_t *lp;
-  i32 offset, size;
-} region_t;
-
-typedef struct cursor_s {
-  i32 x, y;
-  region_t region;
-  i32 coloff, rowoff;
-  u32 max_col, max_row;
-  editor_t* editor;
-  line_t* clp;
-} cursor_t;
-
 cursor_t cursor_init(editor_t* E);
 
 void cursor_set(cursor_t* dest, cursor_t* src);

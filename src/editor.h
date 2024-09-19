@@ -4,25 +4,6 @@
 
 #define VERSION "0.0.1"
 
-typedef struct line {
-  struct line *next;
-  struct line *prev;
-
-  usize capacity;
-  usize size;
-  char *text;
-} line_t;
-
-typedef struct editor_s {
-  unsigned char mode;
-  char filename[255];
-  u32 row_size, row_capacity;
-  bool dirty;
-  bool new_file;
-  bool running;
-  line_t* lines;
-} editor_t;
-
 line_t *lalloc(usize capacity);
 
 line_t* line_append_s(line_t *lp, const char *str, usize len);

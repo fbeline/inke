@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "globals.h"
 #include "editor.h"
 #include "cursor.h"
 #include "input.h"
@@ -25,7 +26,7 @@ int main(int argc, char **argv) {
   Init(argv[1]);
 
   for(;;) {
-    if (!E.running) break;
+    if (!g_running) break;
 
     term_render(&C);
     input_process_keys(&C);

@@ -7,34 +7,11 @@
 #include <unistd.h>
 
 #include "types.h"
+#include "globals.h"
 #include "cursor.h"
 #include "mode.h"
 #include "utils.h"
 #include "vt100.h"
-
-#define NBINDS  256
-
-enum keys {
-  TAB_KEY = 9,
-  ENTER_KEY = 13,
-  BACKSPACE = 127,
-  ARROW_LEFT = 1000,
-  ARROW_RIGHT,
-  ARROW_UP,
-  ARROW_DOWN,
-  PAGE_UP,
-  PAGE_DOWN,
-  HOME_KEY,
-  END_KEY,
-  DEL_KEY
-};
-
-typedef void (*key_func_t)(cursor_t *C);
-
-typedef struct keytab {
-  i32 code;
-  key_func_t fp;
-} keytab_t;
 
 static keytab_t keytabs[NBINDS] = {
   { HOME_KEY, cursor_bol },
@@ -45,7 +22,7 @@ static keytab_t keytabs[NBINDS] = {
   { ARROW_RIGHT, cursor_right },
   { ARROW_UP, cursor_up },
   { ARROW_DOWN, cursor_down },
-  { BACKSPACE, cursor_remove_char },
+  { BACKSPACE_KEY, cursor_remove_char },
   { DEL_KEY, cursor_remove_char },
   { ENTER_KEY, cursor_break_line },
 
