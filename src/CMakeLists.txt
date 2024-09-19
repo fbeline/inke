@@ -3,6 +3,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 add_executable(inke
   main.c
   types.h
+  ds.h ds.c
   globals.h globals.c
   io.h io.c
   vt100.h vt100.c
