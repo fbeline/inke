@@ -49,13 +49,15 @@ static keytab_t keytabs[NBINDS] = {
   { DEL_KEY, cursor_remove_char },
   { ENTER_KEY, cursor_break_line },
 
-  { CONTROL | 'X', mode_set_ctrl_x },
-  { CONTROL | 'H', cursor_remove_char },
   { CONTROL | 'A', cursor_bol },
+  { CONTROL | 'B', cursor_left },
   { CONTROL | 'E', cursor_eol },
+  { CONTROL | 'F', cursor_right },
+  { CONTROL | 'H', cursor_remove_char },
   { CONTROL | 'K', cursor_delete_forward },
   { CONTROL | 'N', cursor_down },
   { CONTROL | 'P', cursor_up },
+  { CONTROL | 'X', mode_set_ctrl_x },
   { CONTROL | '/', cursor_undo },
 
   { META | 'f', cursor_move_word_forward },
