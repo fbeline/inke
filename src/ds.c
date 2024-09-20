@@ -48,17 +48,19 @@ ds_t *dsempty(void) {
   return dsnewlen(0);
 }
 
-ds_t *dscat(ds_t *ds, const char *t) {
-  size_t tlen = strlen(t);
-  ds->len += tlen;
-
+ds_t *dsncat(ds_t *ds, const char *t, size_t n) {
+  ds->len += n;
   if (ds->len >= ds->alloc)
     ds = dsrealloc(ds, ds->len);
 
-  strncat(ds->buf, t, tlen);
+  strncat(ds->buf, t, n);
   ds->buf[ds->len] = '\0';
 
   return ds;
+}
+
+ds_t *dscat(ds_t *ds, const char *t) {
+  return dsncat(ds, t, strlen(t));
 }
 
 ds_t *dscatds(ds_t *ds, const ds_t *t) {

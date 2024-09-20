@@ -6,6 +6,8 @@ void vt_flush(void);
 
 void vt_puts(char *str, ...);
 
+void vt_nputs(char *str, usize n);
+
 void vt_set_cursor_position(i32 x, i32 y);
 
 void vt_show_cursor(void);

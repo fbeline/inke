@@ -28,6 +28,10 @@ void vt_puts(char *str, ...) {
   dscat(sbuffer, fmtstr);
 }
 
+void vt_nputs(char *str, usize n) {
+  dsncat(sbuffer, str, n);
+}
+
 void vt_erase_display(void) {
   vt_puts("\x1b[2J");
 }

@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/ioctl.h>
 
 #include "ds.h"
@@ -17,6 +18,7 @@ static term_t T;
 void term_restore(void) {
   vt_erase_display();
   vt_show_cursor();
+  vt_set_cursor_position(0, 0);
   vt_flush();
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &T.oterm) == -1)
     die("tcsetattr");
@@ -76,25 +78,55 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
   free(status);
 }
 
+static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
+  if (lp == NULL) return;
+
+  char line[1024];
+  i32 size = (i32)lp->size - C->coloff;
+  size = CLAMP(size, 0, T->cols);
+  strncpy(line, lp->text + C->coloff, size);
+  line[size] = '\0';
+
+  if (!C->region.active)
+    return vt_puts(line);
+
+  i32 region_offset = C->region.offset - C->coloff;
+  if (lp == C->region.lp && lp == C->clp){ // region same line
+    vt_nputs(line, region_offset);
+    vt_reverse_video();
+    vt_nputs(line + region_offset, C->region.size);
+    vt_reset_text_attr();
+    vt_puts(line + region_offset + C->region.size);
+  } else if (lp == C->region.lp) { // region start
+    vt_nputs(line, region_offset);
+    vt_reverse_video();
+    vt_puts(line + region_offset);
+  } else if (lp == C->clp) { // region end
+    vt_nputs(line, C->x);
+    vt_reset_text_attr();
+    vt_puts(line + C->x);
+  } else {
+    vt_puts(line);
+  }
+}
+
 static void term_draw(term_t *T, cursor_t *C) {
   int y;
   line_t *lp = C->editor->lines;
 
   for (i32 i = 0; i < C->rowoff && lp->next != NULL; i++) {
+    if (C->region.active && C->region.lp == lp)
+      vt_reverse_video();
+
     lp = lp->next;
   }
 
   for (y = 0; y < T->rows; y++) {
     vt_erase_line();
-
-    if (lp != NULL) {
-      i32 size = (i32)lp->size - C->coloff;
-      size = CLAMP(size, 0, T->cols);
-      vt_puts(lp->text + C->coloff);
-      lp = lp->next;
-    }
-
+    term_draw_line(T, C, lp);
     vt_puts("\r\n");
+
+    if (lp != NULL) lp = lp->next;
   }
 
   term_draw_status_bar(T, C);
