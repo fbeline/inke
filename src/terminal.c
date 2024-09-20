@@ -7,26 +7,30 @@
 #include <sys/ioctl.h>
 
 #include "ds.h"
+#include "globals.h"
 #include "mode.h"
 #include "utils.h"
 #include "vt.h"
 
 static term_t T;
 
-void disable_raw_mode(void) {
+void term_restore(void) {
+  vt_erase_display();
+  vt_show_cursor();
+  vt_flush();
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &T.oterm) == -1)
     die("tcsetattr");
 }
 
 void signal_handler(int signum) {
-  disable_raw_mode();
+  term_restore();
   die("Caught signal %d, exiting...", signum);
 }
 
 static void enable_raw_mode(term_t *T) {
   if (tcgetattr(STDIN_FILENO, &T->oterm) == -1) die("tcgetattr");
 
-  atexit(disable_raw_mode);
+  atexit(term_restore);
   signal(SIGTERM, signal_handler);
   signal(SIGSEGV, signal_handler);
   signal(SIGABRT, signal_handler);
@@ -65,7 +69,7 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
     vt_puts(" ");
 
   vt_puts("\r\n\x1b[K\x1b[m");
-  vt_puts(mode_get_message());
+  vt_puts(get_status_message());
 
   free(status);
 }
@@ -111,11 +115,6 @@ void term_init(void) {
   if (term_get_size(&T) == -1) die("term_get_size");
 }
 
-void term_restore(void) {
-  vt_erase_display();
-  disable_raw_mode();
-}
-
 void term_render(cursor_t *C) {
   cursor_set_max(C, T.cols, T.rows - 1);
   vt_set_cursor_position(0, 0);
@@ -124,7 +123,7 @@ void term_render(cursor_t *C) {
   term_draw(&T, C);
 
   vt_set_cursor_position(C->y + 1, C->x + 1);
-  vt_show_cursor();
+  if (g_cursor_vis) vt_show_cursor();
 
   vt_flush();
 }

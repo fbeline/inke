@@ -29,7 +29,7 @@ void vt_puts(char *str, ...) {
 }
 
 void vt_erase_display(void) {
-  vt_puts("\x1b[2");
+  vt_puts("\x1b[2J");
 }
 
 void vt_set_cursor_position(i32 x, i32 y) {

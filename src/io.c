@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "globals.h"
 #include "mode.h"
 
 static int io_file_write(const char* filename, const char* buf) {
@@ -26,7 +28,7 @@ int io_write_buffer(editor_t* E) {
 
   E->dirty = false;
   mode_cmd_clean();
-  mode_set_message("\"%s\" [unix] %dL, %dB written", E->filename, E->row_size, lp->size);
+  set_status_message("\"%s\" [unix] %dL, %dB written", E->filename, E->row_size, lp->size);
 
   line_free(lp);
 

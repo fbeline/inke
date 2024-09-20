@@ -25,6 +25,7 @@ static keytab_t keytabs[NBINDS] = {
   { DEL_KEY, cursor_remove_char },
   { ENTER_KEY, cursor_break_line },
 
+  { CONTROL | ' ', cursor_region_start },
   { CONTROL | 'A', cursor_bol },
   { CONTROL | 'B', cursor_left },
   { CONTROL | 'E', cursor_eol },
