@@ -22,4 +22,8 @@ void vt_cursor_forward(i32 pn);
 
 void vt_cursor_down(i32 pn);
 
+void vt_reset_text_attr(void);
+
+void vt_reverse_video(void);
+
 void vt_init(void);

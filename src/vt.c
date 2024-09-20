@@ -65,6 +65,14 @@ void vt_show_cursor(void) {
   vt_puts("\x1b[?25h");
 }
 
+void vt_reset_text_attr(void) {
+  vt_puts("\x1b[0m");
+}
+
+void vt_reverse_video(void) {
+  vt_puts("\x1b[7m");
+}
+
 void vt_init(void) {
   sbuffer = dsempty();
   vt_clear_screen();

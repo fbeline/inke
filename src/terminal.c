@@ -48,7 +48,7 @@ static void enable_raw_mode(term_t *T) {
 
 static void term_draw_status_bar(term_t *T, cursor_t *C) {
   vt_erase_line();
-  vt_puts("\x1b[7m");
+  vt_reverse_video();
 
   char *status;
   if ((status = malloc(T->cols + 1)) == NULL) die("out of memory");
@@ -68,7 +68,9 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
   for (i32 i = len; i < T->cols; i++)
     vt_puts(" ");
 
-  vt_puts("\r\n\x1b[K\x1b[m");
+  vt_puts("\r\n");
+  vt_erase_line();
+  vt_reset_text_attr();
   vt_puts(get_status_message());
 
   free(status);
