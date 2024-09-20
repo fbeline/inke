@@ -65,6 +65,24 @@ ds_t *dscatds(ds_t *ds, const ds_t *t) {
   return dscat(ds, t->buf);
 }
 
+ds_t *dssplice(ds_t *ds, size_t idx, const char *t) {
+  if (idx >= ds->len) return dscat(ds, t);
+
+  size_t tlen = strlen(t);
+  size_t new_len = tlen + ds->len;
+
+  if (new_len > ds->alloc)
+    ds = dsrealloc(ds, new_len);
+
+  memmove(ds->buf + idx + tlen, ds->buf + idx, ds->len - idx);
+  memcpy(ds->buf + idx, t, tlen);
+
+  ds->len = new_len;
+  ds->buf[new_len] = '\0';
+
+  return ds;
+}
+
 void dsfree(ds_t *ds) {
   free(ds->buf);
   free(ds);

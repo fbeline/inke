@@ -13,4 +13,5 @@ ds_t *dsnew(const char *init);
 ds_t *dsempty(void);
 ds_t *dscat(ds_t *ds, const char *t);
 ds_t *dscatds(ds_t *ds, const ds_t *t);
+ds_t *dssplice(ds_t *ds, size_t idx, const char *t);
 void dsfree(ds_t *ds);
