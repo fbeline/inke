@@ -132,6 +132,12 @@ static void process_insert_mode(cursor_t *C, i32 ch) {
 
 void input_process_keys(cursor_t* C) {
   i32 ch = input_read_key();
+
+  if (ch == (CONTROL | 'G')) {
+    mode_cmd_clean();
+    set_status_message("Quit");
+  }
+
   switch (g_mode) {
     case MODE_INSERT:
       process_insert_mode(C, ch);
