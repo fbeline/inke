@@ -15,3 +15,4 @@ char *get_status_message(void);
 
 void mark_start(cursor_t *cursor);
 void mark_end(cursor_t *cursor);
+mark_t mark_get(void);

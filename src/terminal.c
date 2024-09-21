@@ -76,6 +76,30 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
   free(status);
 }
 
+static void term_draw_mark(term_t *T, cursor_t *C, line_t *lp, char *line) {
+  mark_t mark = mark_get();
+  mark.start_offset -= C->coloff;
+  mark.end_offset -= C->coloff;
+
+  if (lp == mark.start_lp && lp == mark.end_lp) {
+    vt_nputs(line, mark.start_offset);
+    vt_reverse_video();
+    vt_nputs(line + mark.start_offset, mark.end_offset - mark.start_offset);
+    vt_reset_text_attr();
+    vt_puts(line + mark.end_offset);
+  } else if (lp == mark.start_lp) {
+    vt_nputs(line, mark.start_offset);
+    vt_reverse_video();
+    vt_puts(line + mark.start_offset);
+  } else if (lp == mark.end_lp) {
+    vt_nputs(line, mark.end_offset);
+    vt_reset_text_attr();
+    vt_puts(line + mark.end_offset);
+  } else {
+    vt_puts(line);
+  }
+}
+
 static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   if (lp == NULL) return;
 
@@ -85,26 +109,11 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   strncpy(line, lp->text + C->coloff, size);
   line[size] = '\0';
 
-  if (g_mode != MODE_VISUAL)
+  if (g_mode != MODE_VISUAL || size <= 0) {
     return vt_puts(line);
-
-  if (lp == g_mark.start_lp && lp == g_mark.end_lp){ // region same line
-    vt_nputs(line, g_mark.start_offset);
-    vt_reverse_video();
-    vt_nputs(line + g_mark.start_offset, g_mark.end_offset - g_mark.start_offset);
-    vt_reset_text_attr();
-    vt_puts(line + g_mark.end_offset);
-  } else if (lp == g_mark.start_lp) {
-    vt_nputs(line, g_mark.start_offset);
-    vt_reverse_video();
-    vt_puts(line + g_mark.start_offset);
-  } else if (lp == g_mark.end_lp) {
-    vt_nputs(line, g_mark.end_offset);
-    vt_reset_text_attr();
-    vt_puts(line + g_mark.end_offset);
-  } else {
-    vt_puts(line);
   }
+
+  term_draw_mark(T, C, lp, line);
 }
 
 static void term_draw(term_t *T, cursor_t *C) {

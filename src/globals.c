@@ -59,15 +59,20 @@ static i8 line_compare(line_t *src, line_t *target) {
 }
 
 void mark_end(cursor_t *C) {
+  g_mark.end_lp = C->clp;
+  g_mark.end_offset = C->x + C->coloff;
+}
 
-  i8 cmp = line_compare(C->clp, g_mark.start_lp);
-  if (cmp < 0 || (cmp == 0 && g_mark.start_offset <= C->x + C->coloff)) {
-    g_mark.end_lp = C->clp;
-    g_mark.end_offset = C->x + C->coloff;
-    return;
+mark_t mark_get(void) {
+  i8 cmp = line_compare(g_mark.end_lp, g_mark.start_lp);
+  if (cmp < 0 || (cmp == 0 && g_mark.start_offset <= g_mark.end_offset)) {
+    return g_mark;
   }
 
-  // TODO : FIX IT
-  g_mark.start_lp = C->clp;
-  g_mark.start_offset = C->x + C->coloff;
+  return (mark_t) {
+    .start_lp = g_mark.end_lp,
+    .end_lp = g_mark.start_lp,
+    .end_offset = g_mark.start_offset,
+    .start_offset = g_mark.end_offset
+  };
 }
