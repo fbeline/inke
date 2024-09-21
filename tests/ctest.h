@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <stdio.h>
 
 #define ASSERT_EQUAL(expected, actual) \

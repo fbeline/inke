@@ -64,15 +64,15 @@ typedef struct editor_s {
 
 struct cursor_s;
 
-typedef struct region_s {
-  struct cursor_s *cursor;
-  line_t *lp;
-  i32 offset, size;
-} region_t;
+typedef struct mark_s {
+  line_t *start_lp;
+  line_t *end_lp;
+  i32 start_offset;
+  i32 end_offset;
+} mark_t;
 
 typedef struct cursor_s {
   i32 x, y;
-  region_t region;
   i32 coloff, rowoff;
   u32 max_col, max_row;
   editor_t *editor;

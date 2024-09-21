@@ -8,13 +8,9 @@ void cursor_set(cursor_t* dest, cursor_t* src);
 
 vec2_t cursor_position(cursor_t* cursor);
 
-void cursor_region_start(cursor_t* cursor);
-
 void cursor_region_text(cursor_t* cursor);
 
 void cursor_region_kill(cursor_t* cursor);
-
-void cursor_clear_region(cursor_t* cursor);
 
 char cursor_char(cursor_t* cursor);
 
@@ -41,8 +37,6 @@ void cursor_remove_char(cursor_t* cursor);
 void cursor_insert_char(cursor_t* cursor, int c);
 
 void cursor_insert_text(cursor_t* cursor, const char* text);
-
-void cursor_set_max(cursor_t* cursor, u16 max_col, u16 max_row);
 
 void cursor_down(cursor_t* cursor);
 

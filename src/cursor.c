@@ -18,7 +18,6 @@ static i32 raw_y(cursor_t* C) {
 }
 
 void cursor_set(cursor_t* dest, cursor_t* src) {
-  dest->region = src->region;
   dest->x = src->x;
   dest->y = src->y;
   dest->coloff = src->coloff;
@@ -35,80 +34,47 @@ vec2_t cursor_position(cursor_t* cursor) {
   return (vec2_t) {raw_x(cursor), raw_y(cursor)};
 }
 
-void cursor_region_start(cursor_t* C) {
-  if (g_mode != MODE_VISUAL) {
-    g_mode = MODE_VISUAL;
-    C->region.lp = C->clp;
-    C->region.offset = raw_x(C);
-    C->region.size = 0;
-    memcpy(C->region.cursor, C, sizeof(cursor_t));
-    set_status_message("visual mode");
-  } else {
-    cursor_clear_region(C);
-  }
-}
-
 void cursor_region_text(cursor_t* C) {
   if (g_mode != MODE_VISUAL) return;
 
-  char *str = editor_text_between(C->region.lp, C->region.offset, C->region.size);
-  usize len = MIN((usize)CLIPBUF, strlen(str));
-  strncpy(g_clipbuf, str, len);
-  g_clipbuf[len] = '\0';
+  /* char *str = editor_text_between(C->region.lp, C->region.offset, C->region.size); */
+  /* usize len = MIN((usize)CLIPBUF, strlen(str)); */
+  /* strncpy(g_clipbuf, str, len); */
+  /* g_clipbuf[len] = '\0'; */
 
-  g_mode = MODE_INSERT;
-  clear_status_message();
+  /* g_mode = MODE_INSERT; */
+  /* clear_status_message(); */
 
-  free(str);
+  /* free(str); */
 }
 
 void cursor_region_kill(cursor_t* C) {
   if (g_mode != MODE_VISUAL) return;
 
-  char *str = editor_kill_between(C->editor, C->region.lp, C->region.offset, C->region.size);
-  cursor_set(C, C->region.cursor);
-  undo_push(CUT, *C, str);
+  /* char *str = editor_kill_between(C->editor, C->region.lp, C->region.offset, C->region.size); */
+  /* cursor_set(C, C->region.cursor); */
+  /* undo_push(CUT, *C, str); */
 
-  usize len = MIN((usize)CLIPBUF, strlen(str));
-  strncpy(g_clipbuf, str, len);
-  g_clipbuf[len] = '\0';
+  /* usize len = MIN((usize)CLIPBUF, strlen(str)); */
+  /* strncpy(g_clipbuf, str, len); */
+  /* g_clipbuf[len] = '\0'; */
 
-  g_mode = MODE_INSERT;
-  clear_status_message();
+  /* g_mode = MODE_INSERT; */
+  /* clear_status_message(); */
 
-  free(str);
-}
-
-void cursor_clear_region(cursor_t* C) {
-  g_mode = MODE_INSERT;
-  C->region.size = 0;
-  C->region.lp = NULL;
-}
-
-void cursor_set_max(cursor_t* C, u16 max_col, u16 max_row) {
-  C->max_row = max_row;
-  C->max_col = max_col;
+  /* free(str); */
 }
 
 char cursor_char(cursor_t* C) {
   return editor_char_at(C->clp, raw_x(C));
 }
 
-void __cursor_bol(cursor_t* C, bool region) {
-  if (region) {
-    i32 x = raw_x(C);
-    C->region.size -= x;
-  }
-
+void cursor_bol(cursor_t* C) {
   C->x = 0;
   C->coloff = 0;
 }
 
-void cursor_bol(cursor_t* C) {
-  __cursor_bol(C, g_mode == MODE_VISUAL);
-}
-
-static void __cursor_eol(cursor_t* C, bool region) {
+void cursor_eol(cursor_t* C) {
   i32 len = C->clp->size;
   i32 oldx = raw_x(C);
   if (len > C->max_col) {
@@ -118,16 +84,9 @@ static void __cursor_eol(cursor_t* C, bool region) {
     C->x = len;
     C->coloff = 0;
   }
-
-  if (region)
-    C->region.size += raw_x(C) - oldx;
 }
 
-void cursor_eol(cursor_t* C) {
-  __cursor_eol(C, g_mode == MODE_VISUAL);
-}
-
-static void __cursor_down(cursor_t* C, bool region) {
+void cursor_down(cursor_t* C) {
   vec2_t pos = cursor_position(C);
   if (C->clp->next == NULL) return;
   line_t* p_lp = C->clp;
@@ -139,18 +98,10 @@ static void __cursor_down(cursor_t* C, bool region) {
     C->rowoff++;
   }
 
-  if (pos.x > C->clp->size)
-    __cursor_eol(C, false);
-
-  if (region)
-    C->region.size += raw_x(C) + (p_lp->size - pos.x);
+  if (pos.x > C->clp->size) cursor_eol(C);
 }
 
-void cursor_down(cursor_t* C) {
-  __cursor_down(C, g_mode == MODE_VISUAL);
-}
-
-static void __cursor_up(cursor_t* C, bool region) {
+void cursor_up(cursor_t* C) {
   i32 oldx = raw_x(C);
 
   if (raw_y(C) <= 0 || C->clp->prev == NULL) return;
@@ -163,15 +114,7 @@ static void __cursor_up(cursor_t* C, bool region) {
     C->y--;
   }
 
-  if (raw_x(C) > C->clp->size)
-    __cursor_eol(C, false);
-
-  if (region)
-    C->region.size = C->region.size - oldx - (C->clp->size - raw_x(C));
-}
-
-void cursor_up(cursor_t* C) {
-  __cursor_up(C, g_mode == MODE_VISUAL);
+  if (raw_x(C) > C->clp->size) cursor_eol(C);
 }
 
 void cursor_right(cursor_t* C) {
@@ -181,14 +124,11 @@ void cursor_right(cursor_t* C) {
   if (pos.x < len && C->x == C->max_col) {
     C->coloff++;
   } else if (pos.x >= len) {
-    __cursor_down(C, false);
-    __cursor_bol(C, false);
-    C->region.size--; // do not increase last (blank) x position
+    cursor_down(C);
+    cursor_bol(C);
   } else {
     C->x++;
   }
-
-  C->region.size++;
 }
 
 void cursor_left(cursor_t* C) {
@@ -196,16 +136,13 @@ void cursor_left(cursor_t* C) {
   if (pos.x == 0 && pos.y == 0) {
     return;
   } else if (pos.x == 0 && pos.y > 0) {
-    __cursor_up(C, false);
-    __cursor_eol(C, false);
-    C->region.size++; // do not decrement first x position
+    cursor_up(C);
+    cursor_eol(C);
   } else if (C->x == 0 && C->coloff > 0) {
     C->coloff--;
   } else {
     C->x--;
   }
-
-  C->region.size--;
 }
 
 void cursor_break_line(cursor_t* C) {
@@ -378,7 +315,6 @@ cursor_t cursor_init(editor_t* E) {
   C.rowoff = 0;
   C.x = 0;
   C.y = 0;
-  C.region.cursor = (cursor_t*)malloc(sizeof(cursor_t));
 
   return C;
 }

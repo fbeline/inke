@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "ctest.h"
+#include "../src/globals.h"
 #include "../src/cursor.h"
 #include "../src/editor.h"
 #include "../src/undo.h"
@@ -32,7 +33,6 @@ static cursor_t factory(void) {
   cursor_t C = {0};
   C.max_col = 9999;
   C.max_row = 9999;
-  C.region.cursor = malloc(sizeof(cursor_t));
   C.editor = malloc(sizeof(editor_t));
   memcpy(C.editor, &E, sizeof(editor_t));
 
@@ -101,10 +101,10 @@ static int test_undo_cut(void) {
   cursor_t C = factory();
 
   C.x = 3;
-  cursor_region_start(&C);
+  mark_start(&C);
   cursor_down(&C);
+  mark_end(&C);
   cursor_region_kill(&C);
-  cursor_clear_region(&C);
 
   ASSERT_STRING_EQUAL("foo quux corge", C.clp->text);
   ASSERT_EQUAL(1, C.editor->row_size);

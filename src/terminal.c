@@ -7,9 +7,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 
-#include "ds.h"
 #include "globals.h"
-#include "mode.h"
 #include "utils.h"
 #include "vt.h"
 
@@ -90,21 +88,20 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   if (g_mode != MODE_VISUAL)
     return vt_puts(line);
 
-  i32 region_offset = C->region.offset - C->coloff;
-  if (lp == C->region.lp && lp == C->clp){ // region same line
-    vt_nputs(line, region_offset);
+  if (lp == g_mark.start_lp && lp == g_mark.end_lp){ // region same line
+    vt_nputs(line, g_mark.start_offset);
     vt_reverse_video();
-    vt_nputs(line + region_offset, C->region.size);
+    vt_nputs(line + g_mark.start_offset, g_mark.end_offset - g_mark.start_offset);
     vt_reset_text_attr();
-    vt_puts(line + region_offset + C->region.size);
-  } else if (lp == C->region.lp) { // region start
-    vt_nputs(line, region_offset);
+    vt_puts(line + g_mark.end_offset);
+  } else if (lp == g_mark.start_lp) {
+    vt_nputs(line, g_mark.start_offset);
     vt_reverse_video();
-    vt_puts(line + region_offset);
-  } else if (lp == C->clp) { // region end
-    vt_nputs(line, C->x);
+    vt_puts(line + g_mark.start_offset);
+  } else if (lp == g_mark.end_lp) {
+    vt_nputs(line, g_mark.end_offset);
     vt_reset_text_attr();
-    vt_puts(line + C->x);
+    vt_puts(line + g_mark.end_offset);
   } else {
     vt_puts(line);
   }
@@ -115,7 +112,7 @@ static void term_draw(term_t *T, cursor_t *C) {
   line_t *lp = C->editor->lines;
 
   for (i32 i = 0; i < C->rowoff && lp->next != NULL; i++) {
-    if (g_mode == MODE_VISUAL && C->region.lp == lp)
+    if (g_mode == MODE_VISUAL && g_mark.start_lp == lp)
       vt_reverse_video();
 
     lp = lp->next;
@@ -150,7 +147,8 @@ void term_init(void) {
 }
 
 void term_render(cursor_t *C) {
-  cursor_set_max(C, T.cols, T.rows - 1);
+  C->max_row = T.rows - 1;
+  C->max_col = T.cols;
   vt_set_cursor_position(0, 0);
   vt_hide_cursor();
 

@@ -25,7 +25,7 @@ static keytab_t keytabs[NBINDS] = {
   { DEL_KEY, cursor_remove_char },
   { ENTER_KEY, cursor_break_line },
 
-  { CONTROL | ' ', cursor_region_start },
+  { CONTROL | ' ', mark_start },
   { CONTROL | 'A', cursor_bol },
   { CONTROL | 'B', cursor_left },
   { CONTROL | 'E', cursor_eol },
@@ -56,7 +56,7 @@ static keytab_t keytabs_visual[NBINDS] = {
   { ARROW_UP, cursor_up },
   { ARROW_DOWN, cursor_down },
 
-  { CONTROL | ' ', cursor_region_start },
+  { CONTROL | ' ', mark_start },
   { CONTROL | 'A', cursor_bol },
   { CONTROL | 'B', cursor_left },
   { CONTROL | 'E', cursor_eol },
@@ -190,4 +190,7 @@ void input_process_keys(cursor_t* C) {
       g_cmd_func(C, ch);
       break;
   }
+
+  if (g_mode == MODE_VISUAL)
+    mark_end(C);
 }
