@@ -25,7 +25,7 @@ static keytab_t keytabs[NBINDS] = {
   { DEL_KEY, cursor_remove_char },
   { ENTER_KEY, cursor_break_line },
 
-  { CONTROL | 'Z', cursor_region_start },
+  { CONTROL | ' ', cursor_region_start },
   { CONTROL | 'A', cursor_bol },
   { CONTROL | 'B', cursor_left },
   { CONTROL | 'E', cursor_eol },
@@ -55,7 +55,7 @@ static keytab_t keytabs_visual[NBINDS] = {
   { ARROW_UP, cursor_up },
   { ARROW_DOWN, cursor_down },
 
-  { CONTROL | 'Z', cursor_region_start },
+  { CONTROL | ' ', cursor_region_start },
   { CONTROL | 'A', cursor_bol },
   { CONTROL | 'B', cursor_left },
   { CONTROL | 'E', cursor_eol },
@@ -134,6 +134,9 @@ static i32 input_read_key() {
   if (c >= 0x00 && c <= 0x1F && c != ENTER_KEY) {
     if (c == 0x1F)
       return CONTROL | '/';
+
+    if (c == 0x00)
+      return CONTROL | ' ';
 
     return CONTROL | (c + '@');
   }
