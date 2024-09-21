@@ -30,7 +30,6 @@ static editor_t editor_factory(void) {
 static cursor_t factory(void) {
   editor_t E = editor_factory();
   cursor_t C = {0};
-  C.region.active = false;
   C.max_col = 9999;
   C.max_row = 9999;
   C.region.cursor = malloc(sizeof(cursor_t));

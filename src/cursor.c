@@ -3,6 +3,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include "editor.h"
+#include "globals.h"
 #include "undo.h"
 #include "utils.h"
 
@@ -33,25 +36,26 @@ vec2_t cursor_position(cursor_t* cursor) {
 }
 
 void cursor_region_start(cursor_t* C) {
-  if (!C->region.active) {
-    C->region.active = true;
+  if (g_mode != MODE_VISUAL) {
+    g_mode = MODE_VISUAL;
     C->region.lp = C->clp;
     C->region.offset = raw_x(C);
     C->region.size = 0;
     memcpy(C->region.cursor, C, sizeof(cursor_t));
+    set_status_message("visual mode");
   } else {
     cursor_clear_region(C);
   }
 }
 
 char* cursor_region_text(cursor_t* C) {
-  if (!C->region.active) return NULL;
+  if (g_mode != MODE_VISUAL) return NULL;
 
   return editor_text_between(C->region.lp, C->region.offset, C->region.size);
 }
 
 char* cursor_region_kill(cursor_t* C) {
-  if (!C->region.active) return NULL;
+  if (g_mode != MODE_VISUAL) return NULL;
 
   char *strdata = editor_kill_between(C->editor, C->region.lp, C->region.offset, C->region.size);
   cursor_set(C, C->region.cursor);
@@ -61,9 +65,10 @@ char* cursor_region_kill(cursor_t* C) {
 }
 
 void cursor_clear_region(cursor_t* C) {
-  C->region.active = false;
+  g_mode = MODE_INSERT;
   C->region.size = 0;
   C->region.lp = NULL;
+  set_status_message("");
 }
 
 void cursor_set_max(cursor_t* C, u16 max_col, u16 max_row) {
@@ -86,7 +91,7 @@ void __cursor_bol(cursor_t* C, bool region) {
 }
 
 void cursor_bol(cursor_t* C) {
-  __cursor_bol(C, C->region.active);
+  __cursor_bol(C, g_mode == MODE_VISUAL);
 }
 
 static void __cursor_eol(cursor_t* C, bool region) {
@@ -105,7 +110,7 @@ static void __cursor_eol(cursor_t* C, bool region) {
 }
 
 void cursor_eol(cursor_t* C) {
-  __cursor_eol(C, C->region.active);
+  __cursor_eol(C, g_mode == MODE_VISUAL);
 }
 
 static void __cursor_down(cursor_t* C, bool region) {
@@ -128,7 +133,7 @@ static void __cursor_down(cursor_t* C, bool region) {
 }
 
 void cursor_down(cursor_t* C) {
-  __cursor_down(C, C->region.active);
+  __cursor_down(C, g_mode == MODE_VISUAL);
 }
 
 static void __cursor_up(cursor_t* C, bool region) {
@@ -152,7 +157,7 @@ static void __cursor_up(cursor_t* C, bool region) {
 }
 
 void cursor_up(cursor_t* C) {
-  __cursor_up(C, C->region.active);
+  __cursor_up(C, g_mode == MODE_VISUAL);
 }
 
 void cursor_right(cursor_t* C) {

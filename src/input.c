@@ -45,7 +45,33 @@ static keytab_t keytabs[NBINDS] = {
   { 0, NULL}
 };
 
-static key_func_t get_kfp(int c) {
+static keytab_t keytabs_visual[NBINDS] = {
+  { HOME_KEY, cursor_bol },
+  { END_KEY, cursor_eol },
+  { PAGE_DOWN, cursor_page_down },
+  { PAGE_UP, cursor_page_up },
+  { ARROW_LEFT, cursor_left },
+  { ARROW_RIGHT, cursor_right },
+  { ARROW_UP, cursor_up },
+  { ARROW_DOWN, cursor_down },
+
+  { CONTROL | 'Z', cursor_region_start },
+  { CONTROL | 'A', cursor_bol },
+  { CONTROL | 'B', cursor_left },
+  { CONTROL | 'E', cursor_eol },
+  { CONTROL | 'F', cursor_right },
+  { CONTROL | 'N', cursor_down },
+  { CONTROL | 'P', cursor_up },
+
+  { META | 'f', cursor_move_word_forward },
+  { META | 'b', cursor_move_word_backward },
+  { META | '>', cursor_eof },
+  { META | '<', cursor_bof },
+
+  { 0, NULL}
+};
+
+static key_func_t get_kfp(keytab_t *keytabs, int c) {
 	keytab_t *ktp = &keytabs[0];
 
 	while (ktp->fp != NULL) {
@@ -117,7 +143,7 @@ static i32 input_read_key() {
 
 static void process_insert_mode(cursor_t *C, i32 ch) {
   key_func_t kfp;
-  if ((kfp = get_kfp(ch)) != NULL) {
+  if ((kfp = get_kfp(keytabs, ch)) != NULL) {
     kfp(C);
     return;
   }
@@ -128,6 +154,16 @@ static void process_insert_mode(cursor_t *C, i32 ch) {
   } else if (ch >= 32 && ch <= 126) {
     cursor_insert_char(C, ch);
   }
+}
+
+static void process_visual_mode(cursor_t *C, i32 ch) {
+  key_func_t kfp;
+  if ((kfp = get_kfp(keytabs_visual, ch)) != NULL) {
+    kfp(C);
+    set_status_message("visual mode");
+    return;
+  }
+  set_status_message("visual mode - cmd not found");
 }
 
 void input_process_keys(cursor_t* C) {
@@ -141,6 +177,9 @@ void input_process_keys(cursor_t* C) {
   switch (g_mode) {
     case MODE_INSERT:
       process_insert_mode(C, ch);
+      break;
+    case MODE_VISUAL:
+      process_visual_mode(C, ch);
       break;
     case MODE_CMD_CHAR:
       g_cmd_func(C, ch);

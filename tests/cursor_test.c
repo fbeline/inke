@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../src/cursor.h"
+#include "../src/editor.h"
 #include "ctest.h"
 
 editor_t editor_factory() {
@@ -27,7 +28,6 @@ editor_t editor_factory() {
 cursor_t factory() {
   editor_t E = editor_factory();
   cursor_t C = {0};
-  C.region.active = false;
   C.max_col = 9999;
   C.max_row = 9999;
   C.region.cursor = malloc(sizeof(cursor_t));

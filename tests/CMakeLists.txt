@@ -1,4 +1,6 @@
 set(PROJECT_SOURCES
+  ../src/types.h
+  ../src/globals.h ../src/globals.c
   ../src/utils.h ../src/utils.c
   ../src/editor.h ../src/editor.c
   ../src/cursor.h ../src/cursor.c

@@ -87,7 +87,7 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   strncpy(line, lp->text + C->coloff, size);
   line[size] = '\0';
 
-  if (!C->region.active)
+  if (g_mode != MODE_VISUAL)
     return vt_puts(line);
 
   i32 region_offset = C->region.offset - C->coloff;
@@ -115,7 +115,7 @@ static void term_draw(term_t *T, cursor_t *C) {
   line_t *lp = C->editor->lines;
 
   for (i32 i = 0; i < C->rowoff && lp->next != NULL; i++) {
-    if (C->region.active && C->region.lp == lp)
+    if (g_mode == MODE_VISUAL && C->region.lp == lp)
       vt_reverse_video();
 
     lp = lp->next;

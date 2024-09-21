@@ -1,8 +1,8 @@
 #pragma once
 
 #include <inttypes.h>
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -19,14 +19,15 @@ typedef double f64;
 typedef size_t usize;
 
 #define CONTROL 0x10000000
-#define META    0x20000000
+#define META 0x20000000
 
-#define MODE_INSERT   0x01
-#define MODE_SEARCH   0x02
-#define MODE_CMD      0x04
+#define MODE_INSERT 0x01
+#define MODE_SEARCH 0x02
+#define MODE_CMD 0x04
 #define MODE_CMD_CHAR 0x08
+#define MODE_VISUAL 0x10
 
-#define NBINDS  256
+#define NBINDS 256
 
 enum keys {
   TAB_KEY = 9,
@@ -57,13 +58,12 @@ typedef struct editor_s {
   char filename[255];
   u32 row_size;
   bool dirty, new_file;
-  line_t* lines;
+  line_t *lines;
 } editor_t;
 
 struct cursor_s;
 
 typedef struct region_s {
-  bool active;
   struct cursor_s *cursor;
   line_t *lp;
   i32 offset, size;
@@ -74,8 +74,8 @@ typedef struct cursor_s {
   region_t region;
   i32 coloff, rowoff;
   u32 max_col, max_row;
-  editor_t* editor;
-  line_t* clp;
+  editor_t *editor;
+  line_t *clp;
 } cursor_t;
 
 typedef void (*key_func_t)(cursor_t *C);
@@ -89,4 +89,3 @@ typedef struct keytab {
 typedef struct vec2_s {
   i32 x, y;
 } vec2_t;
-

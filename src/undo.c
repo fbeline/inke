@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "globals.h"
+#include "editor.h"
+
 #define UNDO_OFF 0
 #define UNDO_ON  1
 
@@ -56,7 +59,7 @@ void undo(cursor_t* C) {
   if (undo == NULL) return;
 
   cursor_set(C, &undo->cursor);
-  C->region.active = false;
+  g_mode = MODE_INSERT;
 
   undo_state = UNDO_OFF;
   switch (undo->type) {

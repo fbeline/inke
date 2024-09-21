@@ -1,7 +1,6 @@
 #pragma once
 
 #include "types.h"
-#include "editor.h"
 
 cursor_t cursor_init(editor_t* E);
 
