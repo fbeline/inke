@@ -9,7 +9,6 @@
 #include "utils.h"
 
 #define BLOCK_SIZE 16
-#define TBUFFER_SIZE (1 << 16)  // 64 KB (2^16 bytes)
 
 line_t *lalloc(usize capacity) {
   line_t *lp;
@@ -234,7 +233,7 @@ void editor_delete_backward(line_t *lp, i32 x) {
 }
 
 char *editor_text_between(line_t *lp, i32 offset, i32 size) {
-  char result[TBUFFER_SIZE];
+  char result[CLIPBUF];
 
   i32 i = 0, j = 0;
   while(lp != NULL && size-- > 0) {
@@ -299,7 +298,7 @@ void editor_insert_text(editor_t *E, line_t* lp, i32 x, const char* strdata) {
   lp->size = x;
 
   i32 offset = 0, i = 0, j = 0;
-  char aux[TBUFFER_SIZE];
+  char aux[CLIPBUF];
   char ch;
   while ((ch = strdata[i++]) != '\0') {
     if (ch != '\n') {

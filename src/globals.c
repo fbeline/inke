@@ -9,7 +9,12 @@ bool g_cursor_vis = true;
 u8 g_mode = MODE_INSERT;
 cmd_func_t g_cmd_func = NULL;
 
+char g_clipbuf[CLIPBUF] = {0};
 static char message[256] = {0};
+
+void clear_status_message(void) {
+  message[0] = '\0';
+}
 
 void set_status_message(const char* msg, ...) {
   va_list args;

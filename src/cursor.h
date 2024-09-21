@@ -10,9 +10,9 @@ vec2_t cursor_position(cursor_t* cursor);
 
 void cursor_region_start(cursor_t* cursor);
 
-char* cursor_region_text(cursor_t* cursor);
+void cursor_region_text(cursor_t* cursor);
 
-char* cursor_region_kill(cursor_t* cursor);
+void cursor_region_kill(cursor_t* cursor);
 
 void cursor_clear_region(cursor_t* cursor);
 
@@ -57,5 +57,7 @@ void cursor_break_line(cursor_t* cursor);
 void cursor_delete_forward(cursor_t* cursor);
 
 void cursor_delete_row(cursor_t* cursor);
+
+void cursor_paste(cursor_t *cursor);
 
 void cursor_undo(cursor_t* cursor);

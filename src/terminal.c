@@ -71,8 +71,8 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
     vt_puts(" ");
 
   vt_puts("\r\n");
-  vt_erase_line();
   vt_reset_text_attr();
+  vt_erase_line();
   vt_puts(get_status_message());
 
   free(status);

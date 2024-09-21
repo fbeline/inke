@@ -35,6 +35,7 @@ static keytab_t keytabs[NBINDS] = {
   { CONTROL | 'N', cursor_down },
   { CONTROL | 'P', cursor_up },
   { CONTROL | 'X', mode_set_ctrl_x },
+  { CONTROL | 'Y', cursor_paste },
   { CONTROL | '/', cursor_undo },
 
   { META | 'f', cursor_move_word_forward },
@@ -62,9 +63,11 @@ static keytab_t keytabs_visual[NBINDS] = {
   { CONTROL | 'F', cursor_right },
   { CONTROL | 'N', cursor_down },
   { CONTROL | 'P', cursor_up },
+  { CONTROL | 'W', cursor_region_kill },
 
   { META | 'f', cursor_move_word_forward },
   { META | 'b', cursor_move_word_backward },
+  { META | 'w', cursor_region_text },
   { META | '>', cursor_eof },
   { META | '<', cursor_bof },
 
@@ -163,7 +166,6 @@ static void process_visual_mode(cursor_t *C, i32 ch) {
   key_func_t kfp;
   if ((kfp = get_kfp(keytabs_visual, ch)) != NULL) {
     kfp(C);
-    set_status_message("visual mode");
     return;
   }
   set_status_message("visual mode - cmd not found");

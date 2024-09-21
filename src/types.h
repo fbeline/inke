@@ -28,6 +28,7 @@ typedef size_t usize;
 #define MODE_VISUAL 0x10
 
 #define NBINDS 256
+#define CLIPBUF (1 << 16)  // 64 KB (2^16 bytes)
 
 enum keys {
   TAB_KEY = 9,

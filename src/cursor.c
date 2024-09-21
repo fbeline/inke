@@ -48,27 +48,41 @@ void cursor_region_start(cursor_t* C) {
   }
 }
 
-char* cursor_region_text(cursor_t* C) {
-  if (g_mode != MODE_VISUAL) return NULL;
+void cursor_region_text(cursor_t* C) {
+  if (g_mode != MODE_VISUAL) return;
 
-  return editor_text_between(C->region.lp, C->region.offset, C->region.size);
+  char *str = editor_text_between(C->region.lp, C->region.offset, C->region.size);
+  usize len = MIN((usize)CLIPBUF, strlen(str));
+  strncpy(g_clipbuf, str, len);
+  g_clipbuf[len] = '\0';
+
+  g_mode = MODE_INSERT;
+  clear_status_message();
+
+  free(str);
 }
 
-char* cursor_region_kill(cursor_t* C) {
-  if (g_mode != MODE_VISUAL) return NULL;
+void cursor_region_kill(cursor_t* C) {
+  if (g_mode != MODE_VISUAL) return;
 
-  char *strdata = editor_kill_between(C->editor, C->region.lp, C->region.offset, C->region.size);
+  char *str = editor_kill_between(C->editor, C->region.lp, C->region.offset, C->region.size);
   cursor_set(C, C->region.cursor);
-  undo_push(CUT, *C, strdata);
+  undo_push(CUT, *C, str);
 
-  return strdata;
+  usize len = MIN((usize)CLIPBUF, strlen(str));
+  strncpy(g_clipbuf, str, len);
+  g_clipbuf[len] = '\0';
+
+  g_mode = MODE_INSERT;
+  clear_status_message();
+
+  free(str);
 }
 
 void cursor_clear_region(cursor_t* C) {
   g_mode = MODE_INSERT;
   C->region.size = 0;
   C->region.lp = NULL;
-  set_status_message("");
 }
 
 void cursor_set_max(cursor_t* C, u16 max_col, u16 max_row) {
@@ -350,6 +364,10 @@ void cursor_bof(cursor_t* C) {
 
 void cursor_undo(cursor_t* C) {
   undo(C);
+}
+
+void cursor_paste(cursor_t *C) {
+  cursor_insert_text(C, g_clipbuf);
 }
 
 cursor_t cursor_init(editor_t* E) {
