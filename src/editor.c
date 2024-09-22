@@ -258,7 +258,33 @@ void editor_text_between(editor_t *E, mark_t mark, ds_t *r) {
 }
 
 void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
- // TODO: IMPL
+  line_t *lp = mark.start_lp;
+
+  editor_text_between(E, mark, r);
+
+  if (lp == mark.end_lp) {
+    i32 mark_size = mark.end_offset - mark.start_offset;
+
+    memmove(lp->text + mark.start_offset,
+            lp->text + mark.end_offset,
+            lp->size - mark.end_offset);
+    lp->size -= mark_size;
+    lp->text[lp->size] = '\0';
+    return;
+  }
+
+  lp->size = mark.start_offset;
+  lp->text[lp->size] = '\0';
+  lp = lp->next;
+
+  while(lp != mark.end_lp) {
+    line_t *next = lp->next;
+    line_free(lp);
+    lp = next;
+  }
+
+  line_append(mark.start_lp, lp->text + mark.end_offset);
+  line_free(lp);
 }
 
 void editor_insert_text(editor_t *E, line_t* lp, i32 x, const char* strdata) {

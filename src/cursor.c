@@ -31,6 +31,24 @@ void cursor_set(cursor_t* dest, cursor_t* src) {
   }
 }
 
+static void cursor_set_clp_as(cursor_t *C, line_t *lp, i32 x) {
+  if (lp == NULL || x < 0) return;
+
+  C->clp = C->editor->lines;
+  C->y = 0;
+  C->x = 0;
+  C->coloff = 0;
+  C->rowoff = 0;
+
+  while (C->clp != lp && C->clp != NULL) {
+    cursor_down(C);
+  }
+
+  while(x-- > 0) {
+    cursor_right(C);
+  }
+}
+
 vec2_t cursor_position(cursor_t* cursor) {
   return (vec2_t) {raw_x(cursor), raw_y(cursor)};
 }
@@ -47,8 +65,11 @@ void cursor_region_text(cursor_t* C) {
 void cursor_region_kill(cursor_t* C) {
   if (g_mode != MODE_VISUAL) return;
 
-  editor_kill_between(C->editor, mark_get(), g_clipbuf);
+  mark_t mark = mark_get();
+  editor_kill_between(C->editor, mark, g_clipbuf);
   undo_push(CUT, *C, g_clipbuf->buf);
+
+  cursor_set_clp_as(C, mark.start_lp, mark.start_offset);
 
   g_mode = MODE_INSERT;
   clear_status_message();
