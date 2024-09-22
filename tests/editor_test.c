@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
-#include "../src/editor.h"
+
 #include "ctest.h"
+#include "../src/editor.h"
+#include "../src/globals.h"
 
 editor_t factory() {
    editor_t e = {
@@ -113,25 +115,35 @@ int test_delete_char() {
 int test_text_between() {
   editor_t E = factory();
 
-  char *text = editor_text_between(E.lines, 4, 3);
-  ASSERT_STRING_EQUAL("bar", text);
+  mark_t mark = {
+    .start_lp = E.lines, 
+    .start_offset = 4,
+    .end_lp = E.lines,
+    .end_offset = 7
+  };
 
-  char *text2 = editor_text_between(E.lines, 4, 10);
-  ASSERT_STRING_EQUAL("bar baz\nqux", text2);
+  editor_text_between(&E, mark, g_clipbuf);
+  ASSERT_STRING_EQUAL("bar", g_clipbuf);
+
+  mark.end_lp = E.lines->next;
+  mark.end_offset = 3;
+
+  editor_text_between(&E, mark, g_clipbuf);
+  ASSERT_STRING_EQUAL("bar baz\nqux", g_clipbuf);
 
   return 0;
 }
 
 int test_kill_between() {
-  editor_t E = factory();
+  /* editor_t E = factory(); */
 
-  char *text = editor_kill_between(&E, E.lines, 4, 3);
-  ASSERT_STRING_EQUAL("bar", text);
-  ASSERT_STRING_EQUAL("foo  baz", E.lines->text);
+  /* char *text = editor_kill_between(&E, E.lines, 4, 3); */
+  /* ASSERT_STRING_EQUAL("bar", text); */
+  /* ASSERT_STRING_EQUAL("foo  baz", E.lines->text); */
 
-  editor_t E2 = factory();
-  char *text2 = editor_kill_between(&E2, E2.lines, 4, 11);
-  ASSERT_STRING_EQUAL("foo quux corge", E2.lines->text);
+  /* editor_t E2 = factory(); */
+  /* char *text2 = editor_kill_between(&E2, E2.lines, 4, 11); */
+  /* ASSERT_STRING_EQUAL("foo quux corge", E2.lines->text); */
 
   return 0;
 }

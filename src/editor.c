@@ -232,61 +232,13 @@ void editor_delete_backward(line_t *lp, i32 x) {
   lp->text[lp->size] = '\0';
 }
 
-char *editor_text_between(line_t *lp, i32 offset, i32 size) {
-  char result[CLIPBUF];
 
-  i32 i = 0, j = 0;
-  while(lp != NULL && size-- > 0) {
-    result[i++] = lp->text[(j++) + offset];
-    if (j + offset >= lp->size) {
-      j = 0;
-      offset = 0;
-      if (size > 0) {
-        lp = lp->next;
-        result[i++] = '\n';
-      }
-    }
-  }
-  result[i] = '\0';
-
-  return strdup(result);
+void editor_text_between(editor_t *E, mark_t mark, char *r) {
+ // TODO: IMPL
 }
 
-char *editor_kill_between(editor_t* E, line_t *lp, i32 offset, i32 size) {
-  char *result = editor_text_between(lp, offset, size);
-
-  line_t *head = lp;
-  if (lp->size < offset + size) {
-    while(size > 0 && lp != NULL) {
-      if (lp == head) {
-        lp->text[offset] = '\0';
-        size = size - (lp->size - offset);
-        lp->size = offset;
-        lp = lp->next;
-      } else if (offset == 0 && lp->size < offset + size) {
-        line_t *aux = lp;
-        size -= lp->size;
-        lp = lp->next;
-        line_free(aux);
-        E->row_size--;
-      } else {
-        line_append(head, lp->text + size);
-        line_free(lp);
-
-        E->row_size--;
-        size = 0;
-      }
-
-      offset = 0;
-    }
-    return result;
-  }
-
-  for (int i = 0; i < size; i++) {
-    editor_delete_char_at(lp, offset);
-  }
-
-  return result;
+void editor_kill_between(editor_t *E, mark_t mark, char *r) {
+ // TODO: IMPL
 }
 
 void editor_insert_text(editor_t *E, line_t* lp, i32 x, const char* strdata) {

@@ -86,7 +86,7 @@ void undo(cursor_t* C) {
       break;
     case PASTE:
       // TODO: FIX it to discard new line size
-      editor_kill_between(C->editor, C->clp, C->x + C->coloff, atoi(undo->strdata));
+      /* editor_kill_between(C->editor, C->clp, C->x + C->coloff, atoi(undo->strdata)); */
       break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);

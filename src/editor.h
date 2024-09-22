@@ -26,9 +26,9 @@ void editor_delete_char_at(line_t *lp, i32 x);
 
 line_t* editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch);
 
-char* editor_text_between(line_t *lp, i32 offset, i32 size);
+void editor_text_between(editor_t *E, mark_t mark, char *r);
 
-char* editor_kill_between(editor_t* E, line_t *lp, i32 offset, i32 size);
+void editor_kill_between(editor_t *E, mark_t mark, char *r);
 
 char editor_char_at(line_t *lp, i32 x);
 

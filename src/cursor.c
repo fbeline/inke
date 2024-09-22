@@ -37,32 +37,20 @@ vec2_t cursor_position(cursor_t* cursor) {
 void cursor_region_text(cursor_t* C) {
   if (g_mode != MODE_VISUAL) return;
 
-  /* char *str = editor_text_between(C->region.lp, C->region.offset, C->region.size); */
-  /* usize len = MIN((usize)CLIPBUF, strlen(str)); */
-  /* strncpy(g_clipbuf, str, len); */
-  /* g_clipbuf[len] = '\0'; */
+  editor_text_between(C->editor, mark_get(), g_clipbuf);
 
-  /* g_mode = MODE_INSERT; */
-  /* clear_status_message(); */
-
-  /* free(str); */
+  g_mode = MODE_INSERT;
+  clear_status_message();
 }
 
 void cursor_region_kill(cursor_t* C) {
   if (g_mode != MODE_VISUAL) return;
 
-  /* char *str = editor_kill_between(C->editor, C->region.lp, C->region.offset, C->region.size); */
-  /* cursor_set(C, C->region.cursor); */
-  /* undo_push(CUT, *C, str); */
+  editor_kill_between(C->editor, mark_get(), g_clipbuf);
+  undo_push(CUT, *C, g_clipbuf);
 
-  /* usize len = MIN((usize)CLIPBUF, strlen(str)); */
-  /* strncpy(g_clipbuf, str, len); */
-  /* g_clipbuf[len] = '\0'; */
-
-  /* g_mode = MODE_INSERT; */
-  /* clear_status_message(); */
-
-  /* free(str); */
+  g_mode = MODE_INSERT;
+  clear_status_message();
 }
 
 char cursor_char(cursor_t* C) {
@@ -251,9 +239,14 @@ void cursor_delete_forward(cursor_t* C) {
   if (x == 0 || C->clp->size == 0)
     return cursor_delete_row(C);
 
-  char *text = editor_text_between(C->clp, x, C->clp->size - x);
-  undo_push(DELETE_FORWARD, *C, text);
-  free(text);
+  mark_t mark = {
+    .start_lp = C->clp,
+    .start_offset = x,
+    .end_lp = C->clp,
+    .end_offset = C->clp->size
+  };
+  editor_text_between(C->editor, mark, g_clipbuf);
+  undo_push(DELETE_FORWARD, *C, g_clipbuf);
 
   editor_delete_forward(C->clp, x);
 }
