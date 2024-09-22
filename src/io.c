@@ -8,7 +8,6 @@
 #include "mode.h"
 
 static int io_file_write(const char* filename, const char* buf) {
-  int len;
   FILE *file = fopen(filename, "w");
 
   if (file == NULL) {

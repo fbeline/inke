@@ -86,7 +86,7 @@ static key_func_t get_kfp(keytab_t *keytabs, int c) {
 	return NULL;
 }
 
-static i32 input_read_key() {
+static i32 input_read_key(void) {
   i32 nread;
   char c;
   while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {

@@ -48,7 +48,7 @@ line_t *lrealloc(line_t *lp, usize capacity) {
 line_t* line_append_s(line_t *lp, const char *str, usize len) {
   usize old_size = lp->size;
   usize new_size = lp->size + len;
-  if (new_size > lp->capacity)
+  if (new_size >= lp->capacity)
     lp = lrealloc(lp, new_size);
 
   for(int i = 0, j = old_size; i < len; i++, j++) {
@@ -295,7 +295,7 @@ void editor_insert_text(editor_t *E, line_t* lp, i32 x, const char* strdata) {
   lp->text[x] = '\0';
   lp->size = x;
 
-  i32 offset = 0, i = 0, j = 0;
+  i32 i = 0, j = 0;
   char aux[CLIPBUF];
   char ch;
   while ((ch = strdata[i++]) != '\0') {
@@ -313,6 +313,7 @@ void editor_insert_text(editor_t *E, line_t* lp, i32 x, const char* strdata) {
   aux[j] = '\0';
   line_append(lp, aux);
   line_append(lp, strtail);
+  free(strtail);
 }
 
 static void editor_new_file(const char *filename, editor_t *E) {

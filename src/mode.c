@@ -22,7 +22,6 @@ void mode_cmd_clean(void) {
 }
 
 static void mode_exit_save(cursor_t* C, int ch) {
-  char *buf;
   switch (ch) {
     case 'y':
       io_write_buffer(C->editor);

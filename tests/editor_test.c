@@ -5,7 +5,7 @@
 #include "../src/editor.h"
 #include "../src/globals.h"
 
-editor_t factory() {
+editor_t factory(void) {
    editor_t e = {
     .mode = 0,
     .filename = "foo.txt",
@@ -26,7 +26,7 @@ editor_t factory() {
   return e;
 }
 
-int test_insert_char_at() {
+static int test_insert_char_at(void) {
   editor_t E = factory();
 
   // bol
@@ -44,7 +44,7 @@ int test_insert_char_at() {
   return 0;
 }
 
-int test_move_line_up() {
+static int test_move_line_up(void) {
   editor_t E = factory();
 
   // moveup first line
@@ -60,7 +60,7 @@ int test_move_line_up() {
   return 0;
 }
 
-int test_delete_rows() {
+static int test_delete_rows(void) {
   editor_t E = factory();
 
   // delete first line
@@ -75,14 +75,14 @@ int test_delete_rows() {
 
   // delete all lines at once
   editor_t E2 = factory();
-  editor_delete_lines(&E, E.lines, 2);
-  ASSERT_EQUAL(E.row_size, 1); // min row size is 1
-  ASSERT_STRING_EQUAL("", E.lines->text);
+  editor_delete_lines(&E2, E.lines, 2);
+  ASSERT_EQUAL(E2.row_size, 1); // min row size is 1
+  ASSERT_STRING_EQUAL("", E2.lines->text);
 
   return 0;
 }
 
-int test_break_line() {
+static int test_break_line(void) {
   editor_t E = factory();
 
   editor_break_line(&E, E.lines, 3);
@@ -94,7 +94,7 @@ int test_break_line() {
   return 0;
 }
 
-int test_delete_char() {
+static int test_delete_char(void) {
   editor_t E = factory();
 
   // first char
@@ -112,7 +112,7 @@ int test_delete_char() {
   return 0;
 }
 
-int test_text_between() {
+static int test_text_between(void) {
   editor_t E = factory();
 
   mark_t mark = {
@@ -139,7 +139,7 @@ int test_text_between() {
   return 0;
 }
 
-int test_kill_between() {
+static int test_kill_between(void) {
   /* editor_t E = factory(); */
 
   /* char *text = editor_kill_between(&E, E.lines, 4, 3); */
@@ -153,7 +153,7 @@ int test_kill_between() {
   return 0;
 }
 
-int test_char_at() {
+static int test_char_at(void) {
   editor_t E = factory();
 
   char ch1 = editor_char_at(E.lines, 4);
@@ -164,7 +164,7 @@ int test_char_at() {
   return 0;
 }
 
-int test_insert_row_at() {
+static int test_insert_row_at(void) {
   editor_t E = factory();
 
   editor_insert_row_at(&E, 0);
@@ -178,7 +178,7 @@ int test_insert_row_at() {
   return 0;
 }
 
-int test_insert_row_with_data_at() {
+static int test_insert_row_with_data_at(void) {
   editor_t E = factory();
 
   editor_insert_row_with_data_at(&E, 0, "first row");
@@ -190,7 +190,7 @@ int test_insert_row_with_data_at() {
   return 0;
 }
 
-int test_editor_insert_text() {
+static int test_editor_insert_text(void) {
   editor_t E = factory();
 
   editor_insert_text(&E, E.lines, 0, "first ");
@@ -211,7 +211,7 @@ int test_editor_insert_text() {
   return 0;
 }
 
-int test_rows_to_string() {
+static int test_rows_to_string(void) {
   editor_t E = factory();
 
   line_t* lp = editor_rows_to_string(E.lines, E.row_size);

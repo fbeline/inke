@@ -86,7 +86,6 @@ void cursor_bol(cursor_t* C) {
 
 void cursor_eol(cursor_t* C) {
   i32 len = C->clp->size;
-  i32 oldx = raw_x(C);
   if (len > C->max_col) {
     C->x = C->max_col;
     C->coloff = len - C->max_col;
@@ -97,9 +96,8 @@ void cursor_eol(cursor_t* C) {
 }
 
 void cursor_down(cursor_t* C) {
-  vec2_t pos = cursor_position(C);
   if (C->clp->next == NULL) return;
-  line_t* p_lp = C->clp;
+
   C->clp = C->clp->next;
 
   if (C->y < C->max_row) {
@@ -108,14 +106,13 @@ void cursor_down(cursor_t* C) {
     C->rowoff++;
   }
 
-  if (pos.x > C->clp->size) cursor_eol(C);
+  if (raw_x(C) > C->clp->size) cursor_eol(C);
 }
 
 void cursor_up(cursor_t* C) {
   i32 oldx = raw_x(C);
 
   if (raw_y(C) <= 0 || C->clp->prev == NULL) return;
-  line_t* n_lp = C->clp;
   C->clp = C->clp->prev;
 
   if (C->y == 0 && C->rowoff > 0) {
@@ -182,7 +179,6 @@ void cursor_move_word_forward(cursor_t* C) {
 
 void cursor_move_word_backward(cursor_t* C) {
   char ch1, ch2;
-  editor_t* E = C->editor;
   do {
     vec2_t pos = cursor_position(C);
     if (pos.y == 0 && pos.x == 0)

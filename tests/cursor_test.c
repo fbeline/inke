@@ -4,7 +4,7 @@
 #include "../src/editor.h"
 #include "ctest.h"
 
-editor_t editor_factory() {
+editor_t editor_factory(void) {
    editor_t e = {
     .mode = 0,
     .filename = "foo.txt",
@@ -25,7 +25,7 @@ editor_t editor_factory() {
   return e;
 }
 
-cursor_t factory() {
+cursor_t factory(void) {
   editor_t E = editor_factory();
   cursor_t C = {0};
   C.max_col = 9999;

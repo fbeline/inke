@@ -14,11 +14,3 @@ add_executable(inke
   mode.h mode.c
   cursor.h cursor.c
   editor.h editor.c)
-
-if(WIN32)
-  target_link_libraries(inke)
-endif()
-
-if(UNIX)
-  target_link_libraries(inke -fsanitize=undefined,address -Wall -Wextra -pedantic)
-endif()
