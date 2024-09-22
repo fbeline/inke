@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "ds.h"
 #include "editor.h"
 #include "globals.h"
 #include "undo.h"
@@ -47,7 +48,7 @@ void cursor_region_kill(cursor_t* C) {
   if (g_mode != MODE_VISUAL) return;
 
   editor_kill_between(C->editor, mark_get(), g_clipbuf);
-  undo_push(CUT, *C, g_clipbuf);
+  undo_push(CUT, *C, g_clipbuf->buf);
 
   g_mode = MODE_INSERT;
   clear_status_message();
@@ -246,7 +247,7 @@ void cursor_delete_forward(cursor_t* C) {
     .end_offset = C->clp->size
   };
   editor_text_between(C->editor, mark, g_clipbuf);
-  undo_push(DELETE_FORWARD, *C, g_clipbuf);
+  undo_push(DELETE_FORWARD, *C, g_clipbuf->buf);
 
   editor_delete_forward(C->clp, x);
 }
@@ -297,7 +298,7 @@ void cursor_undo(cursor_t* C) {
 }
 
 void cursor_paste(cursor_t *C) {
-  cursor_insert_text(C, g_clipbuf);
+  cursor_insert_text(C, g_clipbuf->buf);
 }
 
 cursor_t cursor_init(editor_t* E) {

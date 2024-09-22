@@ -122,14 +122,19 @@ int test_text_between() {
     .end_offset = 7
   };
 
-  editor_text_between(&E, mark, g_clipbuf);
-  ASSERT_STRING_EQUAL("bar", g_clipbuf);
+  ds_t *ds = dsempty();
+  editor_text_between(&E, mark, ds);
+  ASSERT_STRING_EQUAL("bar", ds->buf);
 
   mark.end_lp = E.lines->next;
   mark.end_offset = 3;
 
-  editor_text_between(&E, mark, g_clipbuf);
-  ASSERT_STRING_EQUAL("bar baz\nqux", g_clipbuf);
+  ds_t *ds2 = dsempty();
+  editor_text_between(&E, mark, ds2);
+  ASSERT_STRING_EQUAL("bar baz\nqux", ds2->buf);
+
+  dsfree(ds);
+  dsfree(ds2);
 
   return 0;
 }

@@ -7,10 +7,9 @@
 bool g_running = true;
 bool g_cursor_vis = true;
 u8 g_mode = MODE_INSERT;
+ds_t *g_clipbuf = NULL;
 cmd_func_t g_cmd_func = NULL;
 mark_t g_mark = {0};
-
-char g_clipbuf[CLIPBUF] = {0};
 
 static char message[256] = {0};
 
@@ -75,4 +74,8 @@ mark_t mark_get(void) {
     .end_offset = g_mark.start_offset,
     .start_offset = g_mark.end_offset
   };
+}
+
+void globals_init(void) {
+  g_clipbuf = dsempty();
 }

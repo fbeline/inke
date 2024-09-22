@@ -232,12 +232,32 @@ void editor_delete_backward(line_t *lp, i32 x) {
   lp->text[lp->size] = '\0';
 }
 
+void editor_text_between(editor_t *E, mark_t mark, ds_t *r) {
+  r->buf[0] = '\0';
+  r->len = 0;
 
-void editor_text_between(editor_t *E, mark_t mark, char *r) {
- // TODO: IMPL
+  if (mark.start_lp == mark.end_lp) {
+    dsncat(r, 
+           mark.start_lp->text + mark.start_offset,
+           mark.end_offset - mark.start_offset);
+    return;
+  }
+
+  line_t *lp = mark.start_lp;
+  dscat(r, lp->text + mark.start_offset);
+  dscat(r, "\n");
+  lp = lp->next;
+
+  while(lp != mark.end_lp && lp != NULL) {
+    dscat(r, lp->text);
+    dscat(r, "\n");
+    lp = lp->next;
+  }
+
+  dsncat(r, lp->text, mark.end_offset);
 }
 
-void editor_kill_between(editor_t *E, mark_t mark, char *r) {
+void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
  // TODO: IMPL
 }
 

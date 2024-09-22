@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ds.h"
 #include "types.h"
 
 #define VERSION "0.0.1"
@@ -26,9 +27,9 @@ void editor_delete_char_at(line_t *lp, i32 x);
 
 line_t* editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch);
 
-void editor_text_between(editor_t *E, mark_t mark, char *r);
+void editor_text_between(editor_t *E, mark_t mark, ds_t *r);
 
-void editor_kill_between(editor_t *E, mark_t mark, char *r);
+void editor_kill_between(editor_t *E, mark_t mark, ds_t *r);
 
 char editor_char_at(line_t *lp, i32 x);
 

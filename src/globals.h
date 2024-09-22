@@ -1,13 +1,16 @@
 #pragma once
 
 #include "types.h"
+#include "ds.h"
 
 extern bool g_running;
 extern bool g_cursor_vis;
 extern u8 g_mode;
 extern cmd_func_t g_cmd_func;
-extern char g_clipbuf[CLIPBUF];
+extern ds_t *g_clipbuf;
 extern mark_t g_mark;
+
+void globals_init(void);
 
 void set_status_message(const char* msg, ...);
 void clear_status_message(void);

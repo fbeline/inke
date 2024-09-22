@@ -14,6 +14,7 @@ static cursor_t C = {0};
 void Init(const char* filename) {
   E = editor_init(filename);
   C = cursor_init(&E);
+  globals_init();
   term_init();
 }
 
