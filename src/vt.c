@@ -29,6 +29,7 @@ void vt_puts(char *str, ...) {
 }
 
 void vt_nputs(char *str, usize n) {
+  if (n <= 0) return;
   dsncat(sbuffer, str, n);
 }
 

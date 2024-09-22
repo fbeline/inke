@@ -78,8 +78,8 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
 
 static void term_draw_mark(term_t *T, cursor_t *C, line_t *lp, char *line) {
   mark_t mark = mark_get();
-  mark.start_offset -= C->coloff;
-  mark.end_offset -= C->coloff;
+  mark.start_offset = MAX(0, mark.start_offset - C->coloff);
+  mark.end_offset = MAX(0, mark.end_offset - C->coloff);;
 
   if (lp == mark.start_lp && lp == mark.end_lp) {
     vt_nputs(line, mark.start_offset);
@@ -109,7 +109,7 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   strncpy(line, lp->text + C->coloff, size);
   line[size] = '\0';
 
-  if (g_mode != MODE_VISUAL || size <= 0) {
+  if (g_mode != MODE_VISUAL) {
     return vt_puts(line);
   }
 
