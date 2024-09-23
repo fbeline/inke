@@ -50,12 +50,12 @@ static int test_move_line_up(void) {
   // moveup first line
   editor_move_line_up(&E, E.lines);
   ASSERT_STRING_EQUAL("foo bar baz", E.lines->text);
-  ASSERT_EQUAL(2, E.row_size);
+  ASSERT_EQUAL(2ul, E.row_size);
 
   // moveup second line
   E.lines = editor_move_line_up(&E, E.lines->next);
   ASSERT_STRING_EQUAL("foo bar bazqux quux corge", E.lines->text);
-  ASSERT_EQUAL(1, E.row_size);
+  ASSERT_EQUAL(1ul, E.row_size);
 
   return 0;
 }
@@ -65,18 +65,18 @@ static int test_delete_rows(void) {
 
   // delete first line
   editor_delete_lines(&E, E.lines, 1);
-  ASSERT_EQUAL(E.row_size, 1);
+  ASSERT_EQUAL(E.row_size, 1ul);
   ASSERT_STRING_EQUAL("qux quux corge", E.lines->text);
 
   // delete seconds and last line
   editor_delete_lines(&E, E.lines, 1);
-  ASSERT_EQUAL(E.row_size, 1); // min row size is 1
+  ASSERT_EQUAL(E.row_size, 1ul); // min row size is 1
   ASSERT_STRING_EQUAL("", E.lines->text);
 
   // delete all lines at once
   editor_t E2 = factory();
   editor_delete_lines(&E2, E.lines, 2);
-  ASSERT_EQUAL(E2.row_size, 1); // min row size is 1
+  ASSERT_EQUAL(E2.row_size, 1ul); // min row size is 1
   ASSERT_STRING_EQUAL("", E2.lines->text);
 
   return 0;
@@ -86,9 +86,9 @@ static int test_break_line(void) {
   editor_t E = factory();
 
   editor_break_line(&E, E.lines, 3);
-  ASSERT_EQUAL(E.row_size, 3);
+  ASSERT_EQUAL(E.row_size, 3ul);
   ASSERT_STRING_EQUAL("foo", E.lines->text);
-  ASSERT_EQUAL(3, (i32)E.lines->size);
+  ASSERT_EQUAL(3ul, E.lines->size);
   ASSERT_STRING_EQUAL(" bar baz", E.lines->next->text);
 
   return 0;
@@ -116,7 +116,7 @@ static int test_text_between(void) {
   editor_t E = factory();
 
   mark_t mark = {
-    .start_lp = E.lines, 
+    .start_lp = E.lines,
     .start_offset = 4,
     .end_lp = E.lines,
     .end_offset = 7
@@ -169,7 +169,7 @@ static int test_insert_row_at(void) {
 
   editor_insert_row_at(&E, 0);
   editor_insert_row_at(&E, 3);
-  ASSERT_EQUAL(4, E.row_size);
+  ASSERT_EQUAL(4lu, E.row_size);
   ASSERT_STRING_EQUAL("", E.lines->text);
   ASSERT_STRING_EQUAL("foo bar baz", E.lines->next->text);
   ASSERT_STRING_EQUAL("qux quux corge", E.lines->next->next->text);
@@ -206,7 +206,7 @@ static int test_editor_insert_text(void) {
   editor_insert_text(&E2, E2.lines, 4, "testing\nmultiline ");
   ASSERT_STRING_EQUAL(E2.lines->text, "foo testing");
   ASSERT_STRING_EQUAL(E2.lines->next->text, "multiline bar baz");
-  ASSERT_EQUAL(3, E2.row_size);
+  ASSERT_EQUAL(3lu, E2.row_size);
 
   return 0;
 }

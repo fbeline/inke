@@ -8,7 +8,7 @@ static int test_flow(void) {
   editor_t E = editor_init("samples/sample.txt");
   cursor_t C = cursor_init(&E);
 
-  ASSERT_EQUAL(31, E.row_size);
+  ASSERT_EQUAL(31lu, E.row_size);
 
   // DELETE ROW
   cursor_down(&C);
@@ -16,7 +16,7 @@ static int test_flow(void) {
 
   char* l3 = "# Check if a directory was provided as an argument";
   ASSERT_STRING_EQUAL(l3, C.clp->text);
-  ASSERT_EQUAL(30, E.row_size);
+  ASSERT_EQUAL(30lu, E.row_size);
 
   return 0;
 }
@@ -25,7 +25,7 @@ static int test_empty_file(void) {
   editor_t E = editor_init("samples/empty_sample.txt");
   cursor_t C = cursor_init(&E);
 
-  ASSERT_EQUAL(1, E.row_size);
+  ASSERT_EQUAL(1lu, E.row_size);
 
   return 0;
 }

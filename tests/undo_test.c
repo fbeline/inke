@@ -107,12 +107,12 @@ static int test_undo_cut(void) {
   cursor_region_kill(&C);
 
   ASSERT_STRING_EQUAL("foo quux corge", C.clp->text);
-  ASSERT_EQUAL(1, C.editor->row_size);
+  ASSERT_EQUAL(1lu, C.editor->row_size);
 
   undo(&C);
   ASSERT_STRING_EQUAL("foo bar baz", C.clp->text);
   ASSERT_STRING_EQUAL("qux quux corge", C.clp->next->text);
-  ASSERT_EQUAL(2, C.editor->row_size);
+  ASSERT_EQUAL(2lu, C.editor->row_size);
 
   return 0;
 }
@@ -121,12 +121,12 @@ static int test_undo_line_break(void) {
   cursor_t C = factory();
   C.x = 3;
   cursor_break_line(&C);
-  ASSERT_EQUAL(3, C.editor->row_size);
+  ASSERT_EQUAL(3lu, C.editor->row_size);
   ASSERT_STRING_EQUAL(" bar baz", C.clp->text);
   ASSERT_STRING_EQUAL("foo", C.clp->prev->text);
 
   undo(&C);
-  ASSERT_EQUAL(2, C.editor->row_size);
+  ASSERT_EQUAL(2lu, C.editor->row_size);
   ASSERT_STRING_EQUAL("foo bar baz", C.clp->text);
 
   return 0;
@@ -137,11 +137,11 @@ static int test_undo_line_delete(void) {
 
   cursor_delete_row(&C);
   ASSERT_STRING_EQUAL("qux quux corge", C.clp->text);
-  ASSERT_EQUAL(1, (i32)C.editor->row_size);
+  ASSERT_EQUAL(1lu, C.editor->row_size);
 
   undo(&C);
   ASSERT_STRING_EQUAL("foo bar baz", C.clp->text);
-  ASSERT_EQUAL(2, (i32)C.editor->row_size);
+  ASSERT_EQUAL(2lu, C.editor->row_size);
 
   return 0;
 }

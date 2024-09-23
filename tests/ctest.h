@@ -4,10 +4,9 @@
 
 #define ASSERT_EQUAL(expected, actual) \
     if ((expected) != (actual)) { \
-        printf("Test failed: %s == %s, expected %d but got %d\n", #expected, #actual, (expected), (actual)); \
+        printf("Test failed: %s == %s, expected %zu but got %zu\n", #expected, #actual, (expected), (actual)); \
         return 1; \
     }
-
 
 #define ASSERT_VEC2_EQUAL(expected_x, expected_y, actual) \
     if ((expected_x) != (actual.x) || (expected_y) != (actual.y)) { \

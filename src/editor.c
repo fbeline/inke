@@ -51,7 +51,7 @@ line_t* line_append_s(line_t *lp, const char *str, usize len) {
   if (new_size >= lp->capacity)
     lp = lrealloc(lp, new_size);
 
-  for(int i = 0, j = old_size; i < len; i++, j++) {
+  for(usize i = 0, j = old_size; i < len; i++, j++) {
     lp->text[j] = str[i];
   }
 
@@ -89,9 +89,9 @@ static line_t *editor_create_line_after(editor_t *E, line_t* lp, usize capacity)
   return nlp;
 }
 
-void editor_delete_lines(editor_t *E, line_t* lp, i32 size) {
+void editor_delete_lines(editor_t *E, line_t* lp, usize size) {
   line_t *lp1, *lp2 = lp;
-  i32 i = 0;
+  usize i = 0;
   do {
     lp1 = lp2;
     lp2 = lp1->next;
@@ -114,7 +114,7 @@ void editor_delete_lines(editor_t *E, line_t* lp, i32 size) {
   E->row_size -= size;
 }
 
-line_t *editor_rows_to_string(line_t *head, unsigned int size) {
+line_t *editor_rows_to_string(line_t *head, usize size) {
   line_t* ab = lalloc(0);
   line_t* lp = head;
   while (lp != NULL) {
@@ -157,8 +157,8 @@ line_t* editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata) {
   return lp;
 }
 
-char editor_char_at(line_t *lp, i32 x) {
-  if (lp == NULL || x > lp->size || x < 0)
+char editor_char_at(line_t *lp, usize x) {
+  if (lp == NULL || x > lp->size)
     return '\0';
 
   return lp->text[x];
@@ -176,8 +176,8 @@ line_t *editor_move_line_up(editor_t *E, line_t *lp) {
   return prev;
 }
 
-void editor_delete_char_at(line_t *lp, i32 x) {
-  if (x < 0 || x >= lp->size || lp == NULL) return;
+void editor_delete_char_at(line_t *lp, usize x) {
+  if (x >= lp->size || lp == NULL) return;
 
   memmove(&lp->text[x],
           &lp->text[x+1],
@@ -186,9 +186,9 @@ void editor_delete_char_at(line_t *lp, i32 x) {
   lp->size--;
 }
 
-line_t *editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
-  if (x < 0 || x > lp->size)
-    DIE("Invalid position x=%d", x);
+line_t *editor_insert_char_at(editor_t *E, line_t *lp, usize x, char ch) {
+  if (x > lp->size)
+    DIE("Invalid position x=%zu", x);
 
   lp->size++;
   if (lp->size >= lp->capacity) lp = lrealloc(lp, lp->size);
@@ -202,7 +202,7 @@ line_t *editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
   return lp;
 }
 
-void editor_break_line(editor_t *E, line_t *lp, i32 x) {
+void editor_break_line(editor_t *E, line_t *lp, usize x) {
   if (lp == NULL || x > lp->size) return;
 
   line_t *new_line = lalloc(16);
@@ -221,13 +221,13 @@ void editor_break_line(editor_t *E, line_t *lp, i32 x) {
   E->row_size++;
 }
 
-void editor_delete_forward(line_t *lp, i32 x) {
+void editor_delete_forward(line_t *lp, usize x) {
   lp->text[x] = '\0';
   lp->size = x;
 }
 
-void editor_delete_backward(line_t *lp, i32 x) {
-  lp->size -= x;
+void editor_delete_backward(line_t *lp, usize x) {
+  lp->size = lp->size > x ? lp->size - x : 0;
   memmove(lp->text, lp->text + x, lp->size);
   lp->text[lp->size] = '\0';
 }
@@ -263,12 +263,12 @@ void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
   editor_text_between(E, mark, r);
 
   if (lp == mark.end_lp) {
-    i32 mark_size = mark.end_offset - mark.start_offset;
+    usize mark_size = mark.end_offset - mark.start_offset;
 
     memmove(lp->text + mark.start_offset,
             lp->text + mark.end_offset,
             lp->size - mark.end_offset);
-    lp->size -= mark_size;
+    lp->size = mark_size <= lp->size ? lp->size - mark_size : 0;
     lp->text[lp->size] = '\0';
     return;
   }
@@ -287,15 +287,15 @@ void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
   line_free(lp);
 }
 
-void editor_insert_text(editor_t *E, line_t* lp, i32 x, const char* strdata) {
-  if (x < 0 || strdata == NULL || lp == NULL) return;
-  x = MIN(x, (i32)lp->size);
+void editor_insert_text(editor_t *E, line_t* lp, usize x, const char* strdata) {
+  if (strdata == NULL || lp == NULL) return;
+  x = MIN(x, lp->size);
 
   char* strtail = strdup(lp->text + x);
   lp->text[x] = '\0';
   lp->size = x;
 
-  i32 i = 0, j = 0;
+  usize i = 0, j = 0;
   char aux[CLIPBUF];
   char ch;
   while ((ch = strdata[i++]) != '\0') {

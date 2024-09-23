@@ -232,7 +232,7 @@ static int test_cursor_down(void) {
   cursor_t C = factory();
 
   cursor_down(&C);
-  ASSERT_EQUAL(1, C.y);
+  ASSERT_EQUAL(1lu, C.y);
 
   return 0;
 }
@@ -241,11 +241,11 @@ static int test_cursor_up(void) {
   cursor_t C = factory();
 
   cursor_up(&C);
-  ASSERT_EQUAL(0, C.y);
+  ASSERT_EQUAL(0lu, C.y);
 
   cursor_down(&C);
   cursor_up(&C);
-  ASSERT_EQUAL(0, C.y);
+  ASSERT_EQUAL(0lu, C.y);
 
   return 0;
 }
@@ -280,7 +280,7 @@ static int test_cursor_left(void) {
   cursor_down(&C);
   C.x = 0;
   cursor_left(&C);
-  i32 l0len = C.editor->lines->size;
+  usize l0len = C.editor->lines->size;
   ASSERT_VEC2_EQUAL(l0len, 0, cursor_position(&C));
 
   return 0;
