@@ -281,10 +281,12 @@ void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
     line_t *next = lp->next;
     line_free(lp);
     lp = next;
+    E->row_size--;
   }
 
   line_append(mark.start_lp, lp->text + mark.end_offset);
   line_free(lp);
+  E->row_size--;
 }
 
 static void editor_new_file(const char *filename, editor_t *E) {
