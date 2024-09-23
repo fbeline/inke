@@ -235,7 +235,12 @@ void cursor_insert_char(cursor_t* C, int ch) {
 }
 
 void cursor_insert_text(cursor_t* C, const char* text) {
-  editor_insert_text(C->editor, C->clp, raw_x(C), text);
+  for (usize i = 0, max = strlen(text); i < max; i++) {
+    if (text[i] == '\n')
+      cursor_break_line(C);
+    else
+      cursor_insert_char(C, text[i]);
+  }
 }
 
 void cursor_page_up(cursor_t* C) {

@@ -287,35 +287,6 @@ void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
   line_free(lp);
 }
 
-void editor_insert_text(editor_t *E, line_t* lp, usize x, const char* strdata) {
-  if (strdata == NULL || lp == NULL) return;
-  x = MIN(x, lp->size);
-
-  char* strtail = strdup(lp->text + x);
-  lp->text[x] = '\0';
-  lp->size = x;
-
-  usize i = 0, j = 0;
-  char aux[CLIPBUF];
-  char ch;
-  while ((ch = strdata[i++]) != '\0') {
-    if (ch != '\n') {
-      aux[j++] = ch;
-      continue;
-    }
-
-    aux[j] = '\0';
-    line_append(lp, aux);
-    j = 0;
-    aux[0] = '\0';
-    lp = editor_create_line_after(E, lp, 16);
-  }
-  aux[j] = '\0';
-  line_append(lp, aux);
-  line_append(lp, strtail);
-  free(strtail);
-}
-
 static void editor_new_file(const char *filename, editor_t *E) {
   strcpy(E->filename, filename);
   E->row_size = 1;

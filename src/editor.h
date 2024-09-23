@@ -37,8 +37,6 @@ line_t* editor_insert_row_at(editor_t* E, usize n);
 
 line_t* editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata);
 
-void editor_insert_text(editor_t *E, line_t* lp, usize x, const char* str);
-
 line_t* editor_rows_to_string(line_t* lines, usize size);
 
 editor_t editor_init(const char* filename);

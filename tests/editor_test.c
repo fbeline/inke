@@ -190,27 +190,6 @@ static int test_insert_row_with_data_at(void) {
   return 0;
 }
 
-static int test_editor_insert_text(void) {
-  editor_t E = factory();
-
-  editor_insert_text(&E, E.lines, 0, "first ");
-  ASSERT_STRING_EQUAL("first foo bar baz", E.lines->text);
-
-  editor_insert_text(&E, E.lines, 6, "middle ");
-  ASSERT_STRING_EQUAL("first middle foo bar baz", E.lines->text);
-
-  editor_insert_text(&E, E.lines, E.lines->size, " end");
-  ASSERT_STRING_EQUAL("first middle foo bar baz end", E.lines->text);
-
-  editor_t E2 = factory();
-  editor_insert_text(&E2, E2.lines, 4, "testing\nmultiline ");
-  ASSERT_STRING_EQUAL(E2.lines->text, "foo testing");
-  ASSERT_STRING_EQUAL(E2.lines->next->text, "multiline bar baz");
-  ASSERT_EQUAL(3lu, E2.row_size);
-
-  return 0;
-}
-
 static int test_rows_to_string(void) {
   editor_t E = factory();
 
@@ -235,7 +214,6 @@ int main() {
   result += test_char_at();
   result += test_insert_row_at();
   result += test_insert_row_with_data_at();
-  result += test_editor_insert_text();
   result += test_rows_to_string();
 
   return result;
