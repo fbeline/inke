@@ -40,6 +40,7 @@ static keytab_t keytabs[NBINDS] = {
 
   { META | 'f', cursor_move_word_forward },
   { META | 'b', cursor_move_word_backward },
+  { META | '^', cursor_move_line_up },
   { META | '>', cursor_eof },
   { META | '<', cursor_bof },
 
