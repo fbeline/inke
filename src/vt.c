@@ -13,8 +13,7 @@
 static ds_t *sbuffer;
 
 void vt_flush(void) {
-  if (write(STDOUT_FILENO, sbuffer->buf, sbuffer->len) != sbuffer->len)
-    DIE("stdout write error");
+  write(STDOUT_FILENO, sbuffer->buf, sbuffer->len);
   sbuffer->buf[0] = '\0';
   sbuffer->len = 0;
 }

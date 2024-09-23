@@ -14,3 +14,12 @@ add_executable(inke
   mode.h mode.c
   cursor.h cursor.c
   editor.h editor.c)
+
+target_link_libraries(inke
+  -fsanitize=undefined,address
+  -Wall
+  -Wextra
+  -pedantic
+  -Wno-unused-parameter
+)
+

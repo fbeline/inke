@@ -14,8 +14,7 @@
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-linux",
         "CMAKE_C_COMPILER": "clang",
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_C_FLAGS": "-fsanitize=undefined,address -Wall -Wextra -pedantic -Wno-unused-parameter"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {

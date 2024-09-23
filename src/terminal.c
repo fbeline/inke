@@ -54,13 +54,13 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
   if ((status = malloc(T->cols + 1)) == NULL) DIE("out of memory");
 
   i32 len = snprintf(status,
-                     T->cols + 1, "%.20s %s%*s%d,%d",
+                     T->cols + 1, "%.20s %s%*s%zu,%zu",
                      C->editor->filename,
                      C->editor->dirty ? "[+]" : "",
                      T->cols - 20,
                      "",
-                     C->x + 1,
-                     C->y + 1
+                     C->x + C->coloff + 1lu,
+                     C->y + C->rowoff + 1lu
                      );
 
   vt_puts(status);
@@ -110,17 +110,18 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   line[size] = '\0';
 
   if (g_mode != MODE_VISUAL) {
-    return vt_puts(line);
+    vt_puts(line);
+    return;
   }
 
   term_draw_mark(T, C, lp, line);
 }
 
 static void term_draw(term_t *T, cursor_t *C) {
-  int y;
+  usize y;
   line_t *lp = C->editor->lines;
 
-  for (i32 i = 0; i < C->rowoff && lp->next != NULL; i++) {
+  for (usize i = 0; i < C->rowoff && lp->next != NULL; i++) {
     if (g_mode == MODE_VISUAL && g_mark.start_lp == lp)
       vt_reverse_video();
 
