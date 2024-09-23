@@ -30,6 +30,9 @@ typedef size_t usize;
 #define NBINDS 256
 #define CLIPBUF (1 << 16)  // 64 KB (2^16 bytes)
 
+#define UNDO_OFF 0
+#define UNDO_ON  1
+
 enum keys {
   TAB_KEY = 9,
   ENTER_KEY = 13,

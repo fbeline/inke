@@ -4,7 +4,7 @@
 #include "cursor.h"
 
 typedef enum {
-  ADD, BACKSPACE, CUT, PASTE, LINEUP, LINEBREAK, LINEDELETE,
+  ADD, BACKSPACE, CUT, LINEUP, LINEBREAK, LINEDELETE,
   DELETE_FORWARD
 } undo_type;
 

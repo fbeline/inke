@@ -7,14 +7,10 @@
 #include "globals.h"
 #include "editor.h"
 
-#define UNDO_OFF 0
-#define UNDO_ON  1
-
 static undo_t* undo_head = NULL;
-static int undo_state = UNDO_ON;
 
 void undo_push(undo_type type, cursor_t cursor, const char* data) {
-  if (undo_state == UNDO_OFF) return;
+  if (g_undo_state == UNDO_OFF) return;
 
   undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
   undo->type = type;
@@ -47,7 +43,7 @@ void undo_free(undo_t* undo) {
 }
 
 static void undo_line_delete(cursor_t *C, undo_t *undo) {
-  i32 y = C->y + C->rowoff;
+  usize y = C->y + C->rowoff;
   C->clp = editor_insert_row_with_data_at(C->editor, y, undo->strdata);
 
   if (y == 0) C->editor->lines = C->clp;
@@ -61,7 +57,7 @@ void undo(cursor_t* C) {
   cursor_set(C, &undo->cursor);
   g_mode = MODE_INSERT;
 
-  undo_state = UNDO_OFF;
+  g_undo_state = UNDO_OFF;
   switch (undo->type) {
     case ADD:
       cursor_remove_char(C);
@@ -84,15 +80,11 @@ void undo(cursor_t* C) {
     case CUT:
       cursor_insert_text(C, undo->strdata);
       break;
-    case PASTE:
-      // TODO: FIX it to discard new line size
-      /* editor_kill_between(C->editor, C->clp, C->x + C->coloff, atoi(undo->strdata)); */
-      break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
   }
 
-  undo_state = UNDO_ON;
+  g_undo_state = UNDO_ON;
   undo_free(undo);
 }
 
