@@ -18,10 +18,10 @@ line_t *lalloc(usize capacity) {
     capacity = BLOCK_SIZE;
 
   if ((lp = (line_t*)malloc(sizeof(line_t))) == NULL)
-    die("LALLOC OUT OF MEMORY");
+    DIE("LALLOC OUT OF MEMORY");
 
   if ((lp->text = malloc(capacity)) == NULL)
-    die("LALLOC OUT OF MEMORY");
+    DIE("LALLOC OUT OF MEMORY");
 
   lp->capacity = capacity;
   lp->size = 0;
@@ -38,7 +38,7 @@ line_t *lrealloc(line_t *lp, usize capacity) {
     capacity = BLOCK_SIZE;
 
   if ((lp->text = realloc(lp->text, capacity)) == NULL)
-    die("LREALLOC OUT OF MEMORY");
+    DIE("LREALLOC OUT OF MEMORY");
 
   lp->capacity = capacity;
 
@@ -188,7 +188,7 @@ void editor_delete_char_at(line_t *lp, i32 x) {
 
 line_t *editor_insert_char_at(editor_t *E, line_t *lp, i32 x, char ch) {
   if (x < 0 || x > lp->size)
-    die("Invalid position x=%d", x);
+    DIE("Invalid position x=%d", x);
 
   lp->size++;
   if (lp->size >= lp->capacity) lp = lrealloc(lp, lp->size);
@@ -237,7 +237,7 @@ void editor_text_between(editor_t *E, mark_t mark, ds_t *r) {
   r->len = 0;
 
   if (mark.start_lp == mark.end_lp) {
-    dsncat(r, 
+    dsncat(r,
            mark.start_lp->text + mark.start_offset,
            mark.end_offset - mark.start_offset);
     return;

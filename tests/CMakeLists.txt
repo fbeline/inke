@@ -2,7 +2,7 @@ set(PROJECT_SOURCES
   ../src/types.h
   ../src/ds.h  ../src/ds.c
   ../src/globals.h ../src/globals.c
-  ../src/utils.h ../src/utils.c
+  ../src/utils.h
   ../src/editor.h ../src/editor.c
   ../src/cursor.h ../src/cursor.c
   ../src/undo.h ../src/undo.c

@@ -19,16 +19,16 @@ void term_restore(void) {
   vt_set_cursor_position(0, 0);
   vt_flush();
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &T.oterm) == -1)
-    die("tcsetattr");
+    DIE("tcsetattr");
 }
 
 void signal_handler(int signum) {
   term_restore();
-  die("Caught signal %d, exiting...", signum);
+  DIE("Caught signal %d, exiting...", signum);
 }
 
 static void enable_raw_mode(term_t *T) {
-  if (tcgetattr(STDIN_FILENO, &T->oterm) == -1) die("tcgetattr");
+  if (tcgetattr(STDIN_FILENO, &T->oterm) == -1) DIE("tcgetattr");
 
   atexit(term_restore);
   signal(SIGTERM, signal_handler);
@@ -43,7 +43,7 @@ static void enable_raw_mode(term_t *T) {
   raw.c_cc[VMIN] = 0;
   raw.c_cc[VTIME] = 1;
 
-  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
+  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) DIE("tcsetattr");
 }
 
 static void term_draw_status_bar(term_t *T, cursor_t *C) {
@@ -51,7 +51,7 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
   vt_reverse_video();
 
   char *status;
-  if ((status = malloc(T->cols + 1)) == NULL) die("out of memory");
+  if ((status = malloc(T->cols + 1)) == NULL) DIE("out of memory");
 
   i32 len = snprintf(status,
                      T->cols + 1, "%.20s %s%*s%d,%d",
@@ -152,7 +152,7 @@ static i32 term_get_size(term_t *T) {
 void term_init(void) {
   enable_raw_mode(&T);
   vt_init();
-  if (term_get_size(&T) == -1) die("term_get_size");
+  if (term_get_size(&T) == -1) DIE("term_get_size");
 }
 
 void term_render(cursor_t *C) {

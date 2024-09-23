@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdio.h>
 #include "types.h"
 
 /**
@@ -36,4 +37,8 @@
  */
 #define CLAMP(value, min, max) (MAX(MIN((value), (max)), (min)))
 
-void die(const char* msg, ...);
+#define DIE(msg, ...) \
+    do { \
+        fprintf(stderr, (msg), ##__VA_ARGS__); \
+        exit(1); \
+    } while (0)

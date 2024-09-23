@@ -90,7 +90,7 @@ static i32 input_read_key(void) {
   i32 nread;
   char c;
   while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
-    if (nread == -1 && errno != EAGAIN) die("read");
+    if (nread == -1 && errno != EAGAIN) DIE("read");
   }
 
   if (c == '\x1b') {

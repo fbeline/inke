@@ -8,7 +8,7 @@ add_executable(inke
   io.h io.c
   vt.h vt.c
   terminal.h terminal.c
-  utils.h utils.c
+  utils.h
   input.h input.c
   undo.h undo.c
   mode.h mode.c
