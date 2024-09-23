@@ -31,7 +31,7 @@ void cursor_set(cursor_t* dest, cursor_t* src) {
   }
 }
 
-static void cursor_set_clp_as(cursor_t *C, line_t *lp, i32 x) {
+static void cursor_set_clp_as(cursor_t *C, line_t *lp, usize x) {
   if (lp == NULL || x < 0) return;
 
   C->clp = C->editor->lines;
@@ -203,13 +203,11 @@ void cursor_move_line_up(cursor_t *C) {
   else C->y--;
 
   C->x = MIN(C->max_col, prlen);
-  C->coloff = MAX(0, (i32)prlen - C->x);
+  C->coloff = prlen > C->x ? prlen - C->x : 0;;
 }
 
 void cursor_remove_char(cursor_t* C) {
   vec2_t pos = cursor_position(C);
-  char strdata[2] = { editor_char_at(C->clp, pos.x - 1), '\0' };
-
   if (pos.x == 0 && pos.y == 0) return;
   if (pos.x == 0 && pos.y > 0) {
     cursor_move_line_up(C);
@@ -217,6 +215,7 @@ void cursor_remove_char(cursor_t* C) {
     return;
   }
 
+  char strdata[2] = { editor_char_at(C->clp, pos.x - 1), '\0' };
   editor_delete_char_at(C->clp, pos.x-1);
 
   if (C->x == 0 && C->coloff > 0)
@@ -270,20 +269,22 @@ void cursor_delete_forward(cursor_t* C) {
 }
 
 void cursor_delete_row(cursor_t* C) {
-  i32 y = raw_y(C);
-  bool ll = C->editor->row_size - (y + 1) == 0; //last line
+  line_t *lp = NULL;
+  undo_push(LINEDELETE, *C, C->clp->text);
 
-  char* strdata = strdup(C->clp->text);
-  undo_push(LINEDELETE, *C, strdata);
+  if (C->clp->next != NULL) {
+    lp = C->clp->next;
+  } else if (C->clp->next == NULL && C->clp->prev != NULL) {
+    lp = C->clp->prev;
+    if (C->rowoff > 0) C->rowoff--;
+    else C->x--;
+  } else {
+    lp = C->clp;
+  }
 
-  line_t *lp = C->clp->next != NULL ? C->clp->next : C->clp;
   editor_delete_lines(C->editor, C->clp, 1);
   C->clp = lp;
 
-  if (ll) {
-    cursor_up(C);
-    y--;
-  }
   if (raw_x(C) > C->clp->size) cursor_eol(C);
 }
 
@@ -308,7 +309,6 @@ void cursor_bof(cursor_t* C) {
   while(C->clp->prev != NULL)
     C->clp = C->clp->prev;
 }
-
 
 void cursor_undo(cursor_t* C) {
   undo(C);

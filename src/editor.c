@@ -96,7 +96,7 @@ void editor_delete_lines(editor_t *E, line_t* lp, i32 size) {
     lp1 = lp2;
     lp2 = lp1->next;
 
-    // last line
+    // buffer must have at least 1 line
     if (lp1->prev == NULL && lp1->next == NULL) {
       lp1->text[0] = '\0';
       lp1->size = 0;
@@ -158,7 +158,7 @@ line_t* editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata) {
 }
 
 char editor_char_at(line_t *lp, i32 x) {
-  if (lp == NULL || x > lp->size)
+  if (lp == NULL || x > lp->size || x < 0)
     return '\0';
 
   return lp->text[x];

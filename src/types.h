@@ -57,8 +57,8 @@ typedef struct line_s {
 typedef struct editor_s {
   unsigned char mode;
   char filename[255];
-  u32 row_size;
   bool dirty, new_file;
+  usize row_size;
   line_t *lines;
 } editor_t;
 
@@ -67,14 +67,14 @@ struct cursor_s;
 typedef struct mark_s {
   line_t *start_lp;
   line_t *end_lp;
-  i32 start_offset;
-  i32 end_offset;
+  usize start_offset;
+  usize end_offset;
 } mark_t;
 
 typedef struct cursor_s {
-  i32 x, y;
-  i32 coloff, rowoff;
-  u32 max_col, max_row;
+  usize x, y;
+  usize coloff, rowoff;
+  usize max_col, max_row;
   editor_t *editor;
   line_t *clp;
 } cursor_t;
@@ -88,5 +88,5 @@ typedef struct keytab {
 } keytab_t;
 
 typedef struct vec2_s {
-  i32 x, y;
+  usize x, y;
 } vec2_t;
