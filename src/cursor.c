@@ -68,11 +68,8 @@ void cursor_region_kill(cursor_t* C) {
   mark_t mark = mark_get();
   editor_kill_between(C->editor, mark, g_clipbuf);
 
-  cursor_t sc = *C;
-  cursor_set_clp_as(&sc, mark.start_lp, mark.start_offset);
-  undo_push(CUT, sc, g_clipbuf->buf);
-
   cursor_set_clp_as(C, mark.start_lp, mark.start_offset);
+  undo_push(CUT, *C, g_clipbuf->buf);
 
   g_mode = MODE_INSERT;
   clear_status_message();
