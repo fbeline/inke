@@ -50,7 +50,6 @@ static void undo_line_delete(cursor_t *C, undo_t *undo) {
 }
 
 void undo(cursor_t* C) {
-  editor_t* E = C->editor;
   undo_t* undo = undo_pop();
   if (undo == NULL) return;
 

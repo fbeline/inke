@@ -130,7 +130,7 @@ line_t* editor_insert_row_at(editor_t *E, usize y) {
   line_t *pl = NULL;
   line_t *nl = E->lines;
 
-  int i = 0;
+  usize i = 0;
   while(++i <= y && nl != NULL) {
     pl = nl;
     nl = nl->next;

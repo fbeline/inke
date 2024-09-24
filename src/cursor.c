@@ -10,11 +10,11 @@
 #include "undo.h"
 #include "utils.h"
 
-static i32 raw_x(cursor_t* C) {
+static usize raw_x(cursor_t* C) {
   return C->x + C->coloff;
 }
 
-static i32 raw_y(cursor_t* C) {
+static usize raw_y(cursor_t* C) {
   return C->y + C->rowoff;
 }
 
@@ -110,8 +110,6 @@ void cursor_down(cursor_t* C) {
 }
 
 void cursor_up(cursor_t* C) {
-  i32 oldx = raw_x(C);
-
   if (raw_y(C) <= 0 || C->clp->prev == NULL) return;
   C->clp = C->clp->prev;
 
@@ -244,13 +242,13 @@ void cursor_insert_text(cursor_t* C, const char* text) {
 }
 
 void cursor_page_up(cursor_t* C) {
-  for (i32 i = 0; i < C->max_row; i ++) {
+  for (usize i = 0; i < C->max_row; i ++) {
     cursor_up(C);
   }
 }
 
 void cursor_page_down(cursor_t* C) {
-  for (i32 i = 0; i < C->max_row; i ++) {
+  for (usize i = 0; i < C->max_row; i ++) {
     cursor_down(C);
   }
 }
@@ -258,8 +256,10 @@ void cursor_page_down(cursor_t* C) {
 void cursor_delete_forward(cursor_t* C) {
   i32 x = raw_x(C);
 
-  if (x == 0 || C->clp->size == 0)
-    return cursor_delete_row(C);
+  if (x == 0 || C->clp->size == 0) {
+    cursor_delete_row(C);
+    return;
+  }
 
   mark_t mark = {
     .start_lp = C->clp,

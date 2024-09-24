@@ -1,18 +1,12 @@
 #include "mode.h"
 
 #include <stdarg.h>
-#include <stdio.h>
 
 #include "types.h"
 #include "globals.h"
 #include "io.h"
 
 static void mode_cmd_nop(cursor_t *C, int ch) { }
-
-static void mode_cmd_not_found(cursor_t* C, int ch) {
-  set_status_message("keybind not defined");
-  g_mode = MODE_INSERT;
-}
 
 void mode_cmd_clean(void) {
   set_status_message("");

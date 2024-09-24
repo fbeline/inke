@@ -15,11 +15,13 @@ add_executable(inke
   cursor.h cursor.c
   editor.h editor.c)
 
-target_link_libraries(inke
+target_compile_options(inke PRIVATE
   -fsanitize=undefined,address
   -Wall
   -Wextra
   -pedantic
   -Wno-unused-parameter
+  -Wno-unused-function
+  -Wno-gnu-zero-variadic-macro-arguments
 )
 

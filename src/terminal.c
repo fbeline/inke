@@ -57,7 +57,7 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
                      T->cols + 1, "%.20s %s%*s%zu,%zu",
                      C->editor->filename,
                      C->editor->dirty ? "[+]" : "",
-                     T->cols - 20,
+                     (i32)T->cols - 20,
                      "",
                      C->x + C->coloff + 1lu,
                      C->y + C->rowoff + 1lu
@@ -65,7 +65,7 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
 
   vt_puts(status);
 
-  for (i32 i = len; i < T->cols; i++)
+  for (usize i = len; i < T->cols; i++)
     vt_puts(" ");
 
   vt_puts("\r\n");
