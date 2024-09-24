@@ -35,6 +35,10 @@ undo_t* undo_pop(void) {
   return head;
 }
 
+static undo_t *undo_peek(void) {
+  return undo_head;
+}
+
 void undo_free(undo_t* undo) {
   if (undo == NULL) return;
   if (undo->strdata != NULL) free(undo->strdata);
@@ -49,20 +53,28 @@ static void undo_line_delete(cursor_t *C, undo_t *undo) {
   if (y == 0) C->editor->lines = C->clp;
 }
 
-void undo(cursor_t* C) {
-  undo_t* undo = undo_pop();
-  if (undo == NULL) return;
+static void undo_undo(cursor_t *C, undo_t *u) {
+  undo_t *next = undo_peek();
+  if (next == NULL || next->type != u->type)
+    return;
 
-  cursor_set(C, &undo->cursor);
+  undo(C);
+}
+
+void undo(cursor_t* C) {
+  undo_t* u = undo_pop();
+  if (u == NULL) return;
+
+  cursor_set(C, &u->cursor);
   g_mode = MODE_INSERT;
 
   g_undo_state = UNDO_OFF;
-  switch (undo->type) {
+  switch (u->type) {
     case ADD:
       cursor_remove_char(C);
       break;
     case BACKSPACE:
-      cursor_insert_char(C, undo->strdata[0]);
+      cursor_insert_char(C, u->strdata[0]);
       break;
     case LINEUP:
       cursor_break_line(C);
@@ -71,19 +83,20 @@ void undo(cursor_t* C) {
       cursor_move_line_up(C);
       break;
     case LINEDELETE:
-      undo_line_delete(C, undo);
+      undo_line_delete(C, u);
       break;
     case DELETE_FORWARD:
-      cursor_insert_text(C, undo->strdata);
+      cursor_insert_text(C, u->strdata);
       break;
     case CUT:
-      cursor_insert_text(C, undo->strdata);
+      cursor_insert_text(C, u->strdata);
       break;
     default:
-      printf("UNDO TYPE NOT IMPLEMENTED %d\n", undo->type);
+      printf("UNDO TYPE NOT IMPLEMENTED %d\n", u->type);
   }
 
+  undo_undo(C, u);
   g_undo_state = UNDO_ON;
-  undo_free(undo);
+  undo_free(u);
 }
 
