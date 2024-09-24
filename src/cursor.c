@@ -85,7 +85,7 @@ void cursor_bol(cursor_t* C) {
 }
 
 void cursor_eol(cursor_t* C) {
-  i32 len = C->clp->size;
+  usize len = C->clp->size;
   if (len > C->max_col) {
     C->x = C->max_col;
     C->coloff = len - C->max_col;
