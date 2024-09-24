@@ -6,7 +6,6 @@
 #include <stdarg.h>
 
 #include "ds.h"
-#include "utils.h"
 
 #define PUTSIZE 1024
 
