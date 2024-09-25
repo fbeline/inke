@@ -6,13 +6,16 @@
 #include <stdarg.h>
 
 #include "ds.h"
+#include "utils.h"
 
 #define PUTSIZE 1024
 
 static ds_t *sbuffer;
 
 void vt_flush(void) {
-  write(STDOUT_FILENO, sbuffer->buf, sbuffer->len);
+  if (write(STDOUT_FILENO, sbuffer->buf, sbuffer->len) == -1)
+    DIE("Error writing to stdout");
+
   sbuffer->buf[0] = '\0';
   sbuffer->len = 0;
 }

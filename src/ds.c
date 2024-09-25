@@ -39,7 +39,7 @@ ds_t *dsnewlen(size_t len) {
 ds_t *dsnew(const char *init) {
   size_t len = strlen(init);
   ds_t *ds = dsnewlen(len);
-  strncpy(ds->buf, init, len);
+  memcpy(ds->buf, init, len);
 
   return ds;
 }
