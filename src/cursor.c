@@ -32,7 +32,7 @@ void cursor_set(cursor_t* dest, cursor_t* src) {
 }
 
 static void cursor_set_clp_as(cursor_t *C, line_t *lp, usize x) {
-  if (lp == NULL || x < 0) return;
+  if (lp == NULL) return;
 
   C->clp = C->editor->lines;
   C->y = 0;
