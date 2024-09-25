@@ -334,3 +334,20 @@ cursor_t cursor_init(editor_t* E) {
 
   return C;
 }
+
+void cursor_update_window_size(cursor_t *C, u16 rows, u16 cols) {
+  u32 x = raw_x(C);
+  u32 y = raw_y(C);
+
+  C->max_col = cols;
+  C->max_row = rows;
+
+  if (x > cols) {
+    C->coloff = x - cols;
+    C->x = cols;
+  }
+  if (y > rows) {
+    C->rowoff = y - rows;
+    C->y = rows;
+  }
+}
