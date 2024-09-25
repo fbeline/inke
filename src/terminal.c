@@ -139,7 +139,7 @@ static void term_draw(term_t *T, cursor_t *C) {
   term_draw_status_bar(T, C);
 }
 
-static i32 term_get_size(term_t *T) {
+static i32 __term_update_size(term_t *T) {
   struct winsize ws;
   if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) {
     return -1;
@@ -150,10 +150,20 @@ static i32 term_get_size(term_t *T) {
   }
 }
 
+void term_update_size(void) {
+  if (__term_update_size(&T) == -1)
+    DIE("Unable to get screen size");
+}
+
+void term_get_size(u16 *rows, u16 *cols) {
+  *rows = T.rows;
+  *cols = T.cols;
+}
+
 void term_init(void) {
   enable_raw_mode(&T);
   vt_init();
-  if (term_get_size(&T) == -1) DIE("term_get_size");
+  term_update_size();
 }
 
 void term_render(cursor_t *C) {
