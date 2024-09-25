@@ -126,7 +126,7 @@ line_t *editor_rows_to_string(line_t *head, usize size) {
   return ab;
 }
 
-line_t* editor_insert_row_at(editor_t *E, usize y) {
+line_t* editor_insert_row_at(editor_t *E, u32 y) {
   line_t *pl = NULL;
   line_t *nl = E->lines;
 
@@ -150,14 +150,14 @@ line_t* editor_insert_row_at(editor_t *E, usize y) {
   return lp;
 }
 
-line_t* editor_insert_row_with_data_at(editor_t *E, usize y, char* strdata) {
+line_t* editor_insert_row_with_data_at(editor_t *E, u32 y, char* strdata) {
   line_t* lp = editor_insert_row_at(E, y);
   line_append(lp, strdata);
 
   return lp;
 }
 
-char editor_char_at(line_t *lp, usize x) {
+char editor_char_at(line_t *lp, u32 x) {
   if (lp == NULL || x > lp->size)
     return '\0';
 
@@ -176,7 +176,7 @@ line_t *editor_move_line_up(editor_t *E, line_t *lp) {
   return prev;
 }
 
-void editor_delete_char_at(line_t *lp, usize x) {
+void editor_delete_char_at(line_t *lp, u32 x) {
   if (x >= lp->size || lp == NULL) return;
 
   memmove(&lp->text[x],
@@ -186,9 +186,9 @@ void editor_delete_char_at(line_t *lp, usize x) {
   lp->size--;
 }
 
-line_t *editor_insert_char_at(editor_t *E, line_t *lp, usize x, char ch) {
+line_t *editor_insert_char_at(editor_t *E, line_t *lp, u32 x, char ch) {
   if (x > lp->size)
-    DIE("Invalid position x=%zu", x);
+    DIE("Invalid position x=%d", x);
 
   lp->size++;
   if (lp->size >= lp->capacity) lp = lrealloc(lp, lp->size);
@@ -202,7 +202,7 @@ line_t *editor_insert_char_at(editor_t *E, line_t *lp, usize x, char ch) {
   return lp;
 }
 
-void editor_break_line(editor_t *E, line_t *lp, usize x) {
+void editor_break_line(editor_t *E, line_t *lp, u32 x) {
   if (lp == NULL || x > lp->size) return;
 
   line_t *new_line = lalloc(16);
@@ -221,12 +221,12 @@ void editor_break_line(editor_t *E, line_t *lp, usize x) {
   E->row_size++;
 }
 
-void editor_delete_forward(line_t *lp, usize x) {
+void editor_delete_forward(line_t *lp, u32 x) {
   lp->text[x] = '\0';
   lp->size = x;
 }
 
-void editor_delete_backward(line_t *lp, usize x) {
+void editor_delete_backward(line_t *lp, u32 x) {
   lp->size = lp->size > x ? lp->size - x : 0;
   memmove(lp->text, lp->text + x, lp->size);
   lp->text[lp->size] = '\0';

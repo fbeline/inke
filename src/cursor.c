@@ -10,11 +10,11 @@
 #include "undo.h"
 #include "utils.h"
 
-static usize raw_x(cursor_t* C) {
+static u32 raw_x(cursor_t* C) {
   return C->x + C->coloff;
 }
 
-static usize raw_y(cursor_t* C) {
+static u32 raw_y(cursor_t* C) {
   return C->y + C->rowoff;
 }
 
@@ -25,13 +25,13 @@ void cursor_set(cursor_t* dest, cursor_t* src) {
   dest->rowoff = src->rowoff;
 
   dest->clp = dest->editor->lines;
-  usize max = dest->y + dest->rowoff;
-  for (usize i = 0; i < max; i++) {
+  u32 max = dest->y + dest->rowoff;
+  for (u32 i = 0; i < max; i++) {
     dest->clp = dest->clp->next;
   }
 }
 
-static void cursor_set_clp_as(cursor_t *C, line_t *lp, usize x) {
+static void cursor_set_clp_as(cursor_t *C, line_t *lp, u32 x) {
   if (lp == NULL) return;
 
   C->clp = C->editor->lines;
@@ -242,13 +242,13 @@ void cursor_insert_text(cursor_t* C, const char* text) {
 }
 
 void cursor_page_up(cursor_t* C) {
-  for (usize i = 0; i < C->max_row; i ++) {
+  for (u16 i = 0; i < C->max_row; i ++) {
     cursor_up(C);
   }
 }
 
 void cursor_page_down(cursor_t* C) {
-  for (usize i = 0; i < C->max_row; i ++) {
+  for (u16 i = 0; i < C->max_row; i ++) {
     cursor_down(C);
   }
 }
