@@ -70,14 +70,14 @@ struct cursor_s;
 typedef struct mark_s {
   line_t *start_lp;
   line_t *end_lp;
-  usize start_offset;
-  usize end_offset;
+  u32 start_offset;
+  u32 end_offset;
 } mark_t;
 
 typedef struct cursor_s {
-  usize x, y;
-  usize coloff, rowoff;
-  usize max_col, max_row;
+  u32 x, y;
+  u16 coloff, rowoff;
+  u16 max_col, max_row;
   editor_t *editor;
   line_t *clp;
 } cursor_t;
@@ -91,5 +91,5 @@ typedef struct keytab {
 } keytab_t;
 
 typedef struct vec2_s {
-  usize x, y;
+  u32 x, y;
 } vec2_t;
