@@ -1,4 +1,4 @@
-CC = clang
+CC = gcc
 CFLAGS = -Wall -Wextra -pedantic -Wno-unused-parameter \
          -Wno-unused-function -Wno-gnu-zero-variadic-macro-arguments
 SANITIZE_FLAGS = -fsanitize=undefined,address
