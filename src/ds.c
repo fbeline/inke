@@ -11,7 +11,7 @@ static size_t dscalcalloc(size_t len) {
   return len;
 }
 
-static ds_t *dsrealloc(ds_t *ds, size_t len) {
+ds_t *dsrealloc(ds_t *ds, size_t len) {
   ds->alloc = dscalcalloc(len);
   if ((ds->buf = realloc(ds->buf, ds->alloc)) == NULL)
     exit(1);

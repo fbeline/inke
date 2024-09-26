@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "ds.h"
+
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -52,9 +54,7 @@ typedef struct line_s {
   struct line_s *next;
   struct line_s *prev;
 
-  usize capacity;
-  usize size;
-  char *text;
+  ds_t *ds;
 } line_t;
 
 typedef struct editor_s {

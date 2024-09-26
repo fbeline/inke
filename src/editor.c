@@ -13,56 +13,15 @@
 line_t *lalloc(usize capacity) {
   line_t *lp;
 
-  capacity = (capacity + BLOCK_SIZE) & ~(BLOCK_SIZE - 1);
-  if (capacity == 0)
-    capacity = BLOCK_SIZE;
-
   if ((lp = (line_t*)malloc(sizeof(line_t))) == NULL)
     DIE("LALLOC OUT OF MEMORY");
 
-  if ((lp->text = malloc(capacity)) == NULL)
-    DIE("LALLOC OUT OF MEMORY");
+  lp->ds = dsnewlen(capacity);
 
-  lp->capacity = capacity;
-  lp->size = 0;
-  lp->text[0] = '\0';
   lp->next = NULL;
   lp->prev = NULL;
 
   return lp;
-}
-
-line_t *lrealloc(line_t *lp, usize capacity) {
-  capacity = (capacity + BLOCK_SIZE) & ~(BLOCK_SIZE - 1);
-  if (capacity == 0)
-    capacity = BLOCK_SIZE;
-
-  if ((lp->text = realloc(lp->text, capacity)) == NULL)
-    DIE("LREALLOC OUT OF MEMORY");
-
-  lp->capacity = capacity;
-
-  return lp;
-}
-
-line_t* line_append_s(line_t *lp, const char *str, usize len) {
-  usize old_size = lp->size;
-  usize new_size = lp->size + len;
-  if (new_size >= lp->capacity)
-    lp = lrealloc(lp, new_size);
-
-  for(usize i = 0, j = old_size; i < len; i++, j++) {
-    lp->text[j] = str[i];
-  }
-
-  lp->text[new_size] = '\0';
-  lp->size = new_size;
-
-  return lp;
-}
-
-line_t* line_append(line_t *lp, const char *str) {
-  return line_append_s(lp, str, strlen(str));
 }
 
 void line_free(line_t *lp) {
@@ -71,7 +30,7 @@ void line_free(line_t *lp) {
   if (lp->prev != NULL) lp->prev->next = lp->next;
   if (lp->next != NULL) lp->next->prev = lp->prev;
 
-  free(lp->text);
+  dsfree(lp->ds);
   free(lp);
 }
 
@@ -98,8 +57,8 @@ void editor_delete_lines(editor_t *E, line_t* lp, usize size) {
 
     // buffer must have at least 1 line
     if (lp1->prev == NULL && lp1->next == NULL) {
-      lp1->text[0] = '\0';
-      lp1->size = 0;
+      lp1->ds->buf[0] = '\0';
+      lp1->ds->len = 0;
       E->lines = lp1;
       E->row_size = 1;
       return;
@@ -118,7 +77,7 @@ ds_t *editor_rows_to_string(line_t *head) {
   ds_t *ds = dsempty();
   line_t* lp = head;
   while (lp != NULL) {
-    dscat(ds, lp->text);
+    dscat(ds, lp->ds->buf);
     dscat(ds, "\n");
     lp = lp->next;
   }
@@ -152,50 +111,51 @@ line_t* editor_insert_row_at(editor_t *E, u32 y) {
 
 line_t* editor_insert_row_with_data_at(editor_t *E, u32 y, char* strdata) {
   line_t* lp = editor_insert_row_at(E, y);
-  line_append(lp, strdata);
+  dscat(lp->ds, strdata);
 
   return lp;
 }
 
 char editor_char_at(line_t *lp, u32 x) {
-  if (lp == NULL || x > lp->size)
+  if (lp == NULL || x > lp->ds->len)
     return '\0';
 
-  return lp->text[x];
+  return lp->ds->buf[x];
 }
 
 line_t *editor_move_line_up(editor_t *E, line_t *lp) {
   if (lp == NULL || lp->prev == NULL) return NULL;
 
-  line_t *prev = line_append(lp->prev, lp->text);
+  dscat(lp->prev->ds, lp->ds->buf);
   line_free(lp);
 
   E->dirty = true;
   E->row_size--;
 
-  return prev;
+  return lp->prev;
 }
 
 void editor_delete_char_at(line_t *lp, u32 x) {
-  if (x >= lp->size || lp == NULL) return;
+  if (x >= lp->ds->len || lp == NULL) return;
 
-  memmove(&lp->text[x],
-          &lp->text[x+1],
-          lp->size - x + 1);
+  memmove(&lp->ds->buf[x],
+          &lp->ds->buf[x+1],
+          lp->ds->len - x + 1);
 
-  lp->size--;
+  lp->ds->len--;
 }
 
 line_t *editor_insert_char_at(editor_t *E, line_t *lp, u32 x, char ch) {
-  if (x > lp->size)
+  if (x > lp->ds->len)
     DIE("Invalid position x=%d", x);
 
-  lp->size++;
-  if (lp->size >= lp->capacity) lp = lrealloc(lp, lp->size);
+  lp->ds->len++;
+  if (lp->ds->len >= lp->ds->alloc) 
+    lp->ds = dsrealloc(lp->ds, lp->ds->len);
 
-  memmove(lp->text + x + 1, lp->text + x, lp->size - x - 1);
-  lp->text[x] = ch;
-  lp->text[lp->size] = '\0';
+  memmove(lp->ds->buf + x + 1, lp->ds->buf + x, lp->ds->len - x - 1);
+  lp->ds->buf[x] = ch;
+  lp->ds->buf[lp->ds->len] = '\0';
 
   E->dirty = true;
 
@@ -203,14 +163,14 @@ line_t *editor_insert_char_at(editor_t *E, line_t *lp, u32 x, char ch) {
 }
 
 void editor_break_line(editor_t *E, line_t *lp, u32 x) {
-  if (lp == NULL || x > lp->size) return;
+  if (lp == NULL || x > lp->ds->len) return;
 
   line_t *new_line = lalloc(16);
   line_t *next_line = lp->next;
 
-  line_append(new_line, lp->text + x);
-  lp->text[x] = '\0';
-  lp->size = x;
+  dscat(new_line->ds, lp->ds->buf + x);
+  lp->ds->buf[x] = '\0';
+  lp->ds->len = x;
 
   if (next_line != NULL) next_line->prev = new_line;
   lp->next = new_line;
@@ -222,14 +182,14 @@ void editor_break_line(editor_t *E, line_t *lp, u32 x) {
 }
 
 void editor_delete_forward(line_t *lp, u32 x) {
-  lp->text[x] = '\0';
-  lp->size = x;
+  lp->ds->buf[x] = '\0';
+  lp->ds->len = x;
 }
 
 void editor_delete_backward(line_t *lp, u32 x) {
-  lp->size = lp->size > x ? lp->size - x : 0;
-  memmove(lp->text, lp->text + x, lp->size);
-  lp->text[lp->size] = '\0';
+  lp->ds->len = lp->ds->len > x ? lp->ds->len - x : 0;
+  memmove(lp->ds->buf, lp->ds->buf + x, lp->ds->len);
+  lp->ds->buf[lp->ds->len] = '\0';
 }
 
 void editor_text_between(editor_t *E, mark_t mark, ds_t *r) {
@@ -238,23 +198,23 @@ void editor_text_between(editor_t *E, mark_t mark, ds_t *r) {
 
   if (mark.start_lp == mark.end_lp) {
     dsncat(r,
-           mark.start_lp->text + mark.start_offset,
+           mark.start_lp->ds->buf + mark.start_offset,
            mark.end_offset - mark.start_offset);
     return;
   }
 
   line_t *lp = mark.start_lp;
-  dscat(r, lp->text + mark.start_offset);
+  dscat(r, lp->ds->buf + mark.start_offset);
   dscat(r, "\n");
   lp = lp->next;
 
   while(lp != mark.end_lp && lp != NULL) {
-    dscat(r, lp->text);
+    dscat(r, lp->ds->buf);
     dscat(r, "\n");
     lp = lp->next;
   }
 
-  dsncat(r, lp->text, mark.end_offset);
+  dsncat(r, lp->ds->buf, mark.end_offset);
 }
 
 void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
@@ -265,16 +225,16 @@ void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
   if (lp == mark.end_lp) {
     usize mark_size = mark.end_offset - mark.start_offset;
 
-    memmove(lp->text + mark.start_offset,
-            lp->text + mark.end_offset,
-            lp->size - mark.end_offset);
-    lp->size = mark_size <= lp->size ? lp->size - mark_size : 0;
-    lp->text[lp->size] = '\0';
+    memmove(lp->ds->buf + mark.start_offset,
+            lp->ds->buf + mark.end_offset,
+            lp->ds->len - mark.end_offset);
+    lp->ds->len = mark_size <= lp->ds->len ? lp->ds->len - mark_size : 0;
+    lp->ds->buf[lp->ds->len] = '\0';
     return;
   }
 
-  lp->size = mark.start_offset;
-  lp->text[lp->size] = '\0';
+  lp->ds->len = mark.start_offset;
+  lp->ds->buf[lp->ds->len] = '\0';
   lp = lp->next;
 
   while(lp != mark.end_lp) {
@@ -284,7 +244,7 @@ void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
     E->row_size--;
   }
 
-  line_append(mark.start_lp, lp->text + mark.end_offset);
+  dscat(mark.start_lp->ds, lp->ds->buf + mark.end_offset);
   line_free(lp);
   E->row_size--;
 }
@@ -321,7 +281,7 @@ int editor_open_file(const char *filename, editor_t *E) {
 
     // build line
     line_t* line = lalloc(len);
-    line_append(line, buffer);
+    dscat(line->ds, buffer);
 
     if (lp_tail == NULL) {
       E->lines = line;

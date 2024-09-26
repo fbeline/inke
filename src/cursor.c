@@ -85,7 +85,7 @@ void cursor_bol(cursor_t* C) {
 }
 
 void cursor_eol(cursor_t* C) {
-  usize len = C->clp->size;
+  usize len = C->clp->ds->len;
   if (len > C->max_col) {
     C->x = C->max_col;
     C->coloff = len - C->max_col;
@@ -106,7 +106,7 @@ void cursor_down(cursor_t* C) {
     C->rowoff++;
   }
 
-  if (raw_x(C) > C->clp->size) cursor_eol(C);
+  if (raw_x(C) > C->clp->ds->len) cursor_eol(C);
 }
 
 void cursor_up(cursor_t* C) {
@@ -119,12 +119,12 @@ void cursor_up(cursor_t* C) {
     C->y--;
   }
 
-  if (raw_x(C) > C->clp->size) cursor_eol(C);
+  if (raw_x(C) > C->clp->ds->len) cursor_eol(C);
 }
 
 void cursor_right(cursor_t* C) {
   vec2_t pos = cursor_position(C);
-  usize len = C->clp->size;
+  usize len = C->clp->ds->len;
 
   if (pos.x < len && C->x == C->max_col) {
     C->coloff++;
@@ -165,7 +165,7 @@ void cursor_move_word_forward(cursor_t* C) {
   editor_t* E = C->editor;
   do {
     vec2_t pos = cursor_position(C);
-    if (pos.y == E->row_size - 1 && pos.x >= C->clp->size)
+    if (pos.y == E->row_size - 1 && pos.x >= C->clp->ds->len)
       return;
     cursor_right(C);
     pos = cursor_position(C);
@@ -192,7 +192,7 @@ void cursor_move_line_up(cursor_t *C) {
   if (C->clp->prev == NULL) return;
 
   line_t* lp;
-  usize prlen = C->clp->prev->size;
+  usize prlen = C->clp->prev->ds->len;
   if ((lp = editor_move_line_up(C->editor, C->clp)) == NULL) return;
 
   C->clp = lp;
@@ -256,7 +256,7 @@ void cursor_page_down(cursor_t* C) {
 void cursor_delete_forward(cursor_t* C) {
   i32 x = raw_x(C);
 
-  if (x == 0 || C->clp->size == 0) {
+  if (x == 0 || C->clp->ds->len == 0) {
     cursor_delete_row(C);
     return;
   }
@@ -265,7 +265,7 @@ void cursor_delete_forward(cursor_t* C) {
     .start_lp = C->clp,
     .start_offset = x,
     .end_lp = C->clp,
-    .end_offset = C->clp->size
+    .end_offset = C->clp->ds->len
   };
   editor_text_between(C->editor, mark, g_clipbuf);
   undo_push(DELETE_FORWARD, *C, g_clipbuf->buf);
@@ -275,7 +275,7 @@ void cursor_delete_forward(cursor_t* C) {
 
 void cursor_delete_row(cursor_t* C) {
   line_t *lp = NULL;
-  undo_push(LINEDELETE, *C, C->clp->text);
+  undo_push(LINEDELETE, *C, C->clp->ds->buf);
 
   if (C->clp->next != NULL) {
     lp = C->clp->next;
@@ -290,7 +290,7 @@ void cursor_delete_row(cursor_t* C) {
   editor_delete_lines(C->editor, C->clp, 1);
   C->clp = lp;
 
-  if (raw_x(C) > C->clp->size) cursor_eol(C);
+  if (raw_x(C) > C->clp->ds->len) cursor_eol(C);
 }
 
 void cursor_eof(cursor_t* C) {

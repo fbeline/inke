@@ -104,9 +104,9 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   if (lp == NULL) return;
 
   char line[1024];
-  usize size = lp->size > C->coloff ? lp->size - C->coloff : 0;
+  usize size = lp->ds->len > C->coloff ? lp->ds->len - C->coloff : 0;
   size = CLAMP(size, 0, T->cols);
-  strncpy(line, lp->text + C->coloff, size);
+  strncpy(line, lp->ds->buf + C->coloff, size);
   line[size] = '\0';
 
   if (g_mode != MODE_VISUAL) {

@@ -5,10 +5,6 @@
 
 line_t *lalloc(usize capacity);
 
-line_t* line_append_s(line_t *lp, const char *str, usize len);
-
-line_t* line_append(line_t *lp, const char *str);
-
 void line_free(line_t *lp);
 
 line_t *editor_move_line_up(editor_t *E, line_t *lp);
