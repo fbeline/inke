@@ -1,4 +1,5 @@
 #include <signal.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -30,7 +31,7 @@ static void init(const char* filename) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 2) {
+  if (argc < 2 || strlen(argv[1]) == 0) {
     printf("usage: inke [file path]\n");
     exit(1);
   }
