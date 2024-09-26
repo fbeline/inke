@@ -3,6 +3,8 @@
 #include "types.h"
 #include "ds.h"
 
+#define VERSION "0.0.1"
+
 extern bool g_running;
 extern bool g_cursor_vis;
 extern u8 g_mode;

@@ -5,31 +5,29 @@
 #include <string.h>
 
 #include "globals.h"
-#include "mode.h"
+#include "editor.h"
 
-static int io_file_write(const char* filename, const char* buf) {
-  FILE *file = fopen(filename, "w");
+static i32 io_file_write(const char* filename, const char* buf) {
+  FILE *file;
 
-  if (file == NULL) {
-    printf("Error writing to file %s\n", filename);
+  if ((file = fopen(filename, "w")) == NULL)
     return 1;
-  }
+
   fprintf(file, "%s", buf);
   fclose(file);
 
   return 0;
 }
 
-int io_write_buffer(editor_t* E) {
-  line_t* lp = editor_rows_to_string(E->lines, E->row_size);
+i32 io_write_buffer(editor_t* E) {
+  ds_t* ds = editor_rows_to_string(E->lines);
 
-  if (io_file_write(E->filename, lp->text) != 0) return 1;
+  if (io_file_write(E->filename, ds->buf) != 0) return 1;
 
   E->dirty = false;
-  mode_cmd_clean();
-  set_status_message("\"%s\" [unix] %dL, %dB written", E->filename, E->row_size, lp->size);
+  set_status_message("\"%s\" [unix] %dL, %dB written", E->filename, E->row_size, ds->len);
 
-  line_free(lp);
+  dsfree(ds);
 
   return 0;
 }

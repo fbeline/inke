@@ -18,8 +18,11 @@ void mode_cmd_clean(void) {
 static void mode_exit_save(cursor_t* C, int ch) {
   switch (ch) {
     case 'y':
-      io_write_buffer(C->editor);
-      g_running = false;
+      mode_cmd_clean();
+
+      if (io_write_buffer(C->editor) == 0) g_running = false;
+      else set_status_message("Error: Could not save file %.20s", C->editor->filename);
+
       break;
     case 'n':
       g_running = false;
@@ -43,7 +46,8 @@ static void mode_cmd_ctrl_x(cursor_t* C, int ch) {
     else g_running = false;
   } else if (ch == (CONTROL | 'S')) {
     mode_cmd_clean();
-    io_write_buffer(C->editor);
+    if (io_write_buffer(C->editor) == 0) g_running = false;
+    else set_status_message("Error: Could not save file %.20s", C->editor->filename);
   }
 }
 

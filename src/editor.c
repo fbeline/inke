@@ -114,16 +114,16 @@ void editor_delete_lines(editor_t *E, line_t* lp, usize size) {
   E->row_size -= size;
 }
 
-line_t *editor_rows_to_string(line_t *head, usize size) {
-  line_t* ab = lalloc(0);
+ds_t *editor_rows_to_string(line_t *head) {
+  ds_t *ds = dsempty();
   line_t* lp = head;
   while (lp != NULL) {
-    line_append(ab, lp->text);
-    line_append(ab, "\n");
+    dscat(ds, lp->text);
+    dscat(ds, "\n");
     lp = lp->next;
   }
 
-  return ab;
+  return ds;
 }
 
 line_t* editor_insert_row_at(editor_t *E, u32 y) {
