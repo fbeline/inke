@@ -49,10 +49,6 @@ static void cursor_set_clp_as(cursor_t *C, line_t *lp, u32 x) {
   }
 }
 
-vec2_t cursor_position(cursor_t* cursor) {
-  return (vec2_t) {raw_x(cursor), raw_y(cursor)};
-}
-
 void cursor_region_text(cursor_t* C) {
   if (g_mode != MODE_VISUAL) return;
 
@@ -123,12 +119,12 @@ void cursor_up(cursor_t* C) {
 }
 
 void cursor_right(cursor_t* C) {
-  vec2_t pos = cursor_position(C);
+  u32 x = raw_x(C);
   usize len = C->clp->ds->len;
 
-  if (pos.x < len && C->x == C->max_col) {
+  if (x < len && C->x == C->max_col) {
     C->coloff++;
-  } else if (pos.x >= len) {
+  } else if (x >= len) {
     cursor_down(C);
     cursor_bol(C);
   } else {
@@ -137,10 +133,11 @@ void cursor_right(cursor_t* C) {
 }
 
 void cursor_left(cursor_t* C) {
-  vec2_t pos = cursor_position(C);
-  if (pos.x == 0 && pos.y == 0) {
+  u32 x = raw_x(C);
+  u32 y = raw_y(C);
+  if (x == 0 && y == 0) {
     return;
-  } else if (pos.x == 0 && pos.y > 0) {
+  } else if (x == 0 && y > 0) {
     cursor_up(C);
     cursor_eol(C);
   } else if (C->x == 0 && C->coloff > 0) {
@@ -151,9 +148,9 @@ void cursor_left(cursor_t* C) {
 }
 
 void cursor_break_line(cursor_t* C) {
-  vec2_t pos = cursor_position(C);
+  u32 x = raw_x(C);
 
-  editor_break_line(C->editor, C->clp, pos.x);
+  editor_break_line(C->editor, C->clp, x);
   cursor_down(C);
   cursor_bol(C);
 
@@ -164,13 +161,15 @@ void cursor_move_word_forward(cursor_t* C) {
   char ch1, ch2;
   editor_t* E = C->editor;
   do {
-    vec2_t pos = cursor_position(C);
-    if (pos.y == E->row_size - 1 && pos.x >= C->clp->ds->len)
+    u32 x = raw_x(C);
+    u32 y = raw_y(C);
+    if (y == E->row_size - 1 && x >= C->clp->ds->len)
       return;
     cursor_right(C);
-    pos = cursor_position(C);
+    x = raw_x(C);
+    y = raw_y(C);
     ch1 = cursor_char(C);
-    ch2 = editor_char_at(C->clp, pos.x + 1);
+    ch2 = editor_char_at(C->clp, x + 1);
   } while(!(ch1 !=  ' ' && ch2 == ' '));
   cursor_right(C);
 }
@@ -178,13 +177,14 @@ void cursor_move_word_forward(cursor_t* C) {
 void cursor_move_word_backward(cursor_t* C) {
   char ch1, ch2;
   do {
-    vec2_t pos = cursor_position(C);
-    if (pos.y == 0 && pos.x == 0)
+    u32 x = raw_x(C);
+    u32 y = raw_y(C);
+    if (y == 0 && x == 0)
       break;
 
     cursor_left(C);
     ch1 = cursor_char(C);
-    ch2 = editor_char_at(C->clp, pos.x - 2);
+    ch2 = editor_char_at(C->clp, x - 2);
   } while(!(ch1 !=  ' ' && ch2 == ' '));
 }
 
@@ -205,16 +205,17 @@ void cursor_move_line_up(cursor_t *C) {
 }
 
 void cursor_remove_char(cursor_t* C) {
-  vec2_t pos = cursor_position(C);
-  if (pos.x == 0 && pos.y == 0) return;
-  if (pos.x == 0 && pos.y > 0) {
+  u32 x = raw_x(C);
+  u32 y = raw_y(C);
+  if (x == 0 && y == 0) return;
+  if (x == 0 && y > 0) {
     cursor_move_line_up(C);
     undo_push(LINEUP, *C, NULL);
     return;
   }
 
-  char strdata[2] = { editor_char_at(C->clp, pos.x - 1), '\0' };
-  editor_delete_char_at(C->clp, pos.x-1);
+  char strdata[2] = { editor_char_at(C->clp, x - 1), '\0' };
+  editor_delete_char_at(C->clp, x-1);
 
   if (C->x == 0 && C->coloff > 0)
     C->coloff--;

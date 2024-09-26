@@ -89,7 +89,3 @@ typedef struct keytab {
   i32 code;
   key_func_t fp;
 } keytab_t;
-
-typedef struct vec2_s {
-  u32 x, y;
-} vec2_t;

@@ -8,8 +8,6 @@ void cursor_set(cursor_t* dest, cursor_t* src);
 
 void cursor_update_window_size(cursor_t *C, u16 rows, u16 cols);
 
-vec2_t cursor_position(cursor_t* cursor);
-
 void cursor_region_text(cursor_t* cursor);
 
 void cursor_region_kill(cursor_t* cursor);
