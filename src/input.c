@@ -205,6 +205,9 @@ void input_process_keys(cursor_t* C) {
     case MODE_CMD_CHAR:
       g_cmd_func(C, ch);
       break;
+    case MODE_CMD:
+      process_cmd_mode(C, ch);
+      break;
   }
 
   if (g_mode == MODE_VISUAL)

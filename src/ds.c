@@ -85,6 +85,24 @@ ds_t *dssplice(ds_t *ds, size_t idx, const char *t) {
   return ds;
 }
 
+ds_t *dsichar(ds_t *ds, size_t idx, const char ch) {
+  ds->len++;
+  if (ds->len >= ds->alloc)
+    ds = dsrealloc(ds, ds->len);
+
+  if (idx >= ds->len) {
+    ds->buf[ds->len - 1] = ch;
+    ds->buf[ds->len] = '\0';
+    return ds;
+  }
+
+  memmove(ds->buf + idx + 1, ds->buf + idx, ds->len - idx - 1);
+  ds->buf[idx] = ch;
+  ds->buf[ds->len] = '\0';
+
+  return ds;
+}
+
 void dsfree(ds_t *ds) {
   free(ds->buf);
   free(ds);

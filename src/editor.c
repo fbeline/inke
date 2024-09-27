@@ -149,15 +149,7 @@ line_t *editor_insert_char_at(editor_t *E, line_t *lp, u32 x, char ch) {
   if (x > lp->ds->len)
     DIE("Invalid position x=%d", x);
 
-  lp->ds->len++;
-  if (lp->ds->len >= lp->ds->alloc) 
-    lp->ds = dsrealloc(lp->ds, lp->ds->len);
-
-  memmove(lp->ds->buf + x + 1, lp->ds->buf + x, lp->ds->len - x - 1);
-  lp->ds->buf[x] = ch;
-  lp->ds->buf[lp->ds->len] = '\0';
-
-  E->dirty = true;
+  dsichar(lp->ds, x, ch);
 
   return lp;
 }
