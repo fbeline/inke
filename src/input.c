@@ -172,6 +172,21 @@ static void process_visual_mode(cursor_t *C, i32 ch) {
   set_status_message("visual mode - cmd not found");
 }
 
+static void process_cmd_mode(cursor_t *C, i32 ch) {
+  switch (ch) {
+    case ENTER_KEY:
+      g_cmd_func(C, 0x00);
+      break;
+    case BACKSPACE_KEY:
+      // remove char
+      break; 
+    default:
+      if (ch >= 32 && ch <= 126) {
+        // add char to cmd buf
+      }
+  }
+}
+
 void input_process_keys(cursor_t* C) {
   i32 ch = input_read_key();
 
