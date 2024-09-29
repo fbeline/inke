@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 
+#include "cmdline.h"
 #include "globals.h"
 #include "utils.h"
 #include "vt.h"
@@ -71,7 +72,11 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
   vt_puts("\r\n");
   vt_reset_text_attr();
   vt_erase_line();
-  vt_puts(get_status_message());
+
+  if (g_mode == MODE_CMD)
+    vt_puts(cmdline()->ds->buf);
+  else
+    vt_puts(get_status_message());
 
   free(status);
 }

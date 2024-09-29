@@ -2,9 +2,10 @@
 
 #include <stdarg.h>
 
-#include "types.h"
+#include "cmdline.h"
 #include "globals.h"
 #include "io.h"
+#include "types.h"
 
 static void mode_cmd_nop(cursor_t *C, int ch) { }
 
@@ -58,3 +59,9 @@ void mode_set_ctrl_x(cursor_t *C) {
   g_cmd_func = mode_cmd_ctrl_x;
 }
 
+void mode_set_search(cursor_t *C) {
+  cmdline_init("Search:");
+  g_cursor_vis = false;
+  g_mode = MODE_CMD;
+  g_cmd_func = mode_cmd_nop;
+}

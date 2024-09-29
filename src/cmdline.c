@@ -36,6 +36,7 @@ void cmdline_backspace(void) {
 
   line.ds->len--;
   line.x--;
+  line.ds->buf[line.ds->len] = '\0';
 }
 
 void cmdline_init(const char *msg) {
@@ -49,4 +50,8 @@ void cmdline_init(const char *msg) {
   usize msglen = strlen(msg);
   line.x = msglen + 1;
   line.min_x = line.x;
+}
+
+cmdline_t *cmdline(void) {
+  return &line;
 }

@@ -10,6 +10,7 @@
 #include "globals.h"
 #include "cursor.h"
 #include "mode.h"
+#include "cmdline.h"
 #include "utils.h"
 
 static keytab_t keytabs[NBINDS] = {
@@ -34,6 +35,7 @@ static keytab_t keytabs[NBINDS] = {
   { CONTROL | 'K', cursor_delete_forward },
   { CONTROL | 'N', cursor_down },
   { CONTROL | 'P', cursor_up },
+  { CONTROL | 'S', mode_set_search },
   { CONTROL | 'X', mode_set_ctrl_x },
   { CONTROL | 'Y', cursor_paste },
   { CONTROL | '/', cursor_undo },
@@ -178,11 +180,11 @@ static void process_cmd_mode(cursor_t *C, i32 ch) {
       g_cmd_func(C, 0x00);
       break;
     case BACKSPACE_KEY:
-      // remove char
-      break; 
+      cmdline_backspace();
+      break;
     default:
       if (ch >= 32 && ch <= 126) {
-        // add char to cmd buf
+        cmdline_insert(ch);
       }
   }
 }
@@ -192,6 +194,7 @@ void input_process_keys(cursor_t* C) {
 
   if (ch == (CONTROL | 'G')) {
     mode_cmd_clean();
+    cmdline_clean();
     set_status_message("Quit");
   }
 
