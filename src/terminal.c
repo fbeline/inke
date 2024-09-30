@@ -179,7 +179,11 @@ void term_render(cursor_t *C) {
 
   term_draw(&T, C);
 
-  vt_set_cursor_position(C->y + 1, C->x + 1);
+  if (g_mode == MODE_CMD)
+    vt_set_cursor_position(T.rows + 2, cmdline()->x);
+  else
+    vt_set_cursor_position(C->y + 1, C->x + 1);
+
   if (g_cursor_vis) vt_show_cursor();
 
   vt_flush();

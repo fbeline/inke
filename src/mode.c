@@ -60,8 +60,7 @@ void mode_set_ctrl_x(cursor_t *C) {
 }
 
 void mode_set_search(cursor_t *C) {
-  cmdline_init("Search:");
-  g_cursor_vis = false;
+  cmdline_init("I-Search: ");
   g_mode = MODE_CMD;
   g_cmd_func = mode_cmd_nop;
 }
