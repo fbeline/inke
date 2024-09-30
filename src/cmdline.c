@@ -33,7 +33,7 @@ void cmdline_backspace(void) {
     return;
 
   memmove(&line.ds->buf[line.x],
-          &line.ds->buf[line.x+1],
+          &line.ds->buf[line.x + 1],
           line.ds->len - line.x + 1);
 
   line.ds->len--;
@@ -49,8 +49,7 @@ void cmdline_init(const char *msg) {
 
   dscat(line.ds, msg);
 
-  usize msglen = strlen(msg);
-  line.x = msglen + 1;
+  line.x = line.ds->len + 1;
   line.min_x = line.x;
 }
 
@@ -66,14 +65,14 @@ void cmdline_left(void) {
 }
 
 void cmdline_right(void) {
-  if (line.x == line.ds->len)
+  if (line.x > line.ds->len)
     return;
 
   line.x++;
 }
 
 void cmdline_eol(void) {
-  line.x = line.ds->len;
+  line.x = line.ds->len + 1;
 }
 
 void cmdline_bol(void) {
@@ -81,7 +80,10 @@ void cmdline_bol(void) {
 }
 
 void cmdline_del_before(void) {
-  line.ds->len -= line.x;
-  memmove(line.ds->buf, line.ds->buf + line.x, line.ds->len);
+  memmove(line.ds->buf + line.min_x,
+          line.ds->buf + line.x,
+          line.ds->len - line.x + 1);
+  line.ds->len -= (line.x - line.min_x);
+  line.x = line.min_x;
 }
 

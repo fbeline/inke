@@ -182,8 +182,22 @@ static void process_cmd_mode(cursor_t *C, i32 ch) {
     case BACKSPACE_KEY:
       cmdline_backspace();
       break;
+    case ARROW_LEFT:
+      cmdline_left();
+      break;
+    case ARROW_RIGHT:
+      cmdline_right();
+      break;
     default:
-      if (ch >= 32 && ch <= 126) {
+      if (ch == (CONTROL | 'E')) {
+        cmdline_eol();
+      }
+      else if (ch == (CONTROL | 'A')) {
+        cmdline_bol();
+      }
+      else if (ch == (CONTROL | 'U')) {
+        cmdline_del_before();
+      } else if (ch >= 32 && ch <= 126) {
         cmdline_insert(ch);
       }
   }
