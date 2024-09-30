@@ -1,7 +1,9 @@
 #include "cmdline.h"
 
 #include <string.h>
+
 #include "ds.h"
+#include "utils.h"
 
 static cmdline_t line = {
   .min_x = 0,
@@ -55,3 +57,31 @@ void cmdline_init(const char *msg) {
 cmdline_t *cmdline(void) {
   return &line;
 }
+
+void cmdline_left(void) {
+  if (line.x == line.min_x)
+    return;
+
+  line.x--;
+}
+
+void cmdline_right(void) {
+  if (line.x == line.ds->len)
+    return;
+
+  line.x++;
+}
+
+void cmdline_eol(void) {
+  line.x = line.ds->len;
+}
+
+void cmdline_bol(void) {
+  line.x = line.min_x;
+}
+
+void cmdline_del_before(void) {
+  line.ds->len -= line.x;
+  memmove(line.ds->buf, line.ds->buf + line.x, line.ds->len);
+}
+
