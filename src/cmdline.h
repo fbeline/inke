@@ -12,5 +12,5 @@ void cmdline_right(void);
 void cmdline_eol(void);
 void cmdline_bol(void);
 void cmdline_del_before(void);
-char *cmdline_text(void);
+const char *cmdline_text(void);
 cmdline_t *cmdline(void);

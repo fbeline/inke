@@ -92,6 +92,6 @@ void cmdline_del_before(void) {
   line.ds->len -= diff;
 }
 
-char *cmdline_text(void) {
+const char *cmdline_text(void) {
   return &line.ds->buf[line.min_x];
 }

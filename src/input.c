@@ -177,7 +177,7 @@ static void process_visual_mode(cursor_t *C, i32 ch) {
 static void process_cmd_mode(cursor_t *C, i32 ch) {
   switch (ch) {
     case ENTER_KEY:
-      g_cmd_func(C, 0x00);
+      g_cmd_func(C, 0);
       break;
     case BACKSPACE_KEY:
       cmdline_backspace();
@@ -189,8 +189,11 @@ static void process_cmd_mode(cursor_t *C, i32 ch) {
       cmdline_right();
       break;
     default:
-      if (g_mode == MODE_SEARCH && ch == (CONTROL | 'F')) {
-        g_cmd_func(C, 0x00);
+      if (g_mode == MODE_SEARCH && ch == (CONTROL | 'S')) {
+        g_cmd_func(C, 1);
+      }
+      else if (g_mode == MODE_SEARCH && ch == (CONTROL | 'R')) {
+        g_cmd_func(C, -1);
       }
       else if (ch == (CONTROL | 'E')) {
         cmdline_eol();
