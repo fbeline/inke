@@ -189,7 +189,10 @@ static void process_cmd_mode(cursor_t *C, i32 ch) {
       cmdline_right();
       break;
     default:
-      if (ch == (CONTROL | 'E')) {
+      if (g_mode == MODE_SEARCH && ch == (CONTROL | 'F')) {
+        g_cmd_func(C, 0x00);
+      }
+      else if (ch == (CONTROL | 'E')) {
         cmdline_eol();
       }
       else if (ch == (CONTROL | 'A')) {
@@ -222,6 +225,7 @@ void input_process_keys(cursor_t* C) {
     case MODE_CMD_CHAR:
       g_cmd_func(C, ch);
       break;
+    case MODE_SEARCH:
     case MODE_CMD:
       process_cmd_mode(C, ch);
       break;

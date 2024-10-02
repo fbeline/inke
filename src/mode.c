@@ -4,6 +4,7 @@
 
 #include "cmdline.h"
 #include "globals.h"
+#include "isearch.h"
 #include "io.h"
 #include "types.h"
 
@@ -61,6 +62,6 @@ void mode_set_ctrl_x(cursor_t *C) {
 
 void mode_set_search(cursor_t *C) {
   cmdline_init("I-Search: ");
-  g_mode = MODE_CMD;
-  g_cmd_func = mode_cmd_nop;
+  g_mode = MODE_SEARCH;
+  g_cmd_func = isearch;
 }
