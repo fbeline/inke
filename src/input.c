@@ -6,11 +6,12 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "types.h"
-#include "globals.h"
-#include "cursor.h"
-#include "mode.h"
 #include "cmdline.h"
+#include "cursor.h"
+#include "globals.h"
+#include "isearch.h"
+#include "mode.h"
+#include "types.h"
 #include "utils.h"
 
 static keytab_t keytabs[NBINDS] = {
@@ -35,7 +36,7 @@ static keytab_t keytabs[NBINDS] = {
   { CONTROL | 'K', cursor_delete_forward },
   { CONTROL | 'N', cursor_down },
   { CONTROL | 'P', cursor_up },
-  { CONTROL | 'S', mode_set_search },
+  { CONTROL | 'S', isearch_start },
   { CONTROL | 'X', mode_set_ctrl_x },
   { CONTROL | 'Y', cursor_paste },
   { CONTROL | '/', cursor_undo },
