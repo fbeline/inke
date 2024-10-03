@@ -72,12 +72,11 @@ typedef struct editor_s {
   line_t *lines;
 } editor_t;
 
-typedef struct location_s {
+typedef struct isearch_s {
   u32 x;
   u32 y;
-  u32 coloff;
-  u32 rowoff;
-} location_t;
+  usize qlen;
+} isearch_t;
 
 typedef struct mark_s {
   line_t *start_lp;

@@ -11,6 +11,7 @@ u8 g_undo_state = UNDO_ON;
 ds_t *g_clipbuf = NULL;
 cmd_func_t g_cmd_func = NULL;
 mark_t g_mark = {0};
+isearch_t g_isearch = {0};
 
 static char message[256] = {0};
 
