@@ -4,9 +4,11 @@
 
 void vt_flush(void);
 
-void vt_puts(char *str, ...);
+void vt_puts(const char *str);
 
-void vt_nputs(char *str, usize n);
+void vt_fputs(const char *str, ...);
+
+void vt_nputs(const char *str, usize n);
 
 void vt_set_cursor_position(i32 x, i32 y);
 

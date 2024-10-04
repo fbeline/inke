@@ -20,7 +20,7 @@ void vt_flush(void) {
   sbuffer->len = 0;
 }
 
-void vt_puts(char *str, ...) {
+void vt_fputs(const char *str, ...) {
   char fmtstr[PUTSIZE];
   va_list args;
 	va_start(args, str);
@@ -29,7 +29,11 @@ void vt_puts(char *str, ...) {
   dscat(sbuffer, fmtstr);
 }
 
-void vt_nputs(char *str, usize n) {
+void vt_puts(const char *str) {
+  dscat(sbuffer, str);
+}
+
+void vt_nputs(const char *str, usize n) {
   if (n <= 0) return;
   dsncat(sbuffer, str, n);
 }
@@ -39,7 +43,7 @@ void vt_erase_display(void) {
 }
 
 void vt_set_cursor_position(i32 x, i32 y) {
-  vt_puts("\x1b[%d;%dH", x, y);
+  vt_fputs("\x1b[%d;%dH", x, y);
 }
 
 void vt_clear_screen(void) {
@@ -50,13 +54,13 @@ void vt_clear_screen(void) {
 void vt_cursor_forward(i32 pn) {
   if (pn <= 0) return;
 
-  vt_puts("\x1b[%dC", pn);
+  vt_fputs("\x1b[%dC", pn);
 }
 
 void vt_cursor_down(i32 pn) {
   if (pn <= 0) return;
 
-  vt_puts("\x1b[%dB", pn);
+  vt_fputs("\x1b[%dB", pn);
 }
 
 void vt_hide_cursor(void) {
