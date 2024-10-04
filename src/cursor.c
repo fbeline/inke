@@ -201,7 +201,7 @@ void cursor_move_line_up(cursor_t *C) {
   else C->y--;
 
   C->x = MIN(C->max_col, prlen);
-  C->coloff = prlen > C->x ? prlen - C->x : 0;;
+  C->coloff = prlen > C->x ? prlen - C->x : 0;
 }
 
 void cursor_remove_char(cursor_t* C) {

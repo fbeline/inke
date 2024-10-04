@@ -127,12 +127,13 @@ line_t *editor_move_line_up(editor_t *E, line_t *lp) {
   if (lp == NULL || lp->prev == NULL) return NULL;
 
   dscat(lp->prev->ds, lp->ds->buf);
-  line_free(lp);
 
   E->dirty = true;
   E->row_size--;
+  line_t *prev = lp->prev;
+  line_free(lp);
 
-  return lp->prev;
+  return prev;
 }
 
 void editor_delete_char_at(line_t *lp, u32 x) {
