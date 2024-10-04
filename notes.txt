@@ -21,7 +21,7 @@ Suspendisse posuere sapien vel nulla tincidunt gravida.
 Curabitur sit amet neque dignissim ex auctor vulputate.
 
 // session 2
-Lorem Mila ipsum dolor sit amet, consectetur adipiscing elit.
+elit Lorem Mila ipsum dolor elit sit amet, consectetur adipiscing elit.
 Nullam at magna lacinia, auctor elit ac, interdum orci.
 Maecenas mollis neque a tortor finibus, fringilla convallis magna interdum.
 In eget lacus consequat, feugiat arcu non, placerat nulla.

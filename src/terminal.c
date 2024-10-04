@@ -114,7 +114,7 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   strncpy(line, lp->ds->buf + C->coloff, size);
   line[size] = '\0';
 
-  if ((g_mode & MODE_SEARCH) && lp == g_isearch.lp && g_isearch.x > C->coloff) {
+  if ((g_mode & MODE_SEARCH) && lp == g_isearch.lp && g_isearch.x >= C->coloff) {
     u32 sx = g_isearch.x - C->coloff;
     vt_nputs(line, sx);
     vt_reverse_video();

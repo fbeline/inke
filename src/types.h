@@ -76,7 +76,6 @@ typedef struct isearch_s {
   line_t *lp;
   usize qlen;
   u32 x;
-  u32 y;
 } isearch_t;
 
 typedef struct mark_s {

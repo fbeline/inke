@@ -6,34 +6,43 @@
 #include "cursor.h"
 #include "globals.h"
 
-static void isearch_forward(cursor_t *C, const char *query) {
+#define SEARCH_BACKWARD 0
+#define SEARCH_FORWARD  1
+
+static void isearch_search(cursor_t *C, const char *query, u8 dir) {
   line_t *l = C->clp;
-  u32 ocy = C->y + C->rowoff;
   u32 offset = C->x + C->coloff;
   u32 y = 0;
+  u32 x = 0;
 
   while (l != NULL) {
-    char *match = strstr(l->ds->buf + offset, query);
-    if (match == l->ds->buf + offset) {
-      offset += strlen(query);
+    const char *match = strstr(l->ds->buf + offset, query);
+
+    if (match == NULL) {
+      offset = 0;
+      y++;
+      l = dir == SEARCH_FORWARD ? l->next : l->prev;
       continue;
-    } else if (match) {
-      g_isearch.x = match - l->ds->buf;
-      g_isearch.qlen = strlen(query);
-      g_isearch.lp = l;
-      break;
     }
 
-    offset = 0;
-    y++;
-    l = l->next;
+    x = match - l->ds->buf;
+    if (g_isearch.lp == l && g_isearch.x == x) {
+      offset += strlen(query);
+      continue;
+    }
+
+    g_isearch.lp = l;
+    g_isearch.x = x;
+    g_isearch.qlen = strlen(query);
+    break;
   }
 
   if (l == NULL) return;
 
   cursor_bol(C);
   for (u32 i = 0; i < y; i++)
-    cursor_down(C);
+    if (dir == SEARCH_FORWARD) cursor_down(C);
+    else cursor_up(C);
 
   for (u32 i = 0; i < g_isearch.x; i++)
     cursor_right(C);
@@ -43,12 +52,6 @@ static void isearch_forward(cursor_t *C, const char *query) {
     C->coloff += g_isearch.qlen;
     C->x -= g_isearch.qlen;
   }
-
-  g_isearch.y = ocy + y;
-}
-
-static void isearch_reverse(cursor_t *C, const char *query) {
-  // TODO
 }
 
 static void isearch_return(cursor_t *C) {
@@ -60,13 +63,13 @@ void isearch(cursor_t *C, int opt) {
   const char *cmd = cmdline_text();
   switch (opt) {
     case -1:
-      isearch_reverse(C, cmd);
+      isearch_search(C, cmd, SEARCH_BACKWARD);
       break;
     case 0:
       isearch_return(C);
       break;
     case 1:
-      isearch_forward(C, cmd);
+      isearch_search(C, cmd, SEARCH_FORWARD);
       break;
   }
 }
@@ -75,5 +78,5 @@ void isearch_start(cursor_t *C) {
   cmdline_init("I-Search: ");
   g_mode = MODE_SEARCH;
   g_cmd_func = isearch;
-  g_isearch = (isearch_t) {.lp = NULL, .qlen = 0, .x = 0, .y = 0};
+  g_isearch = (isearch_t) {.lp = NULL, .qlen = 0, .x = 0};
 }
