@@ -217,6 +217,7 @@ void input_process_keys(cursor_t* C) {
     mode_cmd_clean();
     cmdline_clean();
     set_status_message("Quit");
+    return;
   }
 
   switch (g_mode) {

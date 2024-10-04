@@ -11,7 +11,7 @@
 static void mode_cmd_nop(cursor_t *C, int ch) { }
 
 void mode_cmd_clean(void) {
-  set_status_message("");
+  clear_status_message();
   g_cursor_vis = true;
   g_mode = MODE_INSERT;
   g_cmd_func = mode_cmd_nop;
