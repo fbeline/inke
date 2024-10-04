@@ -73,9 +73,10 @@ typedef struct editor_s {
 } editor_t;
 
 typedef struct isearch_s {
+  line_t *lp;
+  usize qlen;
   u32 x;
   u32 y;
-  usize qlen;
 } isearch_t;
 
 typedef struct mark_s {

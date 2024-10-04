@@ -114,12 +114,18 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   strncpy(line, lp->ds->buf + C->coloff, size);
   line[size] = '\0';
 
-  if (g_mode != MODE_VISUAL) {
+  if ((g_mode & MODE_SEARCH) && lp == g_isearch.lp && g_isearch.x > C->coloff) {
+    u32 sx = g_isearch.x - C->coloff;
+    vt_nputs(line, sx);
+    vt_reverse_video();
+    vt_nputs(line + sx, g_isearch.qlen);
+    vt_reset_text_attr();
+    vt_puts(line + sx + g_isearch.qlen);
+  } else if (g_mode & MODE_VISUAL) {
+    term_draw_mark(T, C, lp, line);
+  } else {
     vt_puts(line);
-    return;
   }
-
-  term_draw_mark(T, C, lp, line);
 }
 
 static void term_draw(term_t *T, cursor_t *C) {

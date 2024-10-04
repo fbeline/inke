@@ -20,6 +20,7 @@ static void isearch_forward(cursor_t *C, const char *query) {
     } else if (match) {
       g_isearch.x = match - (l->ds->buf + offset);
       g_isearch.qlen = strlen(query);
+      g_isearch.lp = l;
       break;
     }
 
@@ -68,5 +69,5 @@ void isearch_start(cursor_t *C) {
   cmdline_init("I-Search: ");
   g_mode = MODE_SEARCH;
   g_cmd_func = isearch;
-  g_isearch = (isearch_t) {0, 0, 0};
+  g_isearch = (isearch_t) {.lp = NULL, .qlen = 0, .x = 0, .y = 0};
 }
