@@ -18,7 +18,7 @@ static void isearch_forward(cursor_t *C, const char *query) {
       offset += strlen(query);
       continue;
     } else if (match) {
-      g_isearch.x = match - (l->ds->buf + offset);
+      g_isearch.x = match - l->ds->buf;
       g_isearch.qlen = strlen(query);
       g_isearch.lp = l;
       break;
@@ -37,6 +37,12 @@ static void isearch_forward(cursor_t *C, const char *query) {
 
   for (u32 i = 0; i < g_isearch.x; i++)
     cursor_right(C);
+
+  // adjust to show matches in screen
+  if (C->coloff > 0 && C->x >= g_isearch.qlen) {
+    C->coloff += g_isearch.qlen;
+    C->x -= g_isearch.qlen;
+  }
 
   g_isearch.y = ocy + y;
 }
