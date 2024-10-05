@@ -49,8 +49,12 @@ static void mode_cmd_ctrl_x(cursor_t* C, int ch) {
     else g_running = false;
   } else if (ch == (CONTROL | 'S')) {
     mode_cmd_clean();
+
     if (io_write_buffer(C->editor) != 0)
       set_status_message("Error: Could not save file %.20s", C->editor->filename);
+
+    if (C->x + C->coloff > C->clp->ds->len)
+      cursor_eol(C);
   }
 }
 

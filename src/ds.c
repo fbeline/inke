@@ -103,6 +103,12 @@ ds_t *dsichar(ds_t *ds, size_t idx, const char ch) {
   return ds;
 }
 
+ds_t *dsrtrim(ds_t *ds) {
+  while(ds->len > 0 && ds->buf[ds->len-1] == ' ') {
+    ds->buf[--ds->len] = '\0';
+  }
+}
+
 void dsfree(ds_t *ds) {
   free(ds->buf);
   free(ds);

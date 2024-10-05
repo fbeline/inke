@@ -77,6 +77,7 @@ ds_t *editor_rows_to_string(line_t *head) {
   ds_t *ds = dsempty();
   line_t* lp = head;
   while (lp != NULL) {
+    dsrtrim(lp->ds);
     dscat(ds, lp->ds->buf);
     dscat(ds, "\n");
     lp = lp->next;
