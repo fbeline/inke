@@ -107,6 +107,7 @@ ds_t *dsrtrim(ds_t *ds) {
   while(ds->len > 0 && ds->buf[ds->len-1] == ' ') {
     ds->buf[--ds->len] = '\0';
   }
+  return ds;
 }
 
 void dsfree(ds_t *ds) {
