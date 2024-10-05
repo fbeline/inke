@@ -98,6 +98,9 @@ static i32 input_read_key(void) {
     if (nread == -1 && errno != EAGAIN) DIE("read");
   }
 
+  if (c == '\t')
+    return TAB_KEY;
+
   if (c == '\x1b') {
     char seq[3];
 
