@@ -215,6 +215,9 @@ void input_process_keys(cursor_t* C) {
   i32 ch = input_read_key();
 
   if (ch == (CONTROL | 'G')) {
+    if (g_mode == MODE_SEARCH)
+      isearch_abort(C);
+
     mode_cmd_clean();
     cmdline_clean();
     set_status_message("Quit");
