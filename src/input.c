@@ -219,7 +219,6 @@ void input_process_keys(cursor_t* C) {
       isearch_abort(C);
 
     mode_cmd_clean();
-    cmdline_clean();
     set_status_message("Quit");
     return;
   }

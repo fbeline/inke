@@ -12,6 +12,9 @@ static cmdline_t line = {
 };
 
 void cmdline_clean(void) {
+  if (line.ds == NULL)
+    line.ds = dsempty();
+
   line.ds->buf[0] = '\0';
   line.ds->len = 0;
   line.x = 0;
