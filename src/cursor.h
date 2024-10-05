@@ -55,3 +55,5 @@ void cursor_delete_row(cursor_t* cursor);
 void cursor_paste(cursor_t *cursor);
 
 void cursor_undo(cursor_t* cursor);
+
+void cursor_goto(cursor_t* cursor, u32 x, u32 y);

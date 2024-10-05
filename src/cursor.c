@@ -352,3 +352,15 @@ void cursor_update_window_size(cursor_t *C, u16 rows, u16 cols) {
     C->y = rows;
   }
 }
+
+void cursor_goto(cursor_t *C, u32 x, u32 y) {
+  cursor_bof(C);
+
+  while (y-- > 1)
+    cursor_down(C);
+
+  x = MIN(x, C->clp->ds->len);
+  while(x-- > 1)
+    cursor_right(C);
+
+}

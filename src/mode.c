@@ -1,6 +1,7 @@
 #include "mode.h"
 
 #include <stdarg.h>
+#include <stdio.h>
 
 #include "cmdline.h"
 #include "globals.h"
@@ -53,9 +54,24 @@ static void mode_cmd_ctrl_x(cursor_t* C, int ch) {
   }
 }
 
+static void mode_cmd_gotol(cursor_t* C, int ch) {
+  const char *snum = cmdline_text();
+  i32 line;
+  if (sscanf(snum, "%d", &line) == 1) {
+    cursor_goto(C, 0, line);
+    mode_cmd_clean();
+  }
+}
+
 void mode_set_ctrl_x(cursor_t *C) {
   set_status_message("C-x");
   g_cursor_vis = false;
   g_mode = MODE_CMD_CHAR;
   g_cmd_func = mode_cmd_ctrl_x;
+}
+
+void mode_set_gotol(cursor_t *C) {
+  cmdline_init("goto line: ");
+  g_mode = MODE_CMD;
+  g_cmd_func = mode_cmd_gotol;
 }
