@@ -283,7 +283,7 @@ void cursor_delete_row(cursor_t* C) {
   } else if (C->clp->next == NULL && C->clp->prev != NULL) {
     lp = C->clp->prev;
     if (C->rowoff > 0) C->rowoff--;
-    else C->x--;
+    else C->y--;
   } else {
     lp = C->clp;
   }
