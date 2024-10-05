@@ -1,6 +1,7 @@
 #include "vt.h"
 
 #include <termios.h>
+#include <string.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -8,7 +9,7 @@
 #include "ds.h"
 #include "utils.h"
 
-#define PUTSIZE 1024
+#define PUTSIZE 512
 
 static ds_t *sbuffer;
 
@@ -29,13 +30,20 @@ void vt_fputs(const char *str, ...) {
   dscat(sbuffer, fmtstr);
 }
 
-void vt_puts(const char *str) {
-  dscat(sbuffer, str);
-}
-
 void vt_nputs(const char *str, usize n) {
   if (n <= 0) return;
-  dsncat(sbuffer, str, n);
+  for (usize i = 0; i < n; i++) {
+    if (str[i] == '\t') {
+      dscat(sbuffer, "\033[37;44m\u2192\033[0m");
+      continue;
+    }
+
+    dsichar(sbuffer, sbuffer->len, str[i]);
+  }
+}
+
+void vt_puts(const char *str) {
+  vt_nputs(str, strlen(str));
 }
 
 void vt_erase_display(void) {
