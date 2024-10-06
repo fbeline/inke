@@ -24,9 +24,9 @@ void vt_flush(void) {
 void vt_fputs(const char *str, ...) {
   char fmtstr[PUTSIZE];
   va_list args;
-	va_start(args, str);
+  va_start(args, str);
   vsnprintf(fmtstr, PUTSIZE, str, args);
-	va_end(args);
+  va_end(args);
   dscat(sbuffer, fmtstr);
 }
 

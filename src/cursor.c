@@ -1,5 +1,6 @@
 #include "cursor.h"
 
+#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,6 +10,33 @@
 #include "globals.h"
 #include "undo.h"
 #include "utils.h"
+
+static bool is_word_char(i32 c) {
+   return isalnum(c) || c == '_';
+}
+
+bool word_stop(const char *line, u32 index) {
+  if (line == NULL || line[index] == '\0')
+    return false;
+
+  char current_char = line[index];
+  char next_char = line[index + 1];
+
+  if (next_char == '\0')
+    return false;
+
+  if ((is_word_char(current_char) && !is_word_char(next_char)) ||
+      (!is_word_char(current_char) && is_word_char(next_char))) {
+      return true;
+  }
+
+  if ((isspace(current_char) && !isspace(next_char)) ||
+      (!isspace(current_char) && isspace(next_char))) {
+      return true;
+  }
+
+  return false;
+}
 
 static u32 raw_x(cursor_t* C) {
   return C->x + C->coloff;
@@ -158,19 +186,15 @@ void cursor_break_line(cursor_t* C) {
 }
 
 void cursor_move_word_forward(cursor_t* C) {
-  char ch1, ch2;
-  editor_t* E = C->editor;
-  do {
-    u32 x = raw_x(C);
-    u32 y = raw_y(C);
-    if (y == E->row_size - 1 && x >= C->clp->ds->len)
+  usize lastline = C->editor->row_size - 1;
+  cursor_right(C);
+  u32 x = raw_x(C);
+  while(!word_stop(C->clp->ds->buf, x)) {
+    if (raw_y(C) == lastline && x >= C->clp->ds->len)
       return;
     cursor_right(C);
     x = raw_x(C);
-    y = raw_y(C);
-    ch1 = cursor_char(C);
-    ch2 = editor_char_at(C->clp, x + 1);
-  } while(!(ch1 !=  ' ' && ch2 == ' '));
+  }
   cursor_right(C);
 }
 

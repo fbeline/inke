@@ -80,15 +80,15 @@ static keytab_t keytabs_visual[NBINDS] = {
 };
 
 static key_func_t get_kfp(keytab_t *keytabs, int c) {
-	keytab_t *ktp = &keytabs[0];
+  keytab_t *ktp = &keytabs[0];
 
-	while (ktp->fp != NULL) {
-		if (ktp->code == c)
-			return ktp->fp;
-		++ktp;
-	}
+  while (ktp->fp != NULL) {
+    if (ktp->code == c)
+      return ktp->fp;
+    ++ktp;
+  }
 
-	return NULL;
+  return NULL;
 }
 
 static i32 input_read_key(void) {
