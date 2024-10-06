@@ -276,6 +276,9 @@ void cursor_delete_forward(cursor_t* C) {
 
 void cursor_delete_row(cursor_t* C) {
   line_t *lp = NULL;
+  g_clipbuf->buf[0] = '\0';
+  g_clipbuf->len = 0;
+  dscat(g_clipbuf, C->clp->ds->buf);
   undo_push(LINEDELETE, *C, C->clp->ds->buf);
 
   if (C->clp->next != NULL) {
