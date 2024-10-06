@@ -1,0 +1,11 @@
+feat:
+  - open file cmd
+  - cmd auto complete
+  - filesystem navigation tree
+  - search/replace
+  - auto ident
+  - multi buffer
+
+bugs:
+  - fix mouse click on tmux
+  - move word f/b
