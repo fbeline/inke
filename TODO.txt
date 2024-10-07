@@ -8,4 +8,4 @@ feat:
 
 bugs:
   - fix mouse click on tmux
-  - move word f/b
+  - region kill cursor re-position

@@ -15,27 +15,22 @@ static bool is_word_char(i32 c) {
    return isalnum(c) || c == '_';
 }
 
-bool word_stop(const char *line, u32 index) {
-  if (line == NULL || line[index] == '\0')
+static bool word_forward_stop(const char *line, u32 i) {
+  if (line == NULL)
     return false;
+  if (line[i+1] == '\0')
+    return true;
 
-  char current_char = line[index];
-  char next_char = line[index + 1];
+  return is_word_char(line[i]) && !is_word_char(line[i+1]);
+}
 
-  if (next_char == '\0')
+static bool word_backward_stop(const char *line, u32 i) {
+  if (line == NULL)
     return false;
+  if (i == 0)
+    return true;
 
-  if ((is_word_char(current_char) && !is_word_char(next_char)) ||
-      (!is_word_char(current_char) && is_word_char(next_char))) {
-      return true;
-  }
-
-  if ((isspace(current_char) && !isspace(next_char)) ||
-      (!isspace(current_char) && isspace(next_char))) {
-      return true;
-  }
-
-  return false;
+  return is_word_char(line[i]) && !is_word_char(line[i-1]);
 }
 
 static u32 raw_x(cursor_t* C) {
@@ -187,9 +182,8 @@ void cursor_break_line(cursor_t* C) {
 
 void cursor_move_word_forward(cursor_t* C) {
   usize lastline = C->editor->row_size - 1;
-  cursor_right(C);
   u32 x = raw_x(C);
-  while(!word_stop(C->clp->ds->buf, x)) {
+  while(!word_forward_stop(C->clp->ds->buf, x)) {
     if (raw_y(C) == lastline && x >= C->clp->ds->len)
       return;
     cursor_right(C);
@@ -199,17 +193,14 @@ void cursor_move_word_forward(cursor_t* C) {
 }
 
 void cursor_move_word_backward(cursor_t* C) {
-  char ch1, ch2;
-  do {
-    u32 x = raw_x(C);
-    u32 y = raw_y(C);
-    if (y == 0 && x == 0)
+  cursor_left(C);
+  u32 x = raw_x(C);
+  while(!word_backward_stop(C->clp->ds->buf, x)) {
+    if (raw_y(C) == 0 && x == 0)
       break;
-
     cursor_left(C);
-    ch1 = cursor_char(C);
-    ch2 = editor_char_at(C->clp, x - 2);
-  } while(!(ch1 !=  ' ' && ch2 == ' '));
+    x = raw_x(C);
+  }
 }
 
 void cursor_move_line_up(cursor_t *C) {
