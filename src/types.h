@@ -101,7 +101,7 @@ typedef struct buffer_s {
   editor_t *editor;
 } buffer_t;
 
-typedef void (*key_func_t)(cursor_t *C);
+typedef void (*key_func_t)(buffer_t *B);
 typedef void (*cmd_func_t)(i32 ch);
 
 typedef struct keytab {

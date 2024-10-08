@@ -2,6 +2,6 @@
 
 #include "types.h"
 
-void isearch_start(cursor_t *C);
-void isearch(cursor_t *C, int opt);
-void isearch_abort(cursor_t* C);
+void isearch_start(buffer_t *B);
+void isearch(i32 opt);
+void isearch_abort(buffer_t *B);

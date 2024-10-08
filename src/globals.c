@@ -30,7 +30,7 @@ char *get_status_message(void) {
   return message;
 }
 
-void mark_start(cursor_t *C) {
+void mark_start(buffer_t *B) {
 
   if (g_mode == MODE_VISUAL) {
     g_mode = MODE_INSERT;
@@ -41,8 +41,8 @@ void mark_start(cursor_t *C) {
   g_mode = MODE_VISUAL;
   set_status_message("visual mode");
 
-  g_mark.start_lp = C->clp;
-  g_mark.start_offset = C->x + C->coloff;
+  g_mark.start_lp = B->cursor->clp;
+  g_mark.start_offset = B->cursor->x + B->cursor->coloff;
 
   g_mark.end_lp = g_mark.start_lp;
   g_mark.end_lp = g_mark.start_lp;
@@ -59,9 +59,9 @@ static i8 line_compare(line_t *src, line_t *target) {
   return 1;
 }
 
-void mark_end(cursor_t *C) {
-  g_mark.end_lp = C->clp;
-  g_mark.end_offset = C->x + C->coloff;
+void mark_end(buffer_t *B) {
+  g_mark.end_lp = B->cursor->clp;
+  g_mark.end_offset = B->cursor->x + B->cursor->coloff;
 }
 
 mark_t mark_get(void) {

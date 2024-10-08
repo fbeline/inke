@@ -66,43 +66,42 @@ static void mode_set_find_file(void) {
 }
 
 static void mode_cmd_ctrl_x(int ch) {
-  editor_t *E = buffer_get()->editor;
+  buffer_t *B = buffer_get();
   if (ch == (CONTROL | 'C')) {
-    if (E->dirty) mode_set_exit_save();
+    if (B->editor->dirty) mode_set_exit_save();
     else g_running = false;
   } else if (ch == (CONTROL | 'F')) {
     mode_set_find_file();
   } else if (ch == (CONTROL | 'S')) {
     mode_cmd_clean();
 
-    if (io_write_buffer(E) != 0)
-      set_status_message("Error: Could not save file %.20s", E->filename);
+    if (io_write_buffer(B->editor) != 0)
+      set_status_message("Error: Could not save file %.20s", B->editor->filename);
 
     cursor_t *C = buffer_get()->cursor;
     if (C->x + C->coloff > C->clp->ds->len) {
-      cursor_eol(C);
+      cursor_eol(B);
     }
   }
 }
 
-static void mode_cmd_gotol(int ch) {
-  cursor_t *C = buffer_get()->cursor;
+static void mode_cmd_gotol(i32 ch) {
   const char *snum = cmdline_text();
   i32 line;
   if (sscanf(snum, "%d", &line) == 1) {
-    cursor_goto(C, 0, line);
+    cursor_goto(buffer_get(), 0, line);
     mode_cmd_clean();
   }
 }
 
-void mode_set_ctrl_x(cursor_t *C) {
+void mode_set_ctrl_x(buffer_t *B) {
   set_status_message("C-x");
   g_cursor_vis = false;
   g_mode = MODE_CMD_CHAR;
   g_cmd_func = mode_cmd_ctrl_x;
 }
 
-void mode_set_gotol(cursor_t *C) {
+void mode_set_gotol(buffer_t *B) {
   cmdline_init("goto line: ");
   g_mode = MODE_CMD;
   g_cmd_func = mode_cmd_gotol;

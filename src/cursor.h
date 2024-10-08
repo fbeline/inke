@@ -6,56 +6,56 @@ void cursor_init(cursor_t *C);
 
 void cursor_set(cursor_t* dest, cursor_t* src);
 
-void cursor_update_window_size(cursor_t *C, u16 rows, u16 cols);
+void cursor_update_window_size(buffer_t *B, u16 rows, u16 cols);
 
-void cursor_region_text(cursor_t* cursor);
+void cursor_region_text(buffer_t *B);
 
-void cursor_region_kill(cursor_t* cursor);
+void cursor_region_kill(buffer_t *B);
 
-char cursor_char(cursor_t* cursor);
+char cursor_char(buffer_t *B);
 
-void cursor_bol(cursor_t* cursor);
+void cursor_bol(buffer_t *B);
 
-void cursor_eol(cursor_t* cursor);
+void cursor_eol(buffer_t *B);
 
-void cursor_eof(cursor_t* cursor);
+void cursor_eof(buffer_t *B);
 
-void cursor_bof(cursor_t* cursor);
+void cursor_bof(buffer_t *B);
 
-void cursor_page_up(cursor_t* cursor);
+void cursor_page_up(buffer_t *B);
 
-void cursor_page_down(cursor_t* cursor);
+void cursor_page_down(buffer_t *B);
 
-void cursor_move_word_forward(cursor_t* cursor);
+void cursor_move_word_forward(buffer_t *B);
 
-void cursor_move_word_backward(cursor_t* cursor);
+void cursor_move_word_backward(buffer_t *B);
 
-void cursor_move_line_up(cursor_t *C);
+void cursor_move_line_up(buffer_t *B);
 
-void cursor_remove_char(cursor_t* cursor);
+void cursor_remove_char(buffer_t *B);
 
-void cursor_insert_char(cursor_t* cursor, int c);
+void cursor_insert_char(buffer_t *B, i32 c);
 
-void cursor_insert_text(cursor_t* cursor, const char* text);
+void cursor_insert_text(buffer_t *B, const char* text);
 
-void cursor_down(cursor_t* cursor);
+void cursor_down(buffer_t *B);
 
-void cursor_up(cursor_t* cursor);
+void cursor_up(buffer_t *B);
 
-void cursor_right(cursor_t* cursor);
+void cursor_right(buffer_t *B);
 
-void cursor_left(cursor_t* cursor);
+void cursor_left(buffer_t *B);
 
-void cursor_break_line(cursor_t* cursor);
+void cursor_break_line(buffer_t *B);
 
-void cursor_delete_forward(cursor_t* cursor);
+void cursor_delete_forward(buffer_t *B);
 
-void cursor_delete_row(cursor_t* cursor);
+void cursor_delete_row(buffer_t *B);
 
-void cursor_paste(cursor_t *cursor);
+void cursor_paste(buffer_t *B);
 
-void cursor_undo(cursor_t* cursor);
+void cursor_undo(buffer_t *B);
 
-void cursor_goto(cursor_t* cursor, u32 x, u32 y);
+void cursor_goto(buffer_t *B, u32 x, u32 y);
 
 void cursor_free(cursor_t *C);

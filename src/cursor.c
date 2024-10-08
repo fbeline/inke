@@ -54,56 +54,59 @@ void cursor_set(cursor_t* dest, cursor_t* src) {
   }
 }
 
-static void cursor_set_clp_as(cursor_t *C, line_t *lp, u32 x) {
+static void cursor_set_clp_as(buffer_t *B, line_t *lp, u32 x) {
   if (lp == NULL) return;
 
-  C->clp = C->editor->lines;
+  cursor_t *C = B->cursor;
+  C->clp = B->editor->lines;
   C->y = 0;
   C->x = 0;
   C->coloff = 0;
   C->rowoff = 0;
 
   while (C->clp != lp && C->clp != NULL) {
-    cursor_down(C);
+    cursor_down(B);
   }
 
   while(x-- > 0) {
-    cursor_right(C);
+    cursor_right(B);
   }
 }
 
-void cursor_region_text(cursor_t* C) {
+void cursor_region_text(buffer_t *B) {
   if (g_mode != MODE_VISUAL) return;
 
-  editor_text_between(C->editor, mark_get(), g_clipbuf);
+  editor_text_between(B->editor, mark_get(), g_clipbuf);
 
   g_mode = MODE_INSERT;
   clear_status_message();
 }
 
-void cursor_region_kill(cursor_t* C) {
+void cursor_region_kill(buffer_t *B) {
+  cursor_t *C = B->cursor;
   if (g_mode != MODE_VISUAL) return;
 
   mark_t mark = mark_get();
-  editor_kill_between(C->editor, mark, g_clipbuf);
+  editor_kill_between(B->editor, mark, g_clipbuf);
 
-  cursor_set_clp_as(C, mark.start_lp, mark.start_offset);
+  cursor_set_clp_as(B, mark.start_lp, mark.start_offset);
   undo_push(CUT, *C, g_clipbuf->buf);
 
   g_mode = MODE_INSERT;
   clear_status_message();
 }
 
-char cursor_char(cursor_t* C) {
-  return editor_char_at(C->clp, raw_x(C));
+char cursor_char(buffer_t *B) {
+  return editor_char_at(B->cursor->clp, raw_x(B->cursor));
 }
 
-void cursor_bol(cursor_t* C) {
-  C->x = 0;
-  C->coloff = 0;
+void cursor_bol(buffer_t *B) {
+  B->cursor->x = 0;
+  B->cursor->coloff = 0;
 }
 
-void cursor_eol(cursor_t* C) {
+void cursor_eol(buffer_t *B) {
+  cursor_t *C = B->cursor;
   usize len = C->clp->ds->len;
   if (len > C->max_col) {
     C->x = C->max_col;
@@ -114,7 +117,8 @@ void cursor_eol(cursor_t* C) {
   }
 }
 
-void cursor_down(cursor_t* C) {
+void cursor_down(buffer_t *B) {
+  cursor_t *C = B->cursor;
   if (C->clp->next == NULL) return;
 
   C->clp = C->clp->next;
@@ -125,10 +129,11 @@ void cursor_down(cursor_t* C) {
     C->rowoff++;
   }
 
-  if (raw_x(C) > C->clp->ds->len) cursor_eol(C);
+  if (raw_x(C) > C->clp->ds->len) cursor_eol(B);
 }
 
-void cursor_up(cursor_t* C) {
+void cursor_up(buffer_t *B) {
+  cursor_t *C = B->cursor;
   if (raw_y(C) <= 0 || C->clp->prev == NULL) return;
   C->clp = C->clp->prev;
 
@@ -138,77 +143,79 @@ void cursor_up(cursor_t* C) {
     C->y--;
   }
 
-  if (raw_x(C) > C->clp->ds->len) cursor_eol(C);
+  if (raw_x(C) > C->clp->ds->len) cursor_eol(B);
 }
 
-void cursor_right(cursor_t* C) {
+void cursor_right(buffer_t *B) {
+  cursor_t *C = B->cursor;
   u32 x = raw_x(C);
   usize len = C->clp->ds->len;
 
   if (x < len && C->x == C->max_col) {
     C->coloff++;
   } else if (x >= len) {
-    cursor_down(C);
-    cursor_bol(C);
+    cursor_down(B);
+    cursor_bol(B);
   } else {
     C->x++;
   }
 }
 
-void cursor_left(cursor_t* C) {
-  u32 x = raw_x(C);
-  u32 y = raw_y(C);
+void cursor_left(buffer_t *B) {
+  u32 x = raw_x(B->cursor);
+  u32 y = raw_y(B->cursor);
   if (x == 0 && y == 0) {
     return;
   } else if (x == 0 && y > 0) {
-    cursor_up(C);
-    cursor_eol(C);
-  } else if (C->x == 0 && C->coloff > 0) {
-    C->coloff--;
+    cursor_up(B);
+    cursor_eol(B);
+  } else if (B->cursor->x == 0 && B->cursor->coloff > 0) {
+    B->cursor->coloff--;
   } else {
-    C->x--;
+    B->cursor->x--;
   }
 }
 
-void cursor_break_line(cursor_t* C) {
-  u32 x = raw_x(C);
+void cursor_break_line(buffer_t *B) {
+  u32 x = raw_x(B->cursor);
 
-  editor_break_line(C->editor, C->clp, x);
-  cursor_down(C);
-  cursor_bol(C);
+  editor_break_line(B->editor, B->cursor->clp, x);
+  cursor_down(B);
+  cursor_bol(B);
 
-  undo_push(LINEBREAK, *C, NULL);
+  undo_push(LINEBREAK, *B->cursor, NULL);
 }
 
-void cursor_move_word_forward(cursor_t* C) {
-  usize lastline = C->editor->row_size - 1;
-  u32 x = raw_x(C);
-  while(!word_forward_stop(C->clp->ds->buf, x)) {
-    if (raw_y(C) == lastline && x >= C->clp->ds->len)
+void cursor_move_word_forward(buffer_t *B) {
+  usize lastline = B->editor->row_size - 1;
+  u32 x = raw_x(B->cursor);
+  while(!word_forward_stop(B->cursor->clp->ds->buf, x)) {
+    if (raw_y(B->cursor) == lastline && x >= B->cursor->clp->ds->len)
       return;
-    cursor_right(C);
-    x = raw_x(C);
+    cursor_right(B);
+    x = raw_x(B->cursor);
   }
-  cursor_right(C);
+  cursor_right(B);
 }
 
-void cursor_move_word_backward(cursor_t* C) {
-  cursor_left(C);
-  u32 x = raw_x(C);
-  while(!word_backward_stop(C->clp->ds->buf, x)) {
-    if (raw_y(C) == 0 && x == 0)
+void cursor_move_word_backward(buffer_t *B) {
+  cursor_left(B);
+  u32 x = raw_x(B->cursor);
+  while(!word_backward_stop(B->cursor->clp->ds->buf, x)) {
+    if (raw_y(B->cursor) == 0 && x == 0)
       break;
-    cursor_left(C);
-    x = raw_x(C);
+    cursor_left(B);
+    x = raw_x(B->cursor);
   }
 }
 
-void cursor_move_line_up(cursor_t *C) {
+void cursor_move_line_up(buffer_t *B) {
+  cursor_t *C = B->cursor;
   if (C->clp->prev == NULL) return;
 
   line_t* lp;
   usize prlen = C->clp->prev->ds->len;
-  if ((lp = editor_move_line_up(C->editor, C->clp)) == NULL) return;
+  if ((lp = editor_move_line_up(B->editor, C->clp)) == NULL) return;
 
   C->clp = lp;
 
@@ -219,12 +226,13 @@ void cursor_move_line_up(cursor_t *C) {
   C->coloff = prlen > C->x ? prlen - C->x : 0;
 }
 
-void cursor_remove_char(cursor_t* C) {
+void cursor_remove_char(buffer_t *B) {
+  cursor_t *C = B->cursor;
   u32 x = raw_x(C);
   u32 y = raw_y(C);
   if (x == 0 && y == 0) return;
   if (x == 0 && y > 0) {
-    cursor_move_line_up(C);
+    cursor_move_line_up(B);
     undo_push(LINEUP, *C, NULL);
     return;
   }
@@ -241,39 +249,40 @@ void cursor_remove_char(cursor_t* C) {
   undo_push(BACKSPACE, *C, strdata);
 }
 
-void cursor_insert_char(cursor_t* C, int ch) {
-  editor_insert_char_at(C->editor, C->clp, raw_x(C), ch);
-  cursor_right(C);
+void cursor_insert_char(buffer_t *B, int ch) {
+  editor_insert_char_at(B->editor, B->cursor->clp, raw_x(B->cursor), ch);
+  cursor_right(B);
 
-  undo_push(ADD, *C, NULL);
+  undo_push(ADD, *B->cursor, NULL);
 }
 
-void cursor_insert_text(cursor_t* C, const char* text) {
+void cursor_insert_text(buffer_t *B, const char* text) {
   for (usize i = 0, max = strlen(text); i < max; i++) {
     if (text[i] == '\n')
-      cursor_break_line(C);
+      cursor_break_line(B);
     else
-      cursor_insert_char(C, text[i]);
+      cursor_insert_char(B, text[i]);
   }
 }
 
-void cursor_page_up(cursor_t* C) {
-  for (u16 i = 0; i < C->max_row; i ++) {
-    cursor_up(C);
+void cursor_page_up(buffer_t *B) {
+  for (u16 i = 0; i < B->cursor->max_row; i ++) {
+    cursor_up(B);
   }
 }
 
-void cursor_page_down(cursor_t* C) {
-  for (u16 i = 0; i < C->max_row; i ++) {
-    cursor_down(C);
+void cursor_page_down(buffer_t *B) {
+  for (u16 i = 0; i < B->cursor->max_row; i ++) {
+    cursor_down(B);
   }
 }
 
-void cursor_delete_forward(cursor_t* C) {
-  i32 x = raw_x(C);
+void cursor_delete_forward(buffer_t *B) {
+  cursor_t *C = B->cursor;
+  u32 x = raw_x(C);
 
   if (x == 0 || C->clp->ds->len == 0) {
-    cursor_delete_row(C);
+    cursor_delete_row(B);
     return;
   }
 
@@ -289,7 +298,8 @@ void cursor_delete_forward(cursor_t* C) {
   editor_delete_forward(C->clp, x);
 }
 
-void cursor_delete_row(cursor_t* C) {
+void cursor_delete_row(buffer_t *B) {
+  cursor_t *C = B->cursor;
   line_t *lp = NULL;
   g_clipbuf->buf[0] = '\0';
   g_clipbuf->len = 0;
@@ -309,11 +319,12 @@ void cursor_delete_row(cursor_t* C) {
   editor_delete_lines(C->editor, C->clp, 1);
   C->clp = lp;
 
-  if (raw_x(C) > C->clp->ds->len) cursor_eol(C);
+  if (raw_x(C) > C->clp->ds->len) cursor_eol(B);
 }
 
-void cursor_eof(cursor_t* C) {
-  editor_t* E = C->editor;
+void cursor_eof(buffer_t *B) {
+  editor_t *E = B->editor;
+  cursor_t *C = B->cursor;
   if (E->row_size > C->max_row) {
     C->y = C->max_row - 1;
     C->rowoff = E->row_size - C->max_row;
@@ -323,23 +334,52 @@ void cursor_eof(cursor_t* C) {
   }
   while(C->clp->next != NULL)
     C->clp = C->clp->next;
-  cursor_eol(C);
+  cursor_eol(B);
 }
 
-void cursor_bof(cursor_t* C) {
-  cursor_bol(C);
-  C->y = 0;
-  C->rowoff = 0;
-  while(C->clp->prev != NULL)
-    C->clp = C->clp->prev;
+void cursor_bof(buffer_t *B) {
+  cursor_bol(B);
+  B->cursor->y = 0;
+  B->cursor->rowoff = 0;
+  while(B->cursor->clp->prev != NULL)
+    B->cursor->clp = B->cursor->clp->prev;
 }
 
-void cursor_undo(cursor_t* C) {
-  undo(C);
+void cursor_undo(buffer_t *B) {
+  undo(B->cursor);
 }
 
-void cursor_paste(cursor_t *C) {
-  cursor_insert_text(C, g_clipbuf->buf);
+void cursor_paste(buffer_t *B) {
+  cursor_insert_text(B, g_clipbuf->buf);
+}
+
+void cursor_update_window_size(buffer_t *B, u16 rows, u16 cols) {
+  u32 x = raw_x(B->cursor);
+  u32 y = raw_y(B->cursor);
+
+  B->cursor->max_col = cols;
+  B->cursor->max_row = rows;
+
+  if (x > cols) {
+    B->cursor->coloff = x - cols;
+    B->cursor->x = cols;
+  }
+  if (y > rows) {
+    B->cursor->rowoff = y - rows;
+    B->cursor->y = rows;
+  }
+}
+
+void cursor_goto(buffer_t *B, u32 x, u32 y) {
+  cursor_bof(B);
+
+  while (y-- > 1)
+    cursor_down(B);
+
+  x = MIN(x, B->cursor->clp->ds->len);
+  while(x-- > 1)
+    cursor_right(B);
+
 }
 
 void cursor_init(cursor_t *C) {
@@ -347,35 +387,6 @@ void cursor_init(cursor_t *C) {
   C->rowoff = 0;
   C->x = 0;
   C->y = 0;
-}
-
-void cursor_update_window_size(cursor_t *C, u16 rows, u16 cols) {
-  u32 x = raw_x(C);
-  u32 y = raw_y(C);
-
-  C->max_col = cols;
-  C->max_row = rows;
-
-  if (x > cols) {
-    C->coloff = x - cols;
-    C->x = cols;
-  }
-  if (y > rows) {
-    C->rowoff = y - rows;
-    C->y = rows;
-  }
-}
-
-void cursor_goto(cursor_t *C, u32 x, u32 y) {
-  cursor_bof(C);
-
-  while (y-- > 1)
-    cursor_down(C);
-
-  x = MIN(x, C->clp->ds->len);
-  while(x-- > 1)
-    cursor_right(C);
-
 }
 
 void cursor_free(cursor_t *C) {

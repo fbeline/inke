@@ -20,6 +20,6 @@ void set_status_message(const char* msg, ...);
 void clear_status_message(void);
 char *get_status_message(void);
 
-void mark_start(cursor_t *cursor);
-void mark_end(cursor_t *cursor);
+void mark_start(buffer_t *B);
+void mark_end(buffer_t *B);
 mark_t mark_get(void);

@@ -158,22 +158,22 @@ static i32 input_read_key(void) {
 static void process_insert_mode(buffer_t *B, i32 ch) {
   key_func_t kfp;
   if ((kfp = get_kfp(keytabs, ch)) != NULL) {
-    kfp(B->cursor);
+    kfp(B);
     return;
   }
 
   if (ch == TAB_KEY) {
-    cursor_insert_char(B->cursor, ' ');
-    cursor_insert_char(B->cursor, ' ');
+    cursor_insert_char(B, ' ');
+    cursor_insert_char(B, ' ');
   } else if (ch >= 32 && ch <= 126) {
-    cursor_insert_char(B->cursor, ch);
+    cursor_insert_char(B, ch);
   }
 }
 
 static void process_visual_mode(buffer_t *B, i32 ch) {
   key_func_t kfp;
   if ((kfp = get_kfp(keytabs_visual, ch)) != NULL) {
-    kfp(B->cursor);
+    kfp(B);
     return;
   }
   set_status_message("visual mode - cmd not found");
@@ -219,7 +219,7 @@ void input_process_keys(buffer_t* B) {
 
   if (ch == (CONTROL | 'G')) {
     if (g_mode == MODE_SEARCH)
-      isearch_abort(B->cursor);
+      isearch_abort(B);
 
     mode_cmd_clean();
     set_status_message("Quit");
@@ -243,5 +243,5 @@ void input_process_keys(buffer_t* B) {
   }
 
   if (g_mode == MODE_VISUAL)
-    mark_end(B->cursor);
+    mark_end(B);
 }
