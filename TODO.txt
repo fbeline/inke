@@ -5,6 +5,7 @@ feat:
   - search/replace
   - auto ident
   - multi buffer
+  - ident line / region shortcut
 
 bugs:
   - fix mouse click on tmux

@@ -2,12 +2,14 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "cmdline.h"
 #include "globals.h"
 #include "isearch.h"
 #include "io.h"
 #include "types.h"
+#include "utils.h"
 
 static void mode_cmd_nop(cursor_t *C, int ch) { }
 
@@ -44,8 +46,22 @@ void mode_set_exit_save(cursor_t* C) {
 }
 
 static void mode_cmd_open_file(cursor_t* C, i32 _ch) {
-  const char *filepath = cmdline_text();
+  const char *filename = cmdline_text();
+  if (access(filename, F_OK) != 0) return;
+  // editor_free(C->editor);
   // TODO: OPEN FILE
+}
+
+static void mode_set_find_file(void) {
+  g_mode = MODE_CMD;
+  g_cmd_func = mode_cmd_open_file;
+
+  char cwd[NPATH];
+  if (getcwd(cwd, sizeof(cwd)) == NULL) DIE("Error getcwd");
+
+  cmdline_init("Find file: ");
+  cmdline_cat(cwd);
+  cmdline_insert('/');
 }
 
 static void mode_cmd_ctrl_x(cursor_t* C, int ch) {
@@ -53,9 +69,7 @@ static void mode_cmd_ctrl_x(cursor_t* C, int ch) {
     if (C->editor->dirty) mode_set_exit_save(C);
     else g_running = false;
   } else if (ch == (CONTROL | 'F')) {
-    cmdline_init("Find file: ");
-    g_mode = MODE_CMD;
-    g_cmd_func = mode_cmd_open_file;
+    mode_set_find_file();
   } else if (ch == (CONTROL | 'S')) {
     mode_cmd_clean();
 

@@ -35,3 +35,4 @@ ds_t *editor_rows_to_string(line_t* lines);
 
 editor_t editor_init(const char* filename);
 
+void editor_free(editor_t *E);

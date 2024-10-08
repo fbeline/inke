@@ -29,6 +29,7 @@ typedef size_t usize;
 #define MODE_CMD_CHAR 0x08
 #define MODE_VISUAL 0x10
 
+#define NPATH  256
 #define NBINDS 256
 #define CLIPBUF (1 << 16)  // 64 KB (2^16 bytes)
 #define CMDBUFSIZE 512
@@ -66,7 +67,7 @@ typedef struct line_s {
 
 typedef struct editor_s {
   unsigned char mode;
-  char filename[255];
+  char filename[NPATH];
   bool dirty, new_file;
   usize row_size;
   line_t *lines;

@@ -310,3 +310,14 @@ editor_t editor_init(const char *filename) {
 
   return E;
 }
+
+void editor_free(editor_t* E) {
+  line_t *aux;
+  while(E->lines != NULL) {
+    aux = E->lines;
+    E->lines = aux->next;
+    dsfree(aux->ds);
+    free(aux);
+  }
+  free(E);
+}
