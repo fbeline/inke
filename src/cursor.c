@@ -41,16 +41,16 @@ static u32 raw_y(cursor_t* C) {
   return C->y + C->rowoff;
 }
 
-void cursor_set(cursor_t* dest, cursor_t* src) {
-  dest->x = src->x;
-  dest->y = src->y;
-  dest->coloff = src->coloff;
-  dest->rowoff = src->rowoff;
+void cursor_set(buffer_t *dest, buffer_t* src) {
+  dest->cursor->x = src->cursor->x;
+  dest->cursor->y = src->cursor->y;
+  dest->cursor->coloff = src->cursor->coloff;
+  dest->cursor->rowoff = src->cursor->rowoff;
 
-  dest->clp = dest->editor->lines;
-  u32 max = dest->y + dest->rowoff;
+  dest->cursor->clp = dest->editor->lines;
+  u32 max = dest->cursor->y + dest->cursor->rowoff;
   for (u32 i = 0; i < max; i++) {
-    dest->clp = dest->clp->next;
+    dest->cursor->clp = dest->cursor->clp->next;
   }
 }
 
@@ -90,7 +90,7 @@ void cursor_region_kill(buffer_t *B) {
   editor_kill_between(B->editor, mark, g_clipbuf);
 
   cursor_set_clp_as(B, mark.start_lp, mark.start_offset);
-  undo_push(CUT, *C, g_clipbuf->buf);
+  undo_push(CUT, B, g_clipbuf->buf);
 
   g_mode = MODE_INSERT;
   clear_status_message();
@@ -183,7 +183,7 @@ void cursor_break_line(buffer_t *B) {
   cursor_down(B);
   cursor_bol(B);
 
-  undo_push(LINEBREAK, *B->cursor, NULL);
+  undo_push(LINEBREAK, B, NULL);
 }
 
 void cursor_move_word_forward(buffer_t *B) {
@@ -233,7 +233,7 @@ void cursor_remove_char(buffer_t *B) {
   if (x == 0 && y == 0) return;
   if (x == 0 && y > 0) {
     cursor_move_line_up(B);
-    undo_push(LINEUP, *C, NULL);
+    undo_push(LINEUP, B, NULL);
     return;
   }
 
@@ -245,15 +245,15 @@ void cursor_remove_char(buffer_t *B) {
   else
     C->x--;
 
-  C->editor->dirty = true;
-  undo_push(BACKSPACE, *C, strdata);
+  B->editor->dirty = true;
+  undo_push(BACKSPACE, B, strdata);
 }
 
 void cursor_insert_char(buffer_t *B, int ch) {
   editor_insert_char_at(B->editor, B->cursor->clp, raw_x(B->cursor), ch);
   cursor_right(B);
 
-  undo_push(ADD, *B->cursor, NULL);
+  undo_push(ADD, B, NULL);
 }
 
 void cursor_insert_text(buffer_t *B, const char* text) {
@@ -292,8 +292,8 @@ void cursor_delete_forward(buffer_t *B) {
     .end_lp = C->clp,
     .end_offset = C->clp->ds->len
   };
-  editor_text_between(C->editor, mark, g_clipbuf);
-  undo_push(DELETE_FORWARD, *C, g_clipbuf->buf);
+  editor_text_between(B->editor, mark, g_clipbuf);
+  undo_push(DELETE_FORWARD, B, g_clipbuf->buf);
 
   editor_delete_forward(C->clp, x);
 }
@@ -304,7 +304,7 @@ void cursor_delete_row(buffer_t *B) {
   g_clipbuf->buf[0] = '\0';
   g_clipbuf->len = 0;
   dscat(g_clipbuf, C->clp->ds->buf);
-  undo_push(LINEDELETE, *C, C->clp->ds->buf);
+  undo_push(LINEDELETE, B, C->clp->ds->buf);
 
   if (C->clp->next != NULL) {
     lp = C->clp->next;
@@ -316,7 +316,7 @@ void cursor_delete_row(buffer_t *B) {
     lp = C->clp;
   }
 
-  editor_delete_lines(C->editor, C->clp, 1);
+  editor_delete_lines(B->editor, C->clp, 1);
   C->clp = lp;
 
   if (raw_x(C) > C->clp->ds->len) cursor_eol(B);
@@ -346,7 +346,7 @@ void cursor_bof(buffer_t *B) {
 }
 
 void cursor_undo(buffer_t *B) {
-  undo(B->cursor);
+  undo(B);
 }
 
 void cursor_paste(buffer_t *B) {

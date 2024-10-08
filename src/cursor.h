@@ -4,7 +4,7 @@
 
 void cursor_init(cursor_t *C);
 
-void cursor_set(cursor_t* dest, cursor_t* src);
+void cursor_set(buffer_t *dest, buffer_t *src);
 
 void cursor_update_window_size(buffer_t *B, u16 rows, u16 cols);
 

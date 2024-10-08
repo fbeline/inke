@@ -10,7 +10,7 @@
 #define SEARCH_BACKWARD 0
 #define SEARCH_FORWARD  1
 
-static cursor_t oc;
+static buffer_t obuffer;
 
 static void isearch_search(buffer_t *B, const char *query, u8 dir) {
   cursor_t *C = B->cursor;
@@ -80,13 +80,13 @@ void isearch(i32 opt) {
 }
 
 void isearch_abort(buffer_t *B) {
-  cursor_set(B->cursor, &oc);
+  cursor_set(B, &obuffer);
   g_mode = MODE_INSERT;
   clear_status_message();
 }
 
 void isearch_start(buffer_t *B) {
-  oc = *B->cursor;
+  obuffer = *B;
   cmdline_init("I-Search: ");
   g_mode = MODE_SEARCH;
   g_cmd_func = isearch;

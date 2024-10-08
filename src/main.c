@@ -16,7 +16,7 @@ static void handle_sigwinch(int unused __attribute__((unused))) {
   buffer_t *buffer = buffer_get();
   term_update_size();
   term_get_size(&rows, &cols);
-  cursor_update_window_size(buffer->cursor, rows - 1, cols);
+  cursor_update_window_size(buffer, rows - 1, cols);
   term_render(buffer);
 }
 

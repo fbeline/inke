@@ -25,8 +25,6 @@ void buffer_create(const char *filename) {
   editor_init(bufl->buffer->editor, filename);
   cursor_init(bufl->buffer->cursor);
 
-  // TODO: REFACTOR IT
-  bufl->buffer->cursor->editor = bufl->buffer->editor;
   bufl->buffer->cursor->clp = bufl->buffer->editor->lines;
 
   if (head == NULL) {
