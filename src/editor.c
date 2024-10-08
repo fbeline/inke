@@ -299,16 +299,14 @@ int editor_open_file(const char *filename, editor_t *E) {
   return 0;
 }
 
-editor_t editor_init(const char *filename) {
-  editor_t E = {0};
+void editor_init(editor_t *E, const char *filename) {
+  if (E == NULL) return;
 
   if (IO_FILE_EXISTS(filename)) {
-    editor_open_file(filename, &E);
+    editor_open_file(filename, E);
   } else {
-    editor_new_file(filename, &E);
+    editor_new_file(filename, E);
   }
-
-  return E;
 }
 
 void editor_free(editor_t* E) {

@@ -47,7 +47,7 @@ static void enable_raw_mode(term_t *T) {
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) DIE("tcsetattr");
 }
 
-static void term_draw_status_bar(term_t *T, cursor_t *C) {
+static void term_draw_status_bar(term_t *T, buffer_t *B) {
   vt_erase_line();
   vt_reverse_video();
 
@@ -56,12 +56,12 @@ static void term_draw_status_bar(term_t *T, cursor_t *C) {
 
   i32 len = snprintf(status,
                      T->cols + 1, "%.20s %s%*s%zu,%zu",
-                     C->editor->filename,
-                     C->editor->dirty ? "[+]" : "",
+                     B->editor->filename,
+                     B->editor->dirty ? "[+]" : "",
                      (i32)T->cols - 20,
                      "",
-                     C->x + C->coloff + 1lu,
-                     C->y + C->rowoff + 1lu
+                     B->cursor->x + B->cursor->coloff + 1lu,
+                     B->cursor->y + B->cursor->rowoff + 1lu
                      );
 
   vt_puts(status);
@@ -128,9 +128,10 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   }
 }
 
-static void term_draw(term_t *T, cursor_t *C) {
+static void term_draw(term_t *T, buffer_t *B) {
   usize y;
-  line_t *lp = C->editor->lines;
+  line_t *lp = B->editor->lines;
+  cursor_t *C = B->cursor;
 
   for (usize i = 0; i < C->rowoff && lp->next != NULL; i++) {
     if (g_mode == MODE_VISUAL && g_mark.start_lp == lp)
@@ -147,7 +148,7 @@ static void term_draw(term_t *T, cursor_t *C) {
     if (lp != NULL) lp = lp->next;
   }
 
-  term_draw_status_bar(T, C);
+  term_draw_status_bar(T, B);
 }
 
 static i32 __term_update_size(term_t *T) {
@@ -177,18 +178,18 @@ void term_init(void) {
   term_update_size();
 }
 
-void term_render(cursor_t *C) {
-  C->max_row = T.rows - 1;
-  C->max_col = T.cols;
+void term_render(buffer_t *B) {
+  B->cursor->max_row = T.rows - 1;
+  B->cursor->max_col = T.cols;
   vt_set_cursor_position(0, 0);
   vt_hide_cursor();
 
-  term_draw(&T, C);
+  term_draw(&T, B);
 
   if (g_mode & (MODE_CMD | MODE_SEARCH))
     vt_set_cursor_position(T.rows + 2, cmdline()->x + 1);
   else
-    vt_set_cursor_position(C->y + 1, C->x + 1);
+    vt_set_cursor_position(B->cursor->y + 1, B->cursor->x + 1);
 
   if (g_cursor_vis) vt_show_cursor();
 

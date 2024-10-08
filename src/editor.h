@@ -33,6 +33,6 @@ line_t* editor_insert_row_with_data_at(editor_t *E, u32 y, char* strdata);
 
 ds_t *editor_rows_to_string(line_t* lines);
 
-editor_t editor_init(const char* filename);
+void editor_init(editor_t *E, const char* filename);
 
 void editor_free(editor_t *E);

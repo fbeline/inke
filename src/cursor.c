@@ -342,16 +342,11 @@ void cursor_paste(cursor_t *C) {
   cursor_insert_text(C, g_clipbuf->buf);
 }
 
-cursor_t cursor_init(editor_t* E) {
-  cursor_t C = {0};
-  C.editor = E;
-  C.clp = E->lines;
-  C.coloff = 0;
-  C.rowoff = 0;
-  C.x = 0;
-  C.y = 0;
-
-  return C;
+void cursor_init(cursor_t *C) {
+  C->coloff = 0;
+  C->rowoff = 0;
+  C->x = 0;
+  C->y = 0;
 }
 
 void cursor_update_window_size(cursor_t *C, u16 rows, u16 cols) {
@@ -381,4 +376,10 @@ void cursor_goto(cursor_t *C, u32 x, u32 y) {
   while(x-- > 1)
     cursor_right(C);
 
+}
+
+void cursor_free(cursor_t *C) {
+  if (C == NULL) return;
+
+  free(C);
 }

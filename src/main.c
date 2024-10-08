@@ -4,26 +4,24 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "buffer.h"
 #include "globals.h"
 #include "editor.h"
 #include "cursor.h"
 #include "input.h"
 #include "terminal.h"
 
-static editor_t E = {0};
-static cursor_t C = {0};
-
 static void handle_sigwinch(int unused __attribute__((unused))) {
   u16 rows, cols;
+  buffer_t *buffer = buffer_get();
   term_update_size();
   term_get_size(&rows, &cols);
-  cursor_update_window_size(&C, rows - 1, cols);
-  term_render(&C);
+  cursor_update_window_size(buffer->cursor, rows - 1, cols);
+  term_render(buffer);
 }
 
 static void init(const char* filename) {
-  E = editor_init(filename);
-  C = cursor_init(&E);
+  buffer_create(filename);
   globals_init();
   term_init();
 
@@ -41,8 +39,9 @@ int main(int argc, char **argv) {
   for(;;) {
     if (!g_running) break;
 
-    term_render(&C);
-    input_process_keys(&C);
+    buffer_t *buffer = buffer_get();
+    term_render(buffer);
+    input_process_keys(buffer);
   }
 
   term_restore();

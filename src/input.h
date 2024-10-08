@@ -2,4 +2,4 @@
 
 #include "cursor.h"
 
-void input_process_keys(cursor_t *C);
+void input_process_keys(buffer_t *B);

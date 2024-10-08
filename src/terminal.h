@@ -10,7 +10,7 @@ typedef struct term_s {
 
 void term_init(void);
 
-void term_render(cursor_t *C);
+void term_render(buffer_t *B);
 
 void term_restore(void);
 

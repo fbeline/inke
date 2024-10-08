@@ -155,34 +155,34 @@ static i32 input_read_key(void) {
   return c;
 }
 
-static void process_insert_mode(cursor_t *C, i32 ch) {
+static void process_insert_mode(buffer_t *B, i32 ch) {
   key_func_t kfp;
   if ((kfp = get_kfp(keytabs, ch)) != NULL) {
-    kfp(C);
+    kfp(B->cursor);
     return;
   }
 
   if (ch == TAB_KEY) {
-    cursor_insert_char(C, ' ');
-    cursor_insert_char(C, ' ');
+    cursor_insert_char(B->cursor, ' ');
+    cursor_insert_char(B->cursor, ' ');
   } else if (ch >= 32 && ch <= 126) {
-    cursor_insert_char(C, ch);
+    cursor_insert_char(B->cursor, ch);
   }
 }
 
-static void process_visual_mode(cursor_t *C, i32 ch) {
+static void process_visual_mode(buffer_t *B, i32 ch) {
   key_func_t kfp;
   if ((kfp = get_kfp(keytabs_visual, ch)) != NULL) {
-    kfp(C);
+    kfp(B->cursor);
     return;
   }
   set_status_message("visual mode - cmd not found");
 }
 
-static void process_cmd_mode(cursor_t *C, i32 ch) {
+static void process_cmd_mode(buffer_t *B, i32 ch) {
   switch (ch) {
     case ENTER_KEY:
-      g_cmd_func(C, 0);
+      g_cmd_func(0);
       break;
     case BACKSPACE_KEY:
       cmdline_backspace();
@@ -195,10 +195,10 @@ static void process_cmd_mode(cursor_t *C, i32 ch) {
       break;
     default:
       if (g_mode == MODE_SEARCH && ch == (CONTROL | 'S')) {
-        g_cmd_func(C, 1);
+        g_cmd_func(1);
       }
       else if (g_mode == MODE_SEARCH && ch == (CONTROL | 'R')) {
-        g_cmd_func(C, -1);
+        g_cmd_func(-1);
       }
       else if (ch == (CONTROL | 'E')) {
         cmdline_eol();
@@ -214,12 +214,12 @@ static void process_cmd_mode(cursor_t *C, i32 ch) {
   }
 }
 
-void input_process_keys(cursor_t* C) {
+void input_process_keys(buffer_t* B) {
   i32 ch = input_read_key();
 
   if (ch == (CONTROL | 'G')) {
     if (g_mode == MODE_SEARCH)
-      isearch_abort(C);
+      isearch_abort(B->cursor);
 
     mode_cmd_clean();
     set_status_message("Quit");
@@ -228,20 +228,20 @@ void input_process_keys(cursor_t* C) {
 
   switch (g_mode) {
     case MODE_INSERT:
-      process_insert_mode(C, ch);
+      process_insert_mode(B, ch);
       break;
     case MODE_VISUAL:
-      process_visual_mode(C, ch);
+      process_visual_mode(B, ch);
       break;
     case MODE_CMD_CHAR:
-      g_cmd_func(C, ch);
+      g_cmd_func(ch);
       break;
     case MODE_SEARCH:
     case MODE_CMD:
-      process_cmd_mode(C, ch);
+      process_cmd_mode(B, ch);
       break;
   }
 
   if (g_mode == MODE_VISUAL)
-    mark_end(C);
+    mark_end(B->cursor);
 }

@@ -2,7 +2,7 @@
 
 #include "types.h"
 
-cursor_t cursor_init(editor_t* E);
+void cursor_init(cursor_t *C);
 
 void cursor_set(cursor_t* dest, cursor_t* src);
 
@@ -57,3 +57,5 @@ void cursor_paste(cursor_t *cursor);
 void cursor_undo(cursor_t* cursor);
 
 void cursor_goto(cursor_t* cursor, u32 x, u32 y);
+
+void cursor_free(cursor_t *C);

@@ -29,8 +29,9 @@ typedef size_t usize;
 #define MODE_CMD_CHAR 0x08
 #define MODE_VISUAL 0x10
 
-#define NPATH  256
-#define NBINDS 256
+#define NBUFNAME 16
+#define NPATH    256
+#define NBINDS   64
 #define CLIPBUF (1 << 16)  // 64 KB (2^16 bytes)
 #define CMDBUFSIZE 512
 
@@ -94,8 +95,14 @@ typedef struct cursor_s {
   line_t *clp;
 } cursor_t;
 
+typedef struct buffer_s {
+  char name[NBUFNAME];
+  cursor_t *cursor;
+  editor_t *editor;
+} buffer_t;
+
 typedef void (*key_func_t)(cursor_t *C);
-typedef void (*cmd_func_t)(cursor_t *C, int ch);
+typedef void (*cmd_func_t)(i32 ch);
 
 typedef struct keytab {
   i32 code;
