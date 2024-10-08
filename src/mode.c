@@ -43,10 +43,19 @@ void mode_set_exit_save(cursor_t* C) {
   g_cmd_func = mode_exit_save;
 }
 
+static void mode_cmd_open_file(cursor_t* C, i32 _ch) {
+  const char *filepath = cmdline_text();
+  // TODO: OPEN FILE
+}
+
 static void mode_cmd_ctrl_x(cursor_t* C, int ch) {
   if (ch == (CONTROL | 'C')) {
     if (C->editor->dirty) mode_set_exit_save(C);
     else g_running = false;
+  } else if (ch == (CONTROL | 'F')) {
+    cmdline_init("Find file: ");
+    g_mode = MODE_CMD;
+    g_cmd_func = mode_cmd_open_file;
   } else if (ch == (CONTROL | 'S')) {
     mode_cmd_clean();
 
