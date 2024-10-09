@@ -107,9 +107,9 @@ void cursor_bol(buffer_t *B) {
 void cursor_eol(buffer_t *B) {
   cursor_t *C = B->cursor;
   usize len = B->lp->ds->len;
-  if (len > C->max_col) {
-    C->x = C->max_col;
-    C->coloff = len - C->max_col;
+  if (len > g_window.ncol) {
+    C->x = g_window.ncol;
+    C->coloff = len - g_window.ncol;
   } else {
     C->x = len;
     C->coloff = 0;
@@ -122,7 +122,7 @@ void cursor_down(buffer_t *B) {
 
   B->lp = B->lp->next;
 
-  if (C->y < C->max_row) {
+  if (C->y < g_window.nrow) {
     C->y++;
   } else {
     C->rowoff++;
@@ -150,7 +150,7 @@ void cursor_right(buffer_t *B) {
   u32 x = raw_x(C);
   usize len = B->lp->ds->len;
 
-  if (x < len && C->x == C->max_col) {
+  if (x < len && C->x == g_window.ncol) {
     C->coloff++;
   } else if (x >= len) {
     cursor_down(B);
@@ -221,7 +221,7 @@ void cursor_move_line_up(buffer_t *B) {
   if (C->y == 0 && C->rowoff > 0) C->rowoff--;
   else C->y--;
 
-  C->x = MIN(C->max_col, prlen);
+  C->x = MIN(g_window.ncol, prlen);
   C->coloff = prlen > C->x ? prlen - C->x : 0;
 }
 
@@ -265,13 +265,13 @@ void cursor_insert_text(buffer_t *B, const char* text) {
 }
 
 void cursor_page_up(buffer_t *B) {
-  for (u16 i = 0; i < B->cursor->max_row; i ++) {
+  for (u32 i = 0; i < g_window.nrow; i ++) {
     cursor_up(B);
   }
 }
 
 void cursor_page_down(buffer_t *B) {
-  for (u16 i = 0; i < B->cursor->max_row; i ++) {
+  for (u32 i = 0; i < g_window.nrow; i ++) {
     cursor_down(B);
   }
 }
@@ -324,9 +324,9 @@ void cursor_delete_row(buffer_t *B) {
 void cursor_eof(buffer_t *B) {
   editor_t *E = B->editor;
   cursor_t *C = B->cursor;
-  if (E->row_size > C->max_row) {
-    C->y = C->max_row - 1;
-    C->rowoff = E->row_size - C->max_row;
+  if (E->row_size > g_window.nrow) {
+    C->y = g_window.nrow - 1;
+    C->rowoff = E->row_size - g_window.nrow;
   } else {
     C->y = E->row_size - 1;
     C->rowoff = 0;
@@ -356,8 +356,8 @@ void cursor_update_window_size(buffer_t *B, u16 rows, u16 cols) {
   u32 x = raw_x(B->cursor);
   u32 y = raw_y(B->cursor);
 
-  B->cursor->max_col = cols;
-  B->cursor->max_row = rows;
+  g_window.ncol = cols;
+  g_window.nrow = rows;
 
   if (x > cols) {
     B->cursor->coloff = x - cols;

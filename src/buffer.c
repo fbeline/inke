@@ -4,6 +4,7 @@
 
 #include "cursor.h"
 #include "editor.h"
+#include "globals.h"
 #include "utils.h"
 
 typedef struct bufferl_s {
@@ -36,6 +37,8 @@ void buffer_create(const char *filename) {
     bufl->next = head;
     head = bufl;
   }
+
+  g_window.buffer = head->buffer;
 }
 
 buffer_t *buffer_get(void) {

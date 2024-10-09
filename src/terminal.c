@@ -179,8 +179,8 @@ void term_init(void) {
 }
 
 void term_render(buffer_t *B) {
-  B->cursor->max_row = T.rows - 1;
-  B->cursor->max_col = T.cols;
+  g_window.ncol = T.cols;
+  g_window.nrow = T.rows - 1;
   vt_set_cursor_position(0, 0);
   vt_hide_cursor();
 

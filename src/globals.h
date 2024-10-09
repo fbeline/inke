@@ -13,6 +13,7 @@ extern cmd_func_t g_cmd_func;
 extern ds_t *g_clipbuf;
 extern mark_t g_mark;
 extern isearch_t g_isearch;
+extern window_t g_window;
 
 void globals_init(void);
 

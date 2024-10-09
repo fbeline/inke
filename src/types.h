@@ -89,8 +89,7 @@ typedef struct mark_s {
 
 typedef struct cursor_s {
   u32 x, y;
-  u16 coloff, rowoff;
-  u16 max_col, max_row;
+  u32 coloff, rowoff;
 } cursor_t;
 
 typedef struct buffer_s {
@@ -99,6 +98,12 @@ typedef struct buffer_s {
   cursor_t *cursor;
   editor_t *editor;
 } buffer_t;
+
+typedef struct window_s {
+  u32 ncol;
+  u32 nrow;
+  buffer_t *buffer;
+} window_t;
 
 typedef void (*key_func_t)(buffer_t *B);
 typedef void (*cmd_func_t)(i32 ch);
