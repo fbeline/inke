@@ -1,12 +1,12 @@
 feat:
-  - open file cmd
+  - multi buffer
   - cmd auto complete
   - filesystem navigation tree
   - search/replace
   - auto ident
-  - multi buffer
   - ident line / region shortcut
 
 bugs:
+  - screen resize first frame render
   - fix mouse click on tmux
   - region kill cursor re-position
