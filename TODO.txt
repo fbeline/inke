@@ -1,5 +1,4 @@
 feat:
-  - multi buffer
   - cmd auto complete
   - filesystem navigation tree
   - search/replace

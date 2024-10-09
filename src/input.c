@@ -102,7 +102,7 @@ static i32 input_read_key(void) {
     return TAB_KEY;
 
   if (c == '\x1b') {
-    char seq[3];
+    char seq[5];
 
     if (read(STDIN_FILENO, &seq[0], 1) != 1) return '\x1b';
 
@@ -119,6 +119,18 @@ static i32 input_read_key(void) {
             case '6': return PAGE_DOWN;
             case '7': return HOME_KEY;
             case '8': return END_KEY;
+          }
+        } else if (seq[2] == ';') {
+          if (read(STDIN_FILENO, &seq[3], 1) != 1) return '\x1b';
+          if (read(STDIN_FILENO, &seq[4], 1) != 1) return '\x1b';
+
+          if (seq[3] == '5') {
+            switch (seq[4]) {
+              case 'A': return CONTROL | ARROW_UP;
+              case 'B': return CONTROL | ARROW_DOWN;
+              case 'C': return CONTROL | ARROW_RIGHT;
+              case 'D': return CONTROL | ARROW_LEFT;
+            }
           }
         }
       } else {
@@ -143,13 +155,14 @@ static i32 input_read_key(void) {
   }
 
   if (c >= 0x00 && c <= 0x1F && c != ENTER_KEY) {
-    if (c == 0x1F)
-      return CONTROL | '/';
-
-    if (c == 0x00)
-      return CONTROL | ' ';
-
-    return CONTROL | (c + '@');
+    switch (c) {
+      case 0x1F:
+        return CONTROL | '/';
+      case 0x00:
+        return CONTROL | ' ';
+      default:
+        return CONTROL | (c + '@');
+    }
   }
 
   return c;

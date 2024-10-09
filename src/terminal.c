@@ -56,7 +56,7 @@ static void term_draw_status_bar(term_t *T, buffer_t *B) {
 
   i32 len = snprintf(status,
                      T->cols + 1, "%.20s %s%*s%zu,%zu",
-                     B->editor->filename,
+                     B->name,
                      B->editor->dirty ? "[+]" : "",
                      (i32)T->cols - 20,
                      "",

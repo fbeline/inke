@@ -64,13 +64,22 @@ static void mode_set_find_file(void) {
   cmdline_insert('/');
 }
 
-static void mode_cmd_ctrl_x(int ch) {
+static void mode_cmd_ctrl_x(i32 ch) {
   buffer_t *B = g_window.buffer;
   if (ch == (CONTROL | 'C')) {
     if (B->editor->dirty) mode_set_exit_save();
     else g_running = false;
   } else if (ch == (CONTROL | 'F')) {
     mode_set_find_file();
+  } else if (ch == (CONTROL | ARROW_RIGHT)) {
+    buffer_next();
+    mode_cmd_clean();
+  } else if (ch == (CONTROL | ARROW_LEFT)) {
+    buffer_prev();
+    mode_cmd_clean();
+  } else if (ch == 'k') {
+    buffer_free();
+    mode_cmd_clean();
   } else if (ch == (CONTROL | 'S')) {
     mode_cmd_clean();
 

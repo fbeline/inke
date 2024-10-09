@@ -1,6 +1,7 @@
 #include "buffer.h"
 
-#include "stdlib.h"
+#include <stdlib.h>
+#include <string.h>
 
 #include "cursor.h"
 #include "editor.h"
@@ -16,6 +17,15 @@ typedef struct bufferl_s {
 
 static bufferl_t *head = NULL;
 
+static void buffer_set_name(buffer_t *buffer, const char *filename) {
+  const char* name = strrchr(filename, '/');
+  if (name) {
+    strncpy(buffer->name, name + 1, NBUFNAME);
+  } else {
+    strncpy(buffer->name, filename, NBUFNAME);
+  }
+}
+
 void buffer_create(const char *filename) {
   bufferl_t *bufl;
   if ((bufl = malloc(sizeof(bufferl_t))) == NULL) DIE("OUT OF MEMMORY");
@@ -25,6 +35,7 @@ void buffer_create(const char *filename) {
 
   editor_init(bufl->buffer->editor, filename);
   cursor_init(bufl->buffer->cursor);
+  buffer_set_name(bufl->buffer, filename);
 
   bufl->buffer->lp = bufl->buffer->editor->lines;
 
@@ -34,6 +45,7 @@ void buffer_create(const char *filename) {
     head = bufl;
   } else {
     bufl->prev = head->prev;
+    bufl->prev->next = bufl;
     bufl->next = head;
     head->prev = bufl;
     head = bufl;
@@ -59,13 +71,17 @@ buffer_t *buffer_prev(void) {
 }
 
 void buffer_free(void) {
+  bufferl_t *aux = head;
+
   if (head == head->next && head == head->prev) {
     exit(0);
   }
 
-  bufferl_t *aux = head;
-  head = aux->next;
-  head->prev = aux->prev;
+  head->next->prev = head->prev;
+  head->prev->next = head->next;
+  aux = head;
+  head = head->next;
+
   g_window.buffer = head->buffer;
 
   cursor_free(aux->buffer->cursor);
