@@ -49,9 +49,9 @@ void undo_free(undo_t* undo) {
 static void undo_line_delete(buffer_t *B, undo_t *undo) {
   cursor_t *C = B->cursor;
   usize y = C->y + C->rowoff;
-  C->clp = editor_insert_row_with_data_at(B->editor, y, undo->strdata);
+  B->lp = editor_insert_row_with_data_at(B->editor, y, undo->strdata);
 
-  if (y == 0) B->editor->lines = C->clp;
+  if (y == 0) B->editor->lines = B->lp;
 }
 
 static void undo_undo(buffer_t *B, undo_t *u) {

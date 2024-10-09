@@ -91,11 +91,11 @@ typedef struct cursor_s {
   u32 x, y;
   u16 coloff, rowoff;
   u16 max_col, max_row;
-  line_t *clp;
 } cursor_t;
 
 typedef struct buffer_s {
   char name[NBUFNAME];
+  line_t *lp;
   cursor_t *cursor;
   editor_t *editor;
 } buffer_t;

@@ -41,7 +41,7 @@ void mark_start(buffer_t *B) {
   g_mode = MODE_VISUAL;
   set_status_message("visual mode");
 
-  g_mark.start_lp = B->cursor->clp;
+  g_mark.start_lp = B->lp;
   g_mark.start_offset = B->cursor->x + B->cursor->coloff;
 
   g_mark.end_lp = g_mark.start_lp;
@@ -60,7 +60,7 @@ static i8 line_compare(line_t *src, line_t *target) {
 }
 
 void mark_end(buffer_t *B) {
-  g_mark.end_lp = B->cursor->clp;
+  g_mark.end_lp = B->lp;
   g_mark.end_offset = B->cursor->x + B->cursor->coloff;
 }
 

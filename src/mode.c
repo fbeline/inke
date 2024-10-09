@@ -79,7 +79,7 @@ static void mode_cmd_ctrl_x(int ch) {
       set_status_message("Error: Could not save file %.20s", B->editor->filename);
 
     cursor_t *C = buffer_get()->cursor;
-    if (C->x + C->coloff > C->clp->ds->len) {
+    if (C->x + C->coloff > B->lp->ds->len) {
       cursor_eol(B);
     }
   }

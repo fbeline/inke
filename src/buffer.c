@@ -25,11 +25,11 @@ void buffer_create(const char *filename) {
   editor_init(bufl->buffer->editor, filename);
   cursor_init(bufl->buffer->cursor);
 
-  bufl->buffer->cursor->clp = bufl->buffer->editor->lines;
+  bufl->buffer->lp = bufl->buffer->editor->lines;
 
   if (head == NULL) {
-    bufl->next = NULL;
-    bufl->prev = NULL;
+    bufl->next = bufl;
+    bufl->prev = bufl;
     head = bufl;
   } else {
     bufl->prev = head->prev;
