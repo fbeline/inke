@@ -6,18 +6,16 @@
 
 #include "buffer.h"
 #include "globals.h"
-#include "editor.h"
 #include "cursor.h"
 #include "input.h"
 #include "terminal.h"
 
 static void handle_sigwinch(int unused __attribute__((unused))) {
   u16 rows, cols;
-  buffer_t *buffer = buffer_get();
   term_update_size();
   term_get_size(&rows, &cols);
-  cursor_update_window_size(buffer, rows - 1, cols);
-  term_render(buffer);
+  cursor_update_window_size(g_window.buffer, rows - 1, cols);
+  term_render(g_window.buffer);
 }
 
 static void init(const char* filename) {
@@ -39,9 +37,8 @@ int main(int argc, char **argv) {
   for(;;) {
     if (!g_running) break;
 
-    buffer_t *buffer = buffer_get();
-    term_render(buffer);
-    input_process_keys(buffer);
+    term_render(g_window.buffer);
+    input_process_keys(g_window.buffer);
   }
 
   term_restore();

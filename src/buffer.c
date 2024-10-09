@@ -35,6 +35,7 @@ void buffer_create(const char *filename) {
   } else {
     bufl->prev = head->prev;
     bufl->next = head;
+    head->prev = bufl;
     head = bufl;
   }
 
@@ -46,17 +47,26 @@ buffer_t *buffer_get(void) {
 }
 
 buffer_t *buffer_next(void) {
-  return NULL;
+  head = head->next;
+  g_window.buffer = head->buffer;
+  return head->buffer;
 }
 
 buffer_t *buffer_prev(void) {
-  return NULL;
+  head = head->prev;
+  g_window.buffer = head->buffer;
+  return head->buffer;
 }
 
 void buffer_free(void) {
+  if (head == head->next && head == head->prev) {
+    exit(0);
+  }
+
   bufferl_t *aux = head;
   head = aux->next;
   head->prev = aux->prev;
+  g_window.buffer = head->buffer;
 
   cursor_free(aux->buffer->cursor);
   editor_free(aux->buffer->editor);

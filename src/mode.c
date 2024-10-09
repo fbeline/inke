@@ -8,7 +8,6 @@
 #include "cursor.h"
 #include "cmdline.h"
 #include "globals.h"
-#include "isearch.h"
 #include "io.h"
 #include "utils.h"
 
@@ -25,7 +24,7 @@ static void mode_exit_save(int ch) {
   switch (ch) {
     case 'y':
       mode_cmd_clean();
-      editor_t *E = buffer_get()->editor;
+      editor_t *E = g_window.buffer->editor;
       if (io_write_buffer(E) == 0) g_running = false;
       else set_status_message("Error: Could not save file %.20s", E->filename);
 
@@ -66,7 +65,7 @@ static void mode_set_find_file(void) {
 }
 
 static void mode_cmd_ctrl_x(int ch) {
-  buffer_t *B = buffer_get();
+  buffer_t *B = g_window.buffer;
   if (ch == (CONTROL | 'C')) {
     if (B->editor->dirty) mode_set_exit_save();
     else g_running = false;
@@ -78,7 +77,7 @@ static void mode_cmd_ctrl_x(int ch) {
     if (io_write_buffer(B->editor) != 0)
       set_status_message("Error: Could not save file %.20s", B->editor->filename);
 
-    cursor_t *C = buffer_get()->cursor;
+    cursor_t *C = g_window.buffer->cursor;
     if (C->x + C->coloff > B->lp->ds->len) {
       cursor_eol(B);
     }
@@ -89,7 +88,7 @@ static void mode_cmd_gotol(i32 ch) {
   const char *snum = cmdline_text();
   i32 line;
   if (sscanf(snum, "%d", &line) == 1) {
-    cursor_goto(buffer_get(), 0, line);
+    cursor_goto(g_window.buffer, 0, line);
     mode_cmd_clean();
   }
 }

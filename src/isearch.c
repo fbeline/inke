@@ -64,17 +64,16 @@ static void isearch_return(buffer_t *B) {
 }
 
 void isearch(i32 opt) {
-  buffer_t *B = buffer_get();
   const char *cmd = cmdline_text();
   switch (opt) {
     case -1:
-      isearch_search(B, cmd, SEARCH_BACKWARD);
+      isearch_search(g_window.buffer, cmd, SEARCH_BACKWARD);
       break;
     case 0:
-      isearch_return(B);
+      isearch_return(g_window.buffer);
       break;
     case 1:
-      isearch_search(B, cmd, SEARCH_FORWARD);
+      isearch_search(g_window.buffer, cmd, SEARCH_FORWARD);
       break;
   }
 }
