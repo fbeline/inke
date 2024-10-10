@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "cmdline.h"
+#include "prompt.h"
 #include "cursor.h"
 #include "globals.h"
 
@@ -63,7 +63,7 @@ static void isearch_return(buffer_t *B) {
 }
 
 void isearch(i32 opt) {
-  const char *cmd = cmdline_text();
+  const char *cmd = prompt_text();
   switch (opt) {
     case -1:
       isearch_search(g_window.buffer, cmd, SEARCH_BACKWARD);
@@ -85,7 +85,7 @@ void isearch_abort(buffer_t *B) {
 
 void isearch_start(buffer_t *B) {
   obuffer = *B;
-  cmdline_init("I-Search: ");
+  prompt_init("I-Search: ");
   g_mode = MODE_SEARCH;
   g_cmd_func = isearch;
   g_isearch = (isearch_t) {.lp = NULL, .qlen = 0, .x = 0};

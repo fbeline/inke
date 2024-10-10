@@ -1,17 +1,21 @@
-#include "cmdline.h"
+#include "prompt.h"
 
 #include <string.h>
 
 #include "ds.h"
 #include "utils.h"
 
-static cmdline_t line = {
+static prompt_t line = {
   .min_x = 0,
   .x = 0,
   .ds = NULL
 };
 
-void cmdline_clean(void) {
+u32 prompt_x(void) {
+  return line.x;
+}
+
+void prompt_clean(void) {
   if (line.ds == NULL)
     line.ds = dsempty();
 
@@ -21,17 +25,17 @@ void cmdline_clean(void) {
   line.min_x = 0;
 }
 
-void cmdline_cat(const char *str) {
+void prompt_cat(const char *str) {
   dscat(line.ds, str);
   line.x += strlen(str);
 }
 
-void cmdline_insert(char ch) {
+void prompt_insert(char ch) {
   dsichar(line.ds, line.x, ch);
   line.x++;
 }
 
-void cmdline_backspace(void) {
+void prompt_backspace(void) {
   if (line.x == line.min_x)
     return;
 
@@ -44,11 +48,11 @@ void cmdline_backspace(void) {
   line.ds->buf[line.ds->len] = '\0';
 }
 
-void cmdline_init(const char *msg) {
+void prompt_init(const char *msg) {
   if (line.ds == NULL)
     line.ds = dsempty();
 
-  cmdline_clean();
+  prompt_clean();
 
   dscat(line.ds, msg);
 
@@ -56,33 +60,33 @@ void cmdline_init(const char *msg) {
   line.min_x = line.x;
 }
 
-cmdline_t *cmdline(void) {
+prompt_t *prompt(void) {
   return &line;
 }
 
-void cmdline_left(void) {
+void prompt_left(void) {
   if (line.x == line.min_x)
     return;
 
   line.x--;
 }
 
-void cmdline_right(void) {
+void prompt_right(void) {
   if (line.x == line.ds->len)
     return;
 
   line.x++;
 }
 
-void cmdline_eol(void) {
+void prompt_eol(void) {
   line.x = line.ds->len;
 }
 
-void cmdline_bol(void) {
+void prompt_bol(void) {
   line.x = line.min_x;
 }
 
-void cmdline_del_before(void) {
+void prompt_del_before(void) {
   if (line.x == line.min_x)
     return;
 
@@ -95,6 +99,10 @@ void cmdline_del_before(void) {
   line.ds->len -= diff;
 }
 
-const char *cmdline_text(void) {
+const char *prompt_full_text(void) {
+  return line.ds->buf;
+}
+
+const char *prompt_text(void) {
   return &line.ds->buf[line.min_x];
 }

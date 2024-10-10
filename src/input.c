@@ -6,7 +6,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "cmdline.h"
+#include "prompt.h"
 #include "cursor.h"
 #include "globals.h"
 #include "isearch.h"
@@ -198,13 +198,13 @@ static void process_cmd_mode(buffer_t *B, i32 ch) {
       g_cmd_func(0);
       break;
     case BACKSPACE_KEY:
-      cmdline_backspace();
+      prompt_backspace();
       break;
     case ARROW_LEFT:
-      cmdline_left();
+      prompt_left();
       break;
     case ARROW_RIGHT:
-      cmdline_right();
+      prompt_right();
       break;
     default:
       if (g_mode == MODE_SEARCH && ch == (CONTROL | 'S')) {
@@ -214,15 +214,15 @@ static void process_cmd_mode(buffer_t *B, i32 ch) {
         g_cmd_func(-1);
       }
       else if (ch == (CONTROL | 'E')) {
-        cmdline_eol();
+        prompt_eol();
       }
       else if (ch == (CONTROL | 'A')) {
-        cmdline_bol();
+        prompt_bol();
       }
       else if (ch == (CONTROL | 'U')) {
-        cmdline_del_before();
+        prompt_del_before();
       } else if (ch >= 32 && ch <= 126) {
-        cmdline_insert(ch);
+        prompt_insert(ch);
       }
   }
 }

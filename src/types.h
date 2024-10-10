@@ -53,11 +53,11 @@ enum keys {
   DEL_KEY
 };
 
-typedef struct cmdline_s {
+typedef struct prompt_s {
   u32 min_x;
   u32 x;
   ds_t *ds;
-} cmdline_t;
+} prompt_t;
 
 typedef struct line_s {
   struct line_s *next;

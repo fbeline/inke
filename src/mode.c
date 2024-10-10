@@ -6,7 +6,7 @@
 
 #include "buffer.h"
 #include "cursor.h"
-#include "cmdline.h"
+#include "prompt.h"
 #include "globals.h"
 #include "io.h"
 #include "utils.h"
@@ -46,7 +46,7 @@ void mode_set_exit_save() {
 }
 
 static void mode_cmd_open_file(i32 _ch) {
-  const char *filename = cmdline_text();
+  const char *filename = prompt_text();
   if (access(filename, F_OK) != 0) return;
   buffer_create(filename);
   mode_cmd_clean();
@@ -59,9 +59,9 @@ static void mode_set_find_file(void) {
   char cwd[NPATH];
   if (getcwd(cwd, sizeof(cwd)) == NULL) DIE("Error getcwd");
 
-  cmdline_init("Find file: ");
-  cmdline_cat(cwd);
-  cmdline_insert('/');
+  prompt_init("Find file: ");
+  prompt_cat(cwd);
+  prompt_insert('/');
 }
 
 static void mode_cmd_ctrl_x(i32 ch) {
@@ -94,7 +94,7 @@ static void mode_cmd_ctrl_x(i32 ch) {
 }
 
 static void mode_cmd_gotol(i32 ch) {
-  const char *snum = cmdline_text();
+  const char *snum = prompt_text();
   i32 line;
   if (sscanf(snum, "%d", &line) == 1) {
     cursor_goto(g_window.buffer, 0, line);
@@ -110,7 +110,7 @@ void mode_set_ctrl_x(buffer_t *B) {
 }
 
 void mode_set_gotol(buffer_t *B) {
-  cmdline_init("goto line: ");
+  prompt_init("goto line: ");
   g_mode = MODE_CMD;
   g_cmd_func = mode_cmd_gotol;
 }
