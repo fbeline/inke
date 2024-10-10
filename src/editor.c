@@ -244,7 +244,6 @@ static void editor_new_file(const char *filename, editor_t *E) {
   strcpy(E->filename, filename);
   E->nlines = 1;
   E->lines = lalloc(BLOCK_SIZE);
-  E->new_file = true;
 }
 
 int editor_open_file(const char *filename, editor_t *E) {
@@ -291,7 +290,6 @@ int editor_open_file(const char *filename, editor_t *E) {
   strcpy(E->filename, filename);
 
   if (nlines == 0) editor_new_file(filename, E);
-  E->new_file = false;
 
   return 0;
 }

@@ -68,7 +68,6 @@ typedef struct line_s {
 
 typedef struct editor_s {
   char filename[NPATH];
-  bool new_file;
   usize nlines;
   line_t *lines;
 } editor_t;
