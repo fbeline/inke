@@ -18,12 +18,17 @@ typedef struct bufferl_s {
 static bufferl_t *head = NULL;
 
 static void buffer_set_name(buffer_t *buffer, const char *filename) {
+  usize len = 0;
   const char* name = strrchr(filename, '/');
   if (name) {
-    strncpy(buffer->name, name + 1, NBUFNAME);
+    len = MIN(strlen(name + 1), NBUFNAME - 1);
+    memcpy(buffer->name, name + 1, len);
   } else {
-    strncpy(buffer->name, filename, NBUFNAME);
+    len = MIN(strlen(filename), NBUFNAME - 1);
+    memcpy(buffer->name, filename, len);
+
   }
+  buffer->name[len] = '\0';
 }
 
 void buffer_create(const char *filename) {
