@@ -241,7 +241,6 @@ void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
 }
 
 static void editor_new_file(const char *filename, editor_t *E) {
-  strcpy(E->filename, filename);
   E->nlines = 1;
   E->lines = lalloc(BLOCK_SIZE);
 }
@@ -287,7 +286,6 @@ int editor_open_file(const char *filename, editor_t *E) {
   fclose(fp);
 
   E->nlines = nlines;
-  strcpy(E->filename, filename);
 
   if (nlines == 0) editor_new_file(filename, E);
 

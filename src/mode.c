@@ -24,9 +24,9 @@ static void mode_exit_save(int ch) {
   switch (ch) {
     case 'y':
       mode_cmd_clean();
-      editor_t *E = g_window.buffer->editor;
-      if (io_write_buffer(E) == 0) g_running = false;
-      else set_status_message("Error: Could not save file %.20s", E->filename);
+      if (io_write_buffer(g_window.buffer) == 0) g_running = false;
+      else set_status_message("Error: Could not save file %.20s",
+                              g_window.buffer->filename);
 
       break;
     case 'n':
@@ -83,8 +83,8 @@ static void mode_cmd_ctrl_x(i32 ch) {
   } else if (ch == (CONTROL | 'S')) {
     mode_cmd_clean();
 
-    if (io_write_buffer(B->editor) != 0)
-      set_status_message("Error: Could not save file %.20s", B->editor->filename);
+    if (io_write_buffer(B) != 0)
+      set_status_message("Error: Could not save file %.20s", B->filename);
 
     cursor_t *C = g_window.buffer->cursor;
     if (C->x + C->coloff > B->lp->ds->len) {

@@ -67,7 +67,6 @@ typedef struct line_s {
 } line_t;
 
 typedef struct editor_s {
-  char filename[NPATH];
   usize nlines;
   line_t *lines;
 } editor_t;
@@ -91,6 +90,7 @@ typedef struct cursor_s {
 } cursor_t;
 
 typedef struct buffer_s {
+  char filename[NPATH];
   char name[NBUFNAME];
   line_t *lp;
   u32 dirty;
