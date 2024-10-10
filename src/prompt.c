@@ -3,7 +3,12 @@
 #include <string.h>
 
 #include "ds.h"
-#include "utils.h"
+
+typedef struct prompt_s {
+  u32 min_x;
+  u32 x;
+  ds_t *ds;
+} prompt_t;
 
 static prompt_t line = {
   .min_x = 0,

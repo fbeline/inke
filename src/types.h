@@ -53,12 +53,6 @@ enum keys {
   DEL_KEY
 };
 
-typedef struct prompt_s {
-  u32 min_x;
-  u32 x;
-  ds_t *ds;
-} prompt_t;
-
 typedef struct line_s {
   struct line_s *next;
   struct line_s *prev;
