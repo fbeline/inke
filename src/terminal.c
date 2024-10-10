@@ -60,8 +60,8 @@ static void term_draw_status_bar(term_t *T, buffer_t *B) {
                      B->dirty > 0 ? "[+]" : "",
                      (i32)T->cols - 20,
                      "",
-                     B->cursor->x + B->cursor->coloff + 1lu,
-                     B->cursor->y + B->cursor->rowoff + 1lu
+                     B->cursor.x + B->cursor.coloff + 1lu,
+                     B->cursor.y + B->cursor.rowoff + 1lu
                      );
 
   vt_puts(status);
@@ -130,8 +130,8 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
 
 static void term_draw(term_t *T, buffer_t *B) {
   usize y;
-  line_t *lp = B->editor->lines;
-  cursor_t *C = B->cursor;
+  line_t *lp = B->editor.lines;
+  cursor_t *C = &B->cursor;
 
   for (usize i = 0; i < C->rowoff && lp->next != NULL; i++) {
     if (g_mode == MODE_VISUAL && g_mark.start_lp == lp)
@@ -189,7 +189,7 @@ void term_render(buffer_t *B) {
   if (g_mode & (MODE_CMD | MODE_SEARCH))
     vt_set_cursor_position(T.rows + 2, cmdline()->x + 1);
   else
-    vt_set_cursor_position(B->cursor->y + 1, B->cursor->x + 1);
+    vt_set_cursor_position(B->cursor.y + 1, B->cursor.x + 1);
 
   if (g_cursor_vis) vt_show_cursor();
 

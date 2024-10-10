@@ -86,7 +86,7 @@ static void mode_cmd_ctrl_x(i32 ch) {
     if (io_write_buffer(B) != 0)
       set_status_message("Error: Could not save file %.20s", B->filename);
 
-    cursor_t *C = g_window.buffer->cursor;
+    cursor_t *C = &g_window.buffer->cursor;
     if (C->x + C->coloff > B->lp->ds->len) {
       cursor_eol(B);
     }

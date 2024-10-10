@@ -42,13 +42,10 @@ static u32 raw_y(cursor_t* C) {
 }
 
 void cursor_set(buffer_t *dest, buffer_t* src) {
-  dest->cursor->x = src->cursor->x;
-  dest->cursor->y = src->cursor->y;
-  dest->cursor->coloff = src->cursor->coloff;
-  dest->cursor->rowoff = src->cursor->rowoff;
+  dest->cursor = src->cursor;
 
-  dest->lp = dest->editor->lines;
-  u32 max = dest->cursor->y + dest->cursor->rowoff;
+  dest->lp = dest->editor.lines;
+  u32 max = raw_x(&dest->cursor);
   for (u32 i = 0; i < max; i++) {
     dest->lp = dest->lp->next;
   }
@@ -57,8 +54,8 @@ void cursor_set(buffer_t *dest, buffer_t* src) {
 static void cursor_set_lp_as(buffer_t *B, line_t *lp, u32 x) {
   if (lp == NULL) return;
 
-  cursor_t *C = B->cursor;
-  B->lp = B->editor->lines;
+  cursor_t *C = &B->cursor;
+  B->lp = B->editor.lines;
   C->y = 0;
   C->x = 0;
   C->coloff = 0;
@@ -76,7 +73,7 @@ static void cursor_set_lp_as(buffer_t *B, line_t *lp, u32 x) {
 void cursor_region_text(buffer_t *B) {
   if (g_mode != MODE_VISUAL) return;
 
-  editor_text_between(B->editor, mark_get(), g_clipbuf);
+  editor_text_between(&B->editor, mark_get(), g_clipbuf);
 
   g_mode = MODE_INSERT;
   clear_status_message();
@@ -86,7 +83,7 @@ void cursor_region_kill(buffer_t *B) {
   if (g_mode != MODE_VISUAL) return;
 
   mark_t mark = mark_get();
-  editor_kill_between(B->editor, mark, g_clipbuf);
+  editor_kill_between(&B->editor, mark, g_clipbuf);
 
   cursor_set_lp_as(B, mark.start_lp, mark.start_offset);
   undo_push(CUT, B, g_clipbuf->buf);
@@ -98,16 +95,16 @@ void cursor_region_kill(buffer_t *B) {
 }
 
 char cursor_char(buffer_t *B) {
-  return editor_char_at(B->lp, raw_x(B->cursor));
+  return editor_char_at(B->lp, raw_x(&B->cursor));
 }
 
 void cursor_bol(buffer_t *B) {
-  B->cursor->x = 0;
-  B->cursor->coloff = 0;
+  B->cursor.x = 0;
+  B->cursor.coloff = 0;
 }
 
 void cursor_eol(buffer_t *B) {
-  cursor_t *C = B->cursor;
+  cursor_t *C = &B->cursor;
   usize len = B->lp->ds->len;
   if (len > g_window.ncol) {
     C->x = g_window.ncol;
@@ -119,7 +116,7 @@ void cursor_eol(buffer_t *B) {
 }
 
 void cursor_down(buffer_t *B) {
-  cursor_t *C = B->cursor;
+  cursor_t *C = &B->cursor;
   if (B->lp->next == NULL) return;
 
   B->lp = B->lp->next;
@@ -134,7 +131,7 @@ void cursor_down(buffer_t *B) {
 }
 
 void cursor_up(buffer_t *B) {
-  cursor_t *C = B->cursor;
+  cursor_t *C = &B->cursor;
   if (raw_y(C) <= 0 || B->lp->prev == NULL) return;
   B->lp = B->lp->prev;
 
@@ -148,7 +145,7 @@ void cursor_up(buffer_t *B) {
 }
 
 void cursor_right(buffer_t *B) {
-  cursor_t *C = B->cursor;
+  cursor_t *C = &B->cursor;
   u32 x = raw_x(C);
   usize len = B->lp->ds->len;
 
@@ -163,24 +160,24 @@ void cursor_right(buffer_t *B) {
 }
 
 void cursor_left(buffer_t *B) {
-  u32 x = raw_x(B->cursor);
-  u32 y = raw_y(B->cursor);
+  u32 x = raw_x(&B->cursor);
+  u32 y = raw_y(&B->cursor);
   if (x == 0 && y == 0) {
     return;
   } else if (x == 0 && y > 0) {
     cursor_up(B);
     cursor_eol(B);
-  } else if (B->cursor->x == 0 && B->cursor->coloff > 0) {
-    B->cursor->coloff--;
+  } else if (B->cursor.x == 0 && B->cursor.coloff > 0) {
+    B->cursor.coloff--;
   } else {
-    B->cursor->x--;
+    B->cursor.x--;
   }
 }
 
 void cursor_break_line(buffer_t *B) {
-  u32 x = raw_x(B->cursor);
+  u32 x = raw_x(&B->cursor);
 
-  editor_break_line(B->editor, B->lp, x);
+  editor_break_line(&B->editor, B->lp, x);
   cursor_down(B);
   cursor_bol(B);
 
@@ -190,35 +187,35 @@ void cursor_break_line(buffer_t *B) {
 }
 
 void cursor_move_word_forward(buffer_t *B) {
-  usize lastline = B->editor->nlines - 1;
-  u32 x = raw_x(B->cursor);
+  usize lastline = B->editor.nlines - 1;
+  u32 x = raw_x(&B->cursor);
   while(!word_forward_stop(B->lp->ds->buf, x)) {
-    if (raw_y(B->cursor) == lastline && x >= B->lp->ds->len)
+    if (raw_y(&B->cursor) == lastline && x >= B->lp->ds->len)
       return;
     cursor_right(B);
-    x = raw_x(B->cursor);
+    x = raw_x(&B->cursor);
   }
   cursor_right(B);
 }
 
 void cursor_move_word_backward(buffer_t *B) {
   cursor_left(B);
-  u32 x = raw_x(B->cursor);
+  u32 x = raw_x(&B->cursor);
   while(!word_backward_stop(B->lp->ds->buf, x)) {
-    if (raw_y(B->cursor) == 0 && x == 0)
+    if (raw_y(&B->cursor) == 0 && x == 0)
       break;
     cursor_left(B);
-    x = raw_x(B->cursor);
+    x = raw_x(&B->cursor);
   }
 }
 
 void cursor_move_line_up(buffer_t *B) {
-  cursor_t *C = B->cursor;
+  cursor_t *C = &B->cursor;
   if (B->lp->prev == NULL) return;
 
   line_t* lp;
   usize prlen = B->lp->prev->ds->len;
-  if ((lp = editor_move_line_up(B->editor, B->lp)) == NULL) return;
+  if ((lp = editor_move_line_up(&B->editor, B->lp)) == NULL) return;
 
   B->lp = lp;
 
@@ -232,7 +229,7 @@ void cursor_move_line_up(buffer_t *B) {
 }
 
 void cursor_remove_char(buffer_t *B) {
-  cursor_t *C = B->cursor;
+  cursor_t *C = &B->cursor;
   u32 x = raw_x(C);
   u32 y = raw_y(C);
   if (x == 0 && y == 0) return;
@@ -256,7 +253,7 @@ void cursor_remove_char(buffer_t *B) {
 }
 
 void cursor_insert_char(buffer_t *B, int ch) {
-  editor_insert_char_at(B->editor, B->lp, raw_x(B->cursor), ch);
+  editor_insert_char_at(&B->editor, B->lp, raw_x(&B->cursor), ch);
   cursor_right(B);
   B->dirty++;
 
@@ -285,7 +282,7 @@ void cursor_page_down(buffer_t *B) {
 }
 
 void cursor_delete_forward(buffer_t *B) {
-  cursor_t *C = B->cursor;
+  cursor_t *C = &B->cursor;
   u32 x = raw_x(C);
 
   if (x == 0 || B->lp->ds->len == 0) {
@@ -299,7 +296,7 @@ void cursor_delete_forward(buffer_t *B) {
     .end_lp = B->lp,
     .end_offset = B->lp->ds->len
   };
-  editor_text_between(B->editor, mark, g_clipbuf);
+  editor_text_between(&B->editor, mark, g_clipbuf);
   undo_push(DELETE_FORWARD, B, g_clipbuf->buf);
 
   editor_delete_forward(B->lp, x);
@@ -308,7 +305,7 @@ void cursor_delete_forward(buffer_t *B) {
 }
 
 void cursor_delete_row(buffer_t *B) {
-  cursor_t *C = B->cursor;
+  cursor_t *C = &B->cursor;
   line_t *lp = NULL;
   g_clipbuf->buf[0] = '\0';
   g_clipbuf->len = 0;
@@ -325,7 +322,7 @@ void cursor_delete_row(buffer_t *B) {
     lp = B->lp;
   }
 
-  editor_delete_lines(B->editor, B->lp, 1);
+  editor_delete_lines(&B->editor, B->lp, 1);
   B->lp = lp;
 
   if (raw_x(C) > B->lp->ds->len) cursor_eol(B);
@@ -334,8 +331,8 @@ void cursor_delete_row(buffer_t *B) {
 }
 
 void cursor_eof(buffer_t *B) {
-  editor_t *E = B->editor;
-  cursor_t *C = B->cursor;
+  editor_t *E = &B->editor;
+  cursor_t *C = &B->cursor;
   if (E->nlines > g_window.nrow) {
     C->y = g_window.nrow - 1;
     C->rowoff = E->nlines - g_window.nrow;
@@ -350,8 +347,8 @@ void cursor_eof(buffer_t *B) {
 
 void cursor_bof(buffer_t *B) {
   cursor_bol(B);
-  B->cursor->y = 0;
-  B->cursor->rowoff = 0;
+  B->cursor.y = 0;
+  B->cursor.rowoff = 0;
   while(B->lp->prev != NULL)
     B->lp = B->lp->prev;
 }
@@ -365,19 +362,19 @@ void cursor_paste(buffer_t *B) {
 }
 
 void cursor_update_window_size(buffer_t *B, u16 rows, u16 cols) {
-  u32 x = raw_x(B->cursor);
-  u32 y = raw_y(B->cursor);
+  u32 x = raw_x(&B->cursor);
+  u32 y = raw_y(&B->cursor);
 
   g_window.ncol = cols;
   g_window.nrow = rows;
 
   if (x > cols) {
-    B->cursor->coloff = x - cols;
-    B->cursor->x = cols;
+    B->cursor.coloff = x - cols;
+    B->cursor.x = cols;
   }
   if (y > rows) {
-    B->cursor->rowoff = y - rows;
-    B->cursor->y = rows;
+    B->cursor.rowoff = y - rows;
+    B->cursor.y = rows;
   }
 }
 

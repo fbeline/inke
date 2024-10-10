@@ -20,12 +20,12 @@ static i32 io_file_write(const char* filename, const char* buf) {
 }
 
 i32 io_write_buffer(buffer_t* B) {
-  ds_t* ds = editor_rows_to_string(B->editor->lines);
+  ds_t* ds = editor_rows_to_string(B->editor.lines);
 
   if (io_file_write(B->filename, ds->buf) != 0) return 1;
 
   set_status_message("\"%s\" [unix] %dL, %dB written",
-                     B->filename, B->editor->nlines, ds->len);
+                     B->filename, B->editor.nlines, ds->len);
 
   dsfree(ds);
 

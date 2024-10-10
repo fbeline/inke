@@ -37,17 +37,15 @@ void buffer_create(const char *filename) {
   bufferl_t *bufl;
   if ((bufl = malloc(sizeof(bufferl_t))) == NULL) DIE("OUT OF MEMMORY");
   if ((bufl->buffer = malloc(sizeof(buffer_t))) == NULL) DIE("OUT OF MEMMORY");
-  if ((bufl->buffer->editor = malloc(sizeof(editor_t))) == NULL) DIE("OUT OF MEMMORY");
-  if ((bufl->buffer->cursor = malloc(sizeof(cursor_t))) == NULL) DIE("OUT OF MEMMORY");
 
-  editor_init(bufl->buffer->editor, filename);
-  cursor_init(bufl->buffer->cursor);
+  editor_init(&bufl->buffer->editor, filename);
+  cursor_init(&bufl->buffer->cursor);
   buffer_set_name(bufl->buffer, filename);
 
   memcpy(bufl->buffer->filename, filename, fnlen);
   bufl->buffer->filename[fnlen] = '\0';
 
-  bufl->buffer->lp = bufl->buffer->editor->lines;
+  bufl->buffer->lp = bufl->buffer->editor.lines;
   bufl->buffer->dirty = 0;
 
   if (head == NULL) {
@@ -95,7 +93,6 @@ void buffer_free(void) {
 
   g_window.buffer = head->buffer;
 
-  cursor_free(aux->buffer->cursor);
-  editor_free(aux->buffer->editor);
+  editor_free(&aux->buffer->editor);
   free(aux);
 }

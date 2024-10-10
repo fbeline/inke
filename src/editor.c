@@ -310,5 +310,4 @@ void editor_free(editor_t* E) {
     dsfree(aux->ds);
     free(aux);
   }
-  free(E);
 }

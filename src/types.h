@@ -94,8 +94,8 @@ typedef struct buffer_s {
   char name[NBUFNAME];
   line_t *lp;
   u32 dirty;
-  cursor_t *cursor;
-  editor_t *editor;
+  cursor_t cursor;
+  editor_t editor;
 } buffer_t;
 
 typedef struct window_s {

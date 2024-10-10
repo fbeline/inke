@@ -2,7 +2,6 @@
 
 #include <string.h>
 
-#include "buffer.h"
 #include "cmdline.h"
 #include "cursor.h"
 #include "globals.h"
@@ -13,7 +12,7 @@
 static buffer_t obuffer;
 
 static void isearch_search(buffer_t *B, const char *query, u8 dir) {
-  cursor_t *C = B->cursor;
+  cursor_t *C = &B->cursor;
   line_t *l = B->lp;
   u32 offset = C->x + C->coloff;
   u32 y = 0;
