@@ -90,12 +90,12 @@ typedef struct cursor_s {
 } cursor_t;
 
 typedef struct buffer_s {
-  char filename[NPATH];
-  char name[NBUFNAME];
-  line_t *lp;
-  u32 dirty;
   cursor_t cursor;
   editor_t editor;
+  line_t *lp;
+  u16 dirty;
+  char name[NBUFNAME];
+  char filename[NPATH];
 } buffer_t;
 
 typedef struct window_s {
