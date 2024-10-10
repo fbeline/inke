@@ -190,7 +190,7 @@ void cursor_break_line(buffer_t *B) {
 }
 
 void cursor_move_word_forward(buffer_t *B) {
-  usize lastline = B->editor->row_size - 1;
+  usize lastline = B->editor->nlines - 1;
   u32 x = raw_x(B->cursor);
   while(!word_forward_stop(B->lp->ds->buf, x)) {
     if (raw_y(B->cursor) == lastline && x >= B->lp->ds->len)
@@ -336,11 +336,11 @@ void cursor_delete_row(buffer_t *B) {
 void cursor_eof(buffer_t *B) {
   editor_t *E = B->editor;
   cursor_t *C = B->cursor;
-  if (E->row_size > g_window.nrow) {
+  if (E->nlines > g_window.nrow) {
     C->y = g_window.nrow - 1;
-    C->rowoff = E->row_size - g_window.nrow;
+    C->rowoff = E->nlines - g_window.nrow;
   } else {
-    C->y = E->row_size - 1;
+    C->y = E->nlines - 1;
     C->rowoff = 0;
   }
   while(B->lp->next != NULL)

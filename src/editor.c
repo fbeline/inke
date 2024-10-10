@@ -43,7 +43,7 @@ static line_t *editor_create_line_after(editor_t *E, line_t* lp, usize capacity)
   if (nlp->next) nlp->next->prev = nlp;
   if (nlp->prev) nlp->prev->next = nlp;
 
-  E->row_size++;
+  E->nlines++;
 
   return nlp;
 }
@@ -60,7 +60,7 @@ void editor_delete_lines(editor_t *E, line_t* lp, usize size) {
       lp1->ds->buf[0] = '\0';
       lp1->ds->len = 0;
       E->lines = lp1;
-      E->row_size = 1;
+      E->nlines = 1;
       return;
     }
 
@@ -70,7 +70,7 @@ void editor_delete_lines(editor_t *E, line_t* lp, usize size) {
   if (lp == E->lines)
     E->lines = lp2;
 
-  E->row_size -= size;
+  E->nlines -= size;
 }
 
 ds_t *editor_rows_to_string(line_t *head) {
@@ -104,7 +104,7 @@ line_t* editor_insert_row_at(editor_t *E, u32 y) {
   if (nl != NULL) nl->prev = lp;
   if (y == 0) E->lines = lp;
 
-  E->row_size++;
+  E->nlines++;
 
   return lp;
 }
@@ -128,7 +128,7 @@ line_t *editor_move_line_up(editor_t *E, line_t *lp) {
 
   dscat(lp->prev->ds, lp->ds->buf);
 
-  E->row_size--;
+  E->nlines--;
   line_t *prev = lp->prev;
   line_free(lp);
 
@@ -169,7 +169,7 @@ void editor_break_line(editor_t *E, line_t *lp, u32 x) {
   new_line->prev = lp;
   new_line->next = next_line;
 
-  E->row_size++;
+  E->nlines++;
 }
 
 void editor_delete_forward(line_t *lp, u32 x) {
@@ -232,17 +232,17 @@ void editor_kill_between(editor_t *E, mark_t mark, ds_t *r) {
     line_t *next = lp->next;
     line_free(lp);
     lp = next;
-    E->row_size--;
+    E->nlines--;
   }
 
   dscat(mark.start_lp->ds, lp->ds->buf + mark.end_offset);
   line_free(lp);
-  E->row_size--;
+  E->nlines--;
 }
 
 static void editor_new_file(const char *filename, editor_t *E) {
   strcpy(E->filename, filename);
-  E->row_size = 1;
+  E->nlines = 1;
   E->lines = lalloc(BLOCK_SIZE);
   E->new_file = true;
 }
@@ -250,7 +250,7 @@ static void editor_new_file(const char *filename, editor_t *E) {
 int editor_open_file(const char *filename, editor_t *E) {
   FILE *fp;
   char buffer[1024];
-  usize rows_size = 0;
+  usize nlines = 0;
 
   fp = fopen(filename, "r");
   if (fp == NULL) {
@@ -260,7 +260,7 @@ int editor_open_file(const char *filename, editor_t *E) {
 
   line_t* lp_tail = NULL;
   while (fgets(buffer, sizeof(buffer), fp)) {
-    rows_size++;
+    nlines++;
     usize len = strlen(buffer);
 
     if (len > 0 && buffer[len - 1] == '\n') {
@@ -287,10 +287,10 @@ int editor_open_file(const char *filename, editor_t *E) {
 
   fclose(fp);
 
-  E->row_size = rows_size;
+  E->nlines = nlines;
   strcpy(E->filename, filename);
 
-  if (rows_size == 0) editor_new_file(filename, E);
+  if (nlines == 0) editor_new_file(filename, E);
   E->new_file = false;
 
   return 0;
