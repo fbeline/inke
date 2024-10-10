@@ -93,6 +93,8 @@ void cursor_region_kill(buffer_t *B) {
 
   g_mode = MODE_INSERT;
   clear_status_message();
+
+  B->dirty++;
 }
 
 char cursor_char(buffer_t *B) {
@@ -183,6 +185,8 @@ void cursor_break_line(buffer_t *B) {
   cursor_bol(B);
 
   undo_push(LINEBREAK, B, NULL);
+
+  B->dirty++;
 }
 
 void cursor_move_word_forward(buffer_t *B) {
@@ -223,6 +227,8 @@ void cursor_move_line_up(buffer_t *B) {
 
   C->x = MIN(g_window.ncol, prlen);
   C->coloff = prlen > C->x ? prlen - C->x : 0;
+
+  B->dirty++;
 }
 
 void cursor_remove_char(buffer_t *B) {
@@ -244,13 +250,15 @@ void cursor_remove_char(buffer_t *B) {
   else
     C->x--;
 
-  B->editor->dirty = true;
   undo_push(BACKSPACE, B, strdata);
+
+  B->dirty++;
 }
 
 void cursor_insert_char(buffer_t *B, int ch) {
   editor_insert_char_at(B->editor, B->lp, raw_x(B->cursor), ch);
   cursor_right(B);
+  B->dirty++;
 
   undo_push(ADD, B, NULL);
 }
@@ -295,6 +303,8 @@ void cursor_delete_forward(buffer_t *B) {
   undo_push(DELETE_FORWARD, B, g_clipbuf->buf);
 
   editor_delete_forward(B->lp, x);
+
+  B->dirty++;
 }
 
 void cursor_delete_row(buffer_t *B) {
@@ -319,6 +329,8 @@ void cursor_delete_row(buffer_t *B) {
   B->lp = lp;
 
   if (raw_x(C) > B->lp->ds->len) cursor_eol(B);
+
+  B->dirty++;
 }
 
 void cursor_eof(buffer_t *B) {

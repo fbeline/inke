@@ -38,6 +38,7 @@ void buffer_create(const char *filename) {
   buffer_set_name(bufl->buffer, filename);
 
   bufl->buffer->lp = bufl->buffer->editor->lines;
+  bufl->buffer->dirty = 0;
 
   if (head == NULL) {
     bufl->next = bufl;

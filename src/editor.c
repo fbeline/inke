@@ -105,7 +105,6 @@ line_t* editor_insert_row_at(editor_t *E, u32 y) {
   if (y == 0) E->lines = lp;
 
   E->row_size++;
-  E->dirty = true;
 
   return lp;
 }
@@ -129,7 +128,6 @@ line_t *editor_move_line_up(editor_t *E, line_t *lp) {
 
   dscat(lp->prev->ds, lp->ds->buf);
 
-  E->dirty = true;
   E->row_size--;
   line_t *prev = lp->prev;
   line_free(lp);
@@ -171,7 +169,6 @@ void editor_break_line(editor_t *E, line_t *lp, u32 x) {
   new_line->prev = lp;
   new_line->next = next_line;
 
-  E->dirty = true;
   E->row_size++;
 }
 

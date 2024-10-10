@@ -67,7 +67,7 @@ static void mode_set_find_file(void) {
 static void mode_cmd_ctrl_x(i32 ch) {
   buffer_t *B = g_window.buffer;
   if (ch == (CONTROL | 'C')) {
-    if (B->editor->dirty) mode_set_exit_save();
+    if (B->dirty > 0) mode_set_exit_save();
     else g_running = false;
   } else if (ch == (CONTROL | 'F')) {
     mode_set_find_file();

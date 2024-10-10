@@ -24,7 +24,6 @@ i32 io_write_buffer(editor_t* E) {
 
   if (io_file_write(E->filename, ds->buf) != 0) return 1;
 
-  E->dirty = false;
   set_status_message("\"%s\" [unix] %dL, %dB written", E->filename, E->row_size, ds->len);
 
   dsfree(ds);

@@ -69,7 +69,7 @@ typedef struct line_s {
 typedef struct editor_s {
   unsigned char mode;
   char filename[NPATH];
-  bool dirty, new_file;
+  bool new_file;
   usize row_size;
   line_t *lines;
 } editor_t;
@@ -95,6 +95,7 @@ typedef struct cursor_s {
 typedef struct buffer_s {
   char name[NBUFNAME];
   line_t *lp;
+  u32 dirty;
   cursor_t *cursor;
   editor_t *editor;
 } buffer_t;
