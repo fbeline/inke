@@ -67,7 +67,6 @@ typedef struct line_s {
 } line_t;
 
 typedef struct editor_s {
-  unsigned char mode;
   char filename[NPATH];
   bool new_file;
   usize row_size;

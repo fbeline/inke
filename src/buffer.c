@@ -26,7 +26,6 @@ static void buffer_set_name(buffer_t *buffer, const char *filename) {
   } else {
     len = MIN(strlen(filename), NBUFNAME - 1);
     memcpy(buffer->name, filename, len);
-
   }
   buffer->name[len] = '\0';
 }
