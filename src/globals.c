@@ -6,7 +6,7 @@
 
 bool g_running = true;
 bool g_cursor_vis = true;
-u8 g_mode = MODE_INSERT;
+u32 g_mode = MODE_INSERT;
 u8 g_undo_state = UNDO_ON;
 ds_t *g_clipbuf = NULL;
 cmd_func_t g_cmd_func = NULL;

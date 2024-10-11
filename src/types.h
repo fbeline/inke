@@ -20,14 +20,15 @@ typedef float f32;
 typedef double f64;
 typedef size_t usize;
 
-#define CONTROL 0x10000000
-#define META 0x20000000
+#define CONTROL   0x10000000
+#define CONTROL_X 0x20000000
+#define META      0x40000000
 
-#define MODE_INSERT 0x01
-#define MODE_SEARCH 0x02
-#define MODE_CMD 0x04
+#define MODE_INSERT   0x01
+#define MODE_SEARCH   0x02
+#define MODE_CMD      0x04
 #define MODE_CMD_CHAR 0x08
-#define MODE_VISUAL 0x10
+#define MODE_VISUAL   0x10
 
 #define NBUFNAME 16
 #define NPATH    256

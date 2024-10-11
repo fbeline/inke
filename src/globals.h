@@ -7,7 +7,7 @@
 
 extern bool g_running;
 extern bool g_cursor_vis;
-extern u8 g_mode;
+extern u32 g_mode;
 extern u8 g_undo_state;
 extern cmd_func_t g_cmd_func;
 extern ds_t *g_clipbuf;

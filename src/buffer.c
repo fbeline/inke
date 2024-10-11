@@ -6,6 +6,7 @@
 #include "cursor.h"
 #include "editor.h"
 #include "globals.h"
+#include "io.h"
 #include "utils.h"
 
 typedef struct bufferl_s {
@@ -67,19 +68,29 @@ buffer_t *buffer_get(void) {
   return head->buffer;
 }
 
-buffer_t *buffer_next(void) {
+void buffer_next(buffer_t *B) {
   head = head->next;
   g_window.buffer = head->buffer;
-  return head->buffer;
+  g_mode = MODE_INSERT;
 }
 
-buffer_t *buffer_prev(void) {
+void buffer_prev(buffer_t *B) {
   head = head->prev;
   g_window.buffer = head->buffer;
-  return head->buffer;
+  g_mode = MODE_INSERT;
 }
 
-void buffer_free(void) {
+void buffer_save(buffer_t *B) {
+  if (io_write_buffer(B) != 0)
+    set_status_message("Error: Could not save file %.20s", B->filename);
+
+  cursor_t *C = &g_window.buffer->cursor;
+  if (C->x + C->coloff > B->lp->ds->len) {
+    cursor_eol(B);
+  }
+}
+
+void buffer_free(buffer_t *B) {
   bufferl_t *aux = head;
 
   if (head == head->next && head == head->prev) {

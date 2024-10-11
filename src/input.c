@@ -5,10 +5,11 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "buffer.h"
 #include "cursor.h"
 #include "globals.h"
+#include "ifunc.h"
 #include "isearch.h"
-#include "mode.h"
 #include "prompt.h"
 #include "types.h"
 #include "utils.h"
@@ -36,13 +37,20 @@ static keytab_t keytabs[] = {
   { CONTROL | 'N', cursor_down },
   { CONTROL | 'P', cursor_up },
   { CONTROL | 'S', isearch_start },
-  { CONTROL | 'X', mode_set_ctrl_x },
+  { CONTROL | 'X', set_ctrl_x },
   { CONTROL | 'Y', cursor_paste },
   { CONTROL | '/', cursor_undo },
 
+  { CONTROL_X | CONTROL | 'F', ifunc_find_file },
+  { CONTROL_X | CONTROL | 'K', buffer_free },
+  { CONTROL_X | CONTROL | 'S', buffer_save },
+  { CONTROL_X | CONTROL | 'C', ifunc_exit },
+  { CONTROL_X | CONTROL | ARROW_RIGHT, buffer_next },
+  { CONTROL_X | CONTROL | ARROW_LEFT, buffer_prev },
+
   { META | 'f', cursor_move_word_forward },
   { META | 'b', cursor_move_word_backward },
-  { META | 'g', mode_set_gotol },
+  { META | 'g', ifunc_gotol },
   { META | '^', cursor_move_line_up },
   { META | '>', cursor_eof },
   { META | '<', cursor_bof },
@@ -78,7 +86,7 @@ static keytab_t keytabs_visual[] = {
   { 0, NULL}
 };
 
-static key_func_t get_kfp(keytab_t *keytabs, int c) {
+static key_func_t get_kfp(keytab_t *keytabs, i32 c) {
   keytab_t *ktp = &keytabs[0];
 
   while (ktp->fp != NULL) {
@@ -198,13 +206,15 @@ void input_process_keys(buffer_t* B) {
     if (g_mode == MODE_SEARCH)
       isearch_abort(B);
 
-    mode_cmd_clean();
+    g_mode = MODE_INSERT;
     set_status_message("Quit");
     return;
   }
 
+  ch = (CONTROL_X & g_mode) ? (CONTROL_X | ch) : ch;
   switch (g_mode) {
     case MODE_INSERT:
+    case (MODE_INSERT | CONTROL_X):
       process_insert_mode(B, ch);
       break;
     case MODE_VISUAL:
