@@ -5,11 +5,11 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "prompt.h"
 #include "cursor.h"
 #include "globals.h"
 #include "isearch.h"
 #include "mode.h"
+#include "prompt.h"
 #include "types.h"
 #include "utils.h"
 
@@ -191,41 +191,6 @@ static void process_visual_mode(buffer_t *B, i32 ch) {
   set_status_message("visual mode - cmd not found");
 }
 
-static void process_cmd_mode(buffer_t *B, i32 ch) {
-  switch (ch) {
-    case ENTER_KEY:
-      g_cmd_func(0);
-      break;
-    case BACKSPACE_KEY:
-      prompt_backspace();
-      break;
-    case ARROW_LEFT:
-      prompt_left();
-      break;
-    case ARROW_RIGHT:
-      prompt_right();
-      break;
-    default:
-      if (g_mode == MODE_SEARCH && ch == (CONTROL | 'S')) {
-        g_cmd_func(1);
-      }
-      else if (g_mode == MODE_SEARCH && ch == (CONTROL | 'R')) {
-        g_cmd_func(-1);
-      }
-      else if (ch == (CONTROL | 'E')) {
-        prompt_eol();
-      }
-      else if (ch == (CONTROL | 'A')) {
-        prompt_bol();
-      }
-      else if (ch == (CONTROL | 'U')) {
-        prompt_del_before();
-      } else if (ch >= 32 && ch <= 126) {
-        prompt_insert(ch);
-      }
-  }
-}
-
 void input_process_keys(buffer_t* B) {
   i32 ch = input_read_key();
 
@@ -250,7 +215,7 @@ void input_process_keys(buffer_t* B) {
       break;
     case MODE_SEARCH:
     case MODE_CMD:
-      process_cmd_mode(B, ch);
+      prompt_handle_char(ch);
       break;
   }
 

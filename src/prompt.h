@@ -3,6 +3,7 @@
 #include "types.h"
 
 void prompt_init(const char *msg);
+void prompt_handle_char(i32 ch);
 void prompt_cat(const char *str);
 void prompt_insert(char ch);
 void prompt_backspace(void);

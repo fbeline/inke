@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "ds.h"
+#include "globals.h"
 
 typedef struct prompt_s {
   u32 min_x;
@@ -110,4 +111,39 @@ const char *prompt_full_text(void) {
 
 const char *prompt_text(void) {
   return &line.ds->buf[line.min_x];
+}
+
+void prompt_handle_char(i32 ch) {
+  switch (ch) {
+    case ENTER_KEY:
+      g_cmd_func(0);
+      break;
+    case BACKSPACE_KEY:
+      prompt_backspace();
+      break;
+    case ARROW_LEFT:
+      prompt_left();
+      break;
+    case ARROW_RIGHT:
+      prompt_right();
+      break;
+    default:
+      if (g_mode == MODE_SEARCH && ch == (CONTROL | 'S')) {
+        g_cmd_func(1);
+      }
+      else if (g_mode == MODE_SEARCH && ch == (CONTROL | 'R')) {
+        g_cmd_func(-1);
+      }
+      else if (ch == (CONTROL | 'E')) {
+        prompt_eol();
+      }
+      else if (ch == (CONTROL | 'A')) {
+        prompt_bol();
+      }
+      else if (ch == (CONTROL | 'U')) {
+        prompt_del_before();
+      } else if (ch >= 32 && ch <= 126) {
+        prompt_insert(ch);
+      }
+  }
 }
