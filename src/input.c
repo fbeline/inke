@@ -1,6 +1,5 @@
 #include "input.h"
 
-#include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <termios.h>
@@ -14,7 +13,7 @@
 #include "types.h"
 #include "utils.h"
 
-static keytab_t keytabs[NBINDS] = {
+static keytab_t keytabs[] = {
   { HOME_KEY, cursor_bol },
   { END_KEY, cursor_eol },
   { PAGE_DOWN, cursor_page_down },
@@ -51,7 +50,7 @@ static keytab_t keytabs[NBINDS] = {
   { 0, NULL}
 };
 
-static keytab_t keytabs_visual[NBINDS] = {
+static keytab_t keytabs_visual[] = {
   { HOME_KEY, cursor_bol },
   { END_KEY, cursor_eol },
   { PAGE_DOWN, cursor_page_down },
