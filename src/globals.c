@@ -81,4 +81,5 @@ mark_t mark_get(void) {
 
 void globals_init(void) {
   g_clipbuf = dsempty();
+  g_mode = MODE_INSERT;
 }

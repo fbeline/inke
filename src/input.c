@@ -15,87 +15,76 @@
 #include "utils.h"
 
 static keytab_t keytabs[] = {
-  { HOME_KEY, cursor_bol },
-  { END_KEY, cursor_eol },
-  { PAGE_DOWN, cursor_page_down },
-  { PAGE_UP, cursor_page_up },
-  { ARROW_LEFT, cursor_left },
-  { ARROW_RIGHT, cursor_right },
-  { ARROW_UP, cursor_up },
-  { ARROW_DOWN, cursor_down },
-  { BACKSPACE_KEY, cursor_remove_char },
-  { DEL_KEY, cursor_remove_char },
-  { ENTER_KEY, cursor_break_line },
+  { (MODE_INSERT | MODE_VISUAL), HOME_KEY, cursor_bol },
+  { (MODE_INSERT | MODE_VISUAL), END_KEY, cursor_eol },
+  { (MODE_INSERT | MODE_VISUAL), PAGE_DOWN, cursor_page_down },
+  { (MODE_INSERT | MODE_VISUAL), PAGE_UP, cursor_page_up },
+  { (MODE_INSERT | MODE_VISUAL), ARROW_LEFT, cursor_left },
+  { (MODE_INSERT | MODE_VISUAL), ARROW_RIGHT, cursor_right },
+  { (MODE_INSERT | MODE_VISUAL), ARROW_UP, cursor_up },
+  { (MODE_INSERT | MODE_VISUAL), ARROW_DOWN, cursor_down },
+  { (MODE_INSERT | MODE_VISUAL), META | 'f', cursor_move_word_forward },
+  { (MODE_INSERT | MODE_VISUAL), META | 'b', cursor_move_word_backward },
+  { (MODE_INSERT | MODE_VISUAL), META | '^', cursor_move_line_up },
+  { (MODE_INSERT | MODE_VISUAL), META | '>', cursor_eof },
+  { (MODE_INSERT | MODE_VISUAL), META | '<', cursor_bof },
+  { (MODE_INSERT | MODE_VISUAL), CONTROL | ' ', mark_start },
+  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'N', cursor_down },
+  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'P', cursor_up },
+  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'A', cursor_bol },
+  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'B', cursor_left },
+  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'E', cursor_eol },
+  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'F', cursor_right },
 
-  { CONTROL | ' ', mark_start },
-  { CONTROL | 'A', cursor_bol },
-  { CONTROL | 'B', cursor_left },
-  { CONTROL | 'E', cursor_eol },
-  { CONTROL | 'F', cursor_right },
-  { CONTROL | 'H', cursor_remove_char },
-  { CONTROL | 'K', cursor_delete_forward },
-  { CONTROL | 'N', cursor_down },
-  { CONTROL | 'P', cursor_up },
-  { CONTROL | 'S', isearch_start },
-  { CONTROL | 'X', set_ctrl_x },
-  { CONTROL | 'Y', cursor_paste },
-  { CONTROL | '/', cursor_undo },
+  { MODE_VISUAL, CONTROL | 'W', cursor_region_kill },
+  { MODE_VISUAL, META | 'W', cursor_region_text },
 
-  { CONTROL_X | CONTROL | 'F', ifunc_find_file },
-  { CONTROL_X | CONTROL | 'K', buffer_free },
-  { CONTROL_X | CONTROL | 'S', buffer_save },
-  { CONTROL_X | CONTROL | 'C', ifunc_exit },
-  { CONTROL_X | CONTROL | ARROW_RIGHT, buffer_next },
-  { CONTROL_X | CONTROL | ARROW_LEFT, buffer_prev },
+  { MODE_INSERT, BACKSPACE_KEY, cursor_remove_char },
+  { MODE_INSERT, DEL_KEY, cursor_remove_char },
+  { MODE_INSERT, ENTER_KEY, cursor_break_line },
+  { MODE_INSERT, META | 'g', ifunc_gotol },
+  { MODE_INSERT, CONTROL | 'H', cursor_remove_char },
+  { MODE_INSERT, CONTROL | 'K', cursor_delete_forward },
+  { MODE_INSERT, CONTROL | 'S', isearch_start },
+  { MODE_INSERT, CONTROL | 'X', set_ctrl_x },
+  { MODE_INSERT, CONTROL | 'Y', cursor_paste },
+  { MODE_INSERT, CONTROL | '/', cursor_undo },
 
-  { META | 'f', cursor_move_word_forward },
-  { META | 'b', cursor_move_word_backward },
-  { META | 'g', ifunc_gotol },
-  { META | '^', cursor_move_line_up },
-  { META | '>', cursor_eof },
-  { META | '<', cursor_bof },
+  { CONTROL_X, 'K', buffer_free },
+  { CONTROL_X, CONTROL | 'F', ifunc_find_file },
+  { CONTROL_X, CONTROL | 'S', buffer_save },
+  { CONTROL_X, CONTROL | 'C', ifunc_exit },
+  { CONTROL_X, CONTROL | ARROW_RIGHT, buffer_next },
+  { CONTROL_X, CONTROL | ARROW_LEFT, buffer_prev },
 
-  { 0, NULL}
+  { 0, 0, NULL}
 };
 
-static keytab_t keytabs_visual[] = {
-  { HOME_KEY, cursor_bol },
-  { END_KEY, cursor_eol },
-  { PAGE_DOWN, cursor_page_down },
-  { PAGE_UP, cursor_page_up },
-  { ARROW_LEFT, cursor_left },
-  { ARROW_RIGHT, cursor_right },
-  { ARROW_UP, cursor_up },
-  { ARROW_DOWN, cursor_down },
-
-  { CONTROL | ' ', mark_start },
-  { CONTROL | 'A', cursor_bol },
-  { CONTROL | 'B', cursor_left },
-  { CONTROL | 'E', cursor_eol },
-  { CONTROL | 'F', cursor_right },
-  { CONTROL | 'N', cursor_down },
-  { CONTROL | 'P', cursor_up },
-  { CONTROL | 'W', cursor_region_kill },
-
-  { META | 'f', cursor_move_word_forward },
-  { META | 'b', cursor_move_word_backward },
-  { META | 'w', cursor_region_text },
-  { META | '>', cursor_eof },
-  { META | '<', cursor_bof },
-
-  { 0, NULL}
-};
-
-static key_func_t get_kfp(keytab_t *keytabs, i32 c) {
+static key_func_t get_kfp(i32 c) {
   keytab_t *ktp = &keytabs[0];
 
   while (ktp->fp != NULL) {
-    if (ktp->code == c)
+    if ((ktp->flags & g_mode) && ktp->code == c)
       return ktp->fp;
     ++ktp;
   }
 
   return NULL;
+}
+
+static void process_key(buffer_t *B, i32 ch) {
+  key_func_t kfp;
+  if ((kfp = get_kfp(ch)) != NULL) {
+    kfp(B);
+    return;
+  }
+
+  if (ch == TAB_KEY) {
+    cursor_insert_char(B, ' ');
+    cursor_insert_char(B, ' ');
+  } else if (ch >= 32 && ch <= 126) {
+    cursor_insert_char(B, ch);
+  }
 }
 
 static i32 input_read_key(void) {
@@ -175,30 +164,6 @@ static i32 input_read_key(void) {
   return c;
 }
 
-static void process_insert_mode(buffer_t *B, i32 ch) {
-  key_func_t kfp;
-  if ((kfp = get_kfp(keytabs, ch)) != NULL) {
-    kfp(B);
-    return;
-  }
-
-  if (ch == TAB_KEY) {
-    cursor_insert_char(B, ' ');
-    cursor_insert_char(B, ' ');
-  } else if (ch >= 32 && ch <= 126) {
-    cursor_insert_char(B, ch);
-  }
-}
-
-static void process_visual_mode(buffer_t *B, i32 ch) {
-  key_func_t kfp;
-  if ((kfp = get_kfp(keytabs_visual, ch)) != NULL) {
-    kfp(B);
-    return;
-  }
-  set_status_message("visual mode - cmd not found");
-}
-
 void input_process_keys(buffer_t* B) {
   i32 ch = input_read_key();
 
@@ -211,15 +176,7 @@ void input_process_keys(buffer_t* B) {
     return;
   }
 
-  ch = (CONTROL_X & g_mode) ? (CONTROL_X | ch) : ch;
   switch (g_mode) {
-    case MODE_INSERT:
-    case (MODE_INSERT | CONTROL_X):
-      process_insert_mode(B, ch);
-      break;
-    case MODE_VISUAL:
-      process_visual_mode(B, ch);
-      break;
     case MODE_CMD_CHAR:
       g_cmd_func(ch);
       break;
@@ -227,6 +184,8 @@ void input_process_keys(buffer_t* B) {
     case MODE_CMD:
       prompt_handle_char(ch);
       break;
+    default:
+      process_key(B, ch);
   }
 
   if (g_mode == MODE_VISUAL)

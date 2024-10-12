@@ -59,7 +59,7 @@ void set_ctrl_x(buffer_t *B) {
 
   set_status_message("C-x");
   g_cursor_vis = false;
-  g_mode = (g_mode | CONTROL_X);
+  g_mode = CONTROL_X;
 }
 
 void ifunc_exit(buffer_t *B) {

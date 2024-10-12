@@ -20,15 +20,15 @@ typedef float f32;
 typedef double f64;
 typedef size_t usize;
 
-#define CONTROL   0x10000000
-#define CONTROL_X 0x20000000
-#define META      0x40000000
+#define CONTROL       0x00100000
+#define CONTROL_X     0x00200000
+#define META          0x00400000
 
-#define MODE_INSERT   0x01
-#define MODE_SEARCH   0x02
-#define MODE_CMD      0x04
-#define MODE_CMD_CHAR 0x08
-#define MODE_VISUAL   0x10
+#define MODE_INSERT   0x00800000
+#define MODE_SEARCH   0x01000000
+#define MODE_CMD      0x02000000
+#define MODE_CMD_CHAR 0x04000000
+#define MODE_VISUAL   0x08000000
 
 #define NBUFNAME 16
 #define NPATH    256
@@ -103,6 +103,7 @@ typedef void (*key_func_t)(buffer_t *B);
 typedef void (*cmd_func_t)(i32 ch);
 
 typedef struct keytab {
+  u32 flags;
   i32 code;
   key_func_t fp;
 } keytab_t;
