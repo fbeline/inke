@@ -64,7 +64,7 @@ static key_func_t get_kfp(i32 c) {
   keytab_t *ktp = &keytabs[0];
 
   while (ktp->fp != NULL) {
-    if ((ktp->flags & g_mode) && ktp->code == c)
+    if ((ktp->flags & g_flags) && ktp->code == c)
       return ktp->fp;
     ++ktp;
   }
@@ -79,7 +79,7 @@ static void process_key(buffer_t *B, i32 ch) {
     return;
   }
 
-  if (g_mode != MODE_INSERT) return;
+  if (g_flags != MODE_INSERT) return;
 
   if (ch == TAB_KEY) {
     cursor_insert_char(B, ' ');
@@ -170,15 +170,15 @@ void input_process_keys(buffer_t* B) {
   i32 ch = input_read_key();
 
   if (ch == (CONTROL | 'G')) {
-    if (g_mode == MODE_SEARCH)
+    if (g_flags == MODE_SEARCH)
       isearch_abort(B);
 
-    g_mode = MODE_INSERT;
+    g_flags = MODE_INSERT;
     set_status_message("Quit");
     return;
   }
 
-  switch (g_mode) {
+  switch (g_flags) {
     case MODE_CMD_CHAR:
       g_cmd_func(ch);
       break;
@@ -190,6 +190,6 @@ void input_process_keys(buffer_t* B) {
       process_key(B, ch);
   }
 
-  if (g_mode == MODE_VISUAL)
+  if (g_flags == MODE_VISUAL)
     mark_end(B);
 }

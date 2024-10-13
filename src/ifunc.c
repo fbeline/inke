@@ -15,7 +15,7 @@ static void ifunc_nop(i32 ch) { }
 
 static void mode_clean(void) {
   set_status_message("");
-  g_mode = MODE_INSERT;
+  g_flags = MODE_INSERT;
   g_cmd_func = ifunc_nop;
 }
 
@@ -54,16 +54,16 @@ static void gotol(i32 ch) {
 }
 
 void set_ctrl_x(buffer_t *B) {
-  if (g_mode != MODE_INSERT) return;
+  if (g_flags != MODE_INSERT) return;
 
   set_status_message("C-x");
-  g_mode = CONTROL_X;
+  g_flags = CONTROL_X;
 }
 
 void ifunc_exit(buffer_t *B) {
   if (B->dirty > 0) {
     set_status_message("Save file? (y/n or [c]ancel)");
-    g_mode = MODE_CMD_CHAR;
+    g_flags = MODE_CMD_CHAR;
     g_cmd_func = save_and_exit;
   }
   else {
@@ -72,7 +72,7 @@ void ifunc_exit(buffer_t *B) {
 }
 
 void ifunc_find_file(buffer_t *B) {
-  g_mode = MODE_CMD;
+  g_flags = MODE_CMD;
   g_cmd_func = open_file;
 
   char cwd[NPATH];
@@ -85,6 +85,6 @@ void ifunc_find_file(buffer_t *B) {
 
 void ifunc_gotol(buffer_t *B) {
   prompt_init("goto line: ");
-  g_mode = MODE_CMD;
+  g_flags = MODE_CMD;
   g_cmd_func = gotol;
 }
