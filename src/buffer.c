@@ -71,14 +71,14 @@ buffer_t *buffer_get(void) {
 void buffer_next(buffer_t *B) {
   head = head->next;
   g_window.buffer = head->buffer;
-  g_flags = MODE_INSERT;
+  g_flags = MINSERT;
   set_status_message("");
 }
 
 void buffer_prev(buffer_t *B) {
   head = head->prev;
   g_window.buffer = head->buffer;
-  g_flags = MODE_INSERT;
+  g_flags = MINSERT;
   set_status_message("");
 }
 
@@ -90,7 +90,7 @@ void buffer_save(buffer_t *B) {
   if (C->x + C->coloff > B->lp->ds->len) {
     cursor_eol(B);
   }
-  g_flags = MODE_INSERT;
+  g_flags = MINSERT;
   set_status_message("");
 }
 

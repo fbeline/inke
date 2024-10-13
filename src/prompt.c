@@ -128,10 +128,10 @@ void prompt_handle_char(i32 ch) {
       prompt_right();
       break;
     default:
-      if (g_flags & MODE_SEARCH && ch == (CONTROL | 'S')) {
+      if (g_flags & MSEARCH && ch == (CONTROL | 'S')) {
         g_cmd_func(1);
       }
-      else if (g_flags & MODE_SEARCH && ch == (CONTROL | 'R')) {
+      else if (g_flags & MSEARCH && ch == (CONTROL | 'R')) {
         g_cmd_func(-1);
       }
       else if (ch == (CONTROL | 'E')) {

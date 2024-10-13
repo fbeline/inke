@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 bool g_running = true;
-u32 g_flags = MODE_INSERT;
+u32 g_flags = MINSERT;
 u8 g_undo_state = UNDO_ON;
 ds_t *g_clipbuf = NULL;
 cmd_func_t g_cmd_func = NULL;
@@ -28,13 +28,13 @@ char *get_status_message(void) {
 
 void mark_start(buffer_t *B) {
 
-  if (g_flags == MODE_VISUAL) {
-    g_flags = MODE_INSERT;
+  if (g_flags == MVISUAL) {
+    g_flags = MINSERT;
     set_status_message("");
     return;
   }
 
-  g_flags = MODE_VISUAL;
+  g_flags = MVISUAL;
   set_status_message("visual mode");
 
   g_mark.start_lp = B->lp;
@@ -76,5 +76,5 @@ mark_t mark_get(void) {
 
 void globals_init(void) {
   g_clipbuf = dsempty();
-  g_flags = MODE_INSERT;
+  g_flags = MINSERT;
 }

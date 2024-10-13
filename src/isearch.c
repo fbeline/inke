@@ -58,7 +58,7 @@ static void isearch_search(buffer_t *B, const char *query, u8 dir) {
 }
 
 static void isearch_return(buffer_t *B) {
-  g_flags = MODE_INSERT;
+  g_flags = MINSERT;
   set_status_message("");
 }
 
@@ -79,14 +79,14 @@ void isearch(i32 opt) {
 
 void isearch_abort(buffer_t *B) {
   cursor_set(B, &obuffer);
-  g_flags = MODE_INSERT;
+  g_flags = MINSERT;
   set_status_message("");
 }
 
 void isearch_start(buffer_t *B) {
   obuffer = *B;
   prompt_init("I-Search: ");
-  g_flags = MODE_SEARCH;
+  g_flags = MSEARCH;
   g_cmd_func = isearch;
   g_isearch = (isearch_t) {.lp = NULL, .qlen = 0, .x = 0};
 }

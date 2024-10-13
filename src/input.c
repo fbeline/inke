@@ -15,40 +15,40 @@
 #include "utils.h"
 
 static keytab_t keytabs[] = {
-  { (MODE_INSERT | MODE_VISUAL), HOME_KEY, cursor_bol },
-  { (MODE_INSERT | MODE_VISUAL), END_KEY, cursor_eol },
-  { (MODE_INSERT | MODE_VISUAL), PAGE_DOWN, cursor_page_down },
-  { (MODE_INSERT | MODE_VISUAL), PAGE_UP, cursor_page_up },
-  { (MODE_INSERT | MODE_VISUAL), ARROW_LEFT, cursor_left },
-  { (MODE_INSERT | MODE_VISUAL), ARROW_RIGHT, cursor_right },
-  { (MODE_INSERT | MODE_VISUAL), ARROW_UP, cursor_up },
-  { (MODE_INSERT | MODE_VISUAL), ARROW_DOWN, cursor_down },
-  { (MODE_INSERT | MODE_VISUAL), META | 'f', cursor_move_word_forward },
-  { (MODE_INSERT | MODE_VISUAL), META | 'b', cursor_move_word_backward },
-  { (MODE_INSERT | MODE_VISUAL), META | '^', cursor_move_line_up },
-  { (MODE_INSERT | MODE_VISUAL), META | '>', cursor_eof },
-  { (MODE_INSERT | MODE_VISUAL), META | '<', cursor_bof },
-  { (MODE_INSERT | MODE_VISUAL), CONTROL | ' ', mark_start },
-  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'N', cursor_down },
-  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'P', cursor_up },
-  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'A', cursor_bol },
-  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'B', cursor_left },
-  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'E', cursor_eol },
-  { (MODE_INSERT | MODE_VISUAL), CONTROL | 'F', cursor_right },
+  { (MINSERT | MVISUAL), HOME_KEY, cursor_bol },
+  { (MINSERT | MVISUAL), END_KEY, cursor_eol },
+  { (MINSERT | MVISUAL), PAGE_DOWN, cursor_page_down },
+  { (MINSERT | MVISUAL), PAGE_UP, cursor_page_up },
+  { (MINSERT | MVISUAL), ARROW_LEFT, cursor_left },
+  { (MINSERT | MVISUAL), ARROW_RIGHT, cursor_right },
+  { (MINSERT | MVISUAL), ARROW_UP, cursor_up },
+  { (MINSERT | MVISUAL), ARROW_DOWN, cursor_down },
+  { (MINSERT | MVISUAL), META | 'f', cursor_move_word_forward },
+  { (MINSERT | MVISUAL), META | 'b', cursor_move_word_backward },
+  { (MINSERT | MVISUAL), META | '^', cursor_move_line_up },
+  { (MINSERT | MVISUAL), META | '>', cursor_eof },
+  { (MINSERT | MVISUAL), META | '<', cursor_bof },
+  { (MINSERT | MVISUAL), CONTROL | ' ', mark_start },
+  { (MINSERT | MVISUAL), CONTROL | 'N', cursor_down },
+  { (MINSERT | MVISUAL), CONTROL | 'P', cursor_up },
+  { (MINSERT | MVISUAL), CONTROL | 'A', cursor_bol },
+  { (MINSERT | MVISUAL), CONTROL | 'B', cursor_left },
+  { (MINSERT | MVISUAL), CONTROL | 'E', cursor_eol },
+  { (MINSERT | MVISUAL), CONTROL | 'F', cursor_right },
 
-  { MODE_VISUAL, CONTROL | 'W', cursor_region_kill },
-  { MODE_VISUAL, META | 'W', cursor_region_text },
+  { MVISUAL, CONTROL | 'W', cursor_region_kill },
+  { MVISUAL, META | 'W', cursor_region_text },
 
-  { MODE_INSERT, BACKSPACE_KEY, cursor_remove_char },
-  { MODE_INSERT, DEL_KEY, cursor_remove_char },
-  { MODE_INSERT, ENTER_KEY, cursor_break_line },
-  { MODE_INSERT, META | 'g', ifunc_gotol },
-  { MODE_INSERT, CONTROL | 'H', cursor_remove_char },
-  { MODE_INSERT, CONTROL | 'K', cursor_delete_forward },
-  { MODE_INSERT, CONTROL | 'S', isearch_start },
-  { MODE_INSERT, CONTROL | 'X', set_ctrl_x },
-  { MODE_INSERT, CONTROL | 'Y', cursor_paste },
-  { MODE_INSERT, CONTROL | '/', cursor_undo },
+  { MINSERT, BACKSPACE_KEY, cursor_remove_char },
+  { MINSERT, DEL_KEY, cursor_remove_char },
+  { MINSERT, ENTER_KEY, cursor_break_line },
+  { MINSERT, META | 'g', ifunc_gotol },
+  { MINSERT, CONTROL | 'H', cursor_remove_char },
+  { MINSERT, CONTROL | 'K', cursor_delete_forward },
+  { MINSERT, CONTROL | 'S', isearch_start },
+  { MINSERT, CONTROL | 'X', set_ctrl_x },
+  { MINSERT, CONTROL | 'Y', cursor_paste },
+  { MINSERT, CONTROL | '/', cursor_undo },
 
   { CONTROL_X, 'K', buffer_free },
   { CONTROL_X, CONTROL | 'F', ifunc_find_file },
@@ -79,7 +79,7 @@ static void process_key(buffer_t *B, i32 ch) {
     return;
   }
 
-  if (g_flags != MODE_INSERT) return;
+  if (g_flags != MINSERT) return;
 
   if (ch == TAB_KEY) {
     cursor_insert_char(B, ' ');
@@ -170,26 +170,26 @@ void input_process_keys(buffer_t* B) {
   i32 ch = input_read_key();
 
   if (ch == (CONTROL | 'G')) {
-    if (g_flags == MODE_SEARCH)
+    if (g_flags == MSEARCH)
       isearch_abort(B);
 
-    g_flags = MODE_INSERT;
+    g_flags = MINSERT;
     set_status_message("Quit");
     return;
   }
 
   switch (g_flags) {
-    case MODE_CMD_CHAR:
+    case MCMD_CHAR:
       g_cmd_func(ch);
       break;
-    case MODE_SEARCH:
-    case MODE_CMD:
+    case MSEARCH:
+    case MCMD:
       prompt_handle_char(ch);
       break;
     default:
       process_key(B, ch);
   }
 
-  if (g_flags == MODE_VISUAL)
+  if (g_flags == MVISUAL)
     mark_end(B);
 }

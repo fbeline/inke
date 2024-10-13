@@ -73,7 +73,7 @@ static void term_draw_status_bar(term_t *T, buffer_t *B) {
   vt_reset_text_attr();
   vt_erase_line();
 
-  if (g_flags & (MODE_CMD | MODE_SEARCH))
+  if (g_flags & (MCMD | MSEARCH))
     vt_puts(prompt_full_text());
   else
     vt_puts(get_status_message());
@@ -114,14 +114,14 @@ static void term_draw_line(term_t *T, cursor_t *C, line_t *lp) {
   strncpy(line, lp->ds->buf + C->coloff, size);
   line[size] = '\0';
 
-  if ((g_flags & MODE_SEARCH) && lp == g_isearch.lp && g_isearch.x >= C->coloff) {
+  if ((g_flags & MSEARCH) && lp == g_isearch.lp && g_isearch.x >= C->coloff) {
     u32 sx = g_isearch.x - C->coloff;
     vt_nputs(line, sx);
     vt_reverse_video();
     vt_nputs(line + sx, g_isearch.qlen);
     vt_reset_text_attr();
     vt_puts(line + sx + g_isearch.qlen);
-  } else if (g_flags & MODE_VISUAL) {
+  } else if (g_flags & MVISUAL) {
     term_draw_mark(T, C, lp, line);
   } else {
     vt_puts(line);
@@ -134,7 +134,7 @@ static void term_draw(term_t *T, buffer_t *B) {
   cursor_t *C = &B->cursor;
 
   for (usize i = 0; i < C->rowoff && lp->next != NULL; i++) {
-    if (g_flags == MODE_VISUAL && g_mark.start_lp == lp)
+    if (g_flags == MVISUAL && g_mark.start_lp == lp)
       vt_reverse_video();
 
     lp = lp->next;
@@ -186,12 +186,12 @@ void term_render(buffer_t *B) {
 
   term_draw(&T, B);
 
-  if (g_flags & (MODE_CMD | MODE_SEARCH))
+  if (g_flags & (MCMD | MSEARCH))
     vt_set_cursor_position(T.rows + 2, prompt_x() + 1);
   else
     vt_set_cursor_position(B->cursor.y + 1, B->cursor.x + 1);
 
-  if (g_flags & (MODE_INSERT | MODE_VISUAL))
+  if (g_flags & (MINSERT | MVISUAL))
     vt_show_cursor();
 
   vt_flush();
