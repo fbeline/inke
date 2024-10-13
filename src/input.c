@@ -79,6 +79,8 @@ static void process_key(buffer_t *B, i32 ch) {
     return;
   }
 
+  if (g_mode != MODE_INSERT) return;
+
   if (ch == TAB_KEY) {
     cursor_insert_char(B, ' ');
     cursor_insert_char(B, ' ');
