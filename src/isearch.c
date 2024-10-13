@@ -59,7 +59,7 @@ static void isearch_search(buffer_t *B, const char *query, u8 dir) {
 
 static void isearch_return(buffer_t *B) {
   g_mode = MODE_INSERT;
-  clear_status_message();
+  set_status_message("");
 }
 
 void isearch(i32 opt) {
@@ -80,7 +80,7 @@ void isearch(i32 opt) {
 void isearch_abort(buffer_t *B) {
   cursor_set(B, &obuffer);
   g_mode = MODE_INSERT;
-  clear_status_message();
+  set_status_message("");
 }
 
 void isearch_start(buffer_t *B) {

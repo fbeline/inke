@@ -76,7 +76,7 @@ void cursor_region_text(buffer_t *B) {
   editor_text_between(&B->editor, mark_get(), g_clipbuf);
 
   g_mode = MODE_INSERT;
-  clear_status_message();
+  set_status_message("");
 }
 
 void cursor_region_kill(buffer_t *B) {
@@ -89,7 +89,7 @@ void cursor_region_kill(buffer_t *B) {
   undo_push(CUT, B, g_clipbuf->buf);
 
   g_mode = MODE_INSERT;
-  clear_status_message();
+  set_status_message("");
 
   B->dirty++;
 }

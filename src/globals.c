@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 bool g_running = true;
-bool g_cursor_vis = true;
 u32 g_mode = MODE_INSERT;
 u8 g_undo_state = UNDO_ON;
 ds_t *g_clipbuf = NULL;
@@ -15,10 +14,6 @@ isearch_t g_isearch = {0};
 window_t g_window = {0};
 
 static char message[256] = {0};
-
-void clear_status_message(void) {
-  message[0] = '\0';
-}
 
 void set_status_message(const char* msg, ...) {
   va_list args;
@@ -35,7 +30,7 @@ void mark_start(buffer_t *B) {
 
   if (g_mode == MODE_VISUAL) {
     g_mode = MODE_INSERT;
-    clear_status_message();
+    set_status_message("");
     return;
   }
 

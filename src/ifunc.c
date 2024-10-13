@@ -14,8 +14,7 @@
 static void ifunc_nop(i32 ch) { }
 
 static void mode_clean(void) {
-  clear_status_message();
-  g_cursor_vis = true;
+  set_status_message("");
   g_mode = MODE_INSERT;
   g_cmd_func = ifunc_nop;
 }
@@ -58,14 +57,12 @@ void set_ctrl_x(buffer_t *B) {
   if (g_mode != MODE_INSERT) return;
 
   set_status_message("C-x");
-  g_cursor_vis = false;
   g_mode = CONTROL_X;
 }
 
 void ifunc_exit(buffer_t *B) {
   if (B->dirty > 0) {
     set_status_message("Save file? (y/n or [c]ancel)");
-    g_cursor_vis = false;
     g_mode = MODE_CMD_CHAR;
     g_cmd_func = save_and_exit;
   }

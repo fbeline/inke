@@ -191,7 +191,8 @@ void term_render(buffer_t *B) {
   else
     vt_set_cursor_position(B->cursor.y + 1, B->cursor.x + 1);
 
-  if (g_cursor_vis) vt_show_cursor();
+  if (g_mode & (MODE_INSERT | MODE_VISUAL))
+    vt_show_cursor();
 
   vt_flush();
 }

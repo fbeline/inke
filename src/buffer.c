@@ -72,22 +72,26 @@ void buffer_next(buffer_t *B) {
   head = head->next;
   g_window.buffer = head->buffer;
   g_mode = MODE_INSERT;
+  set_status_message("");
 }
 
 void buffer_prev(buffer_t *B) {
   head = head->prev;
   g_window.buffer = head->buffer;
   g_mode = MODE_INSERT;
+  set_status_message("");
 }
 
 void buffer_save(buffer_t *B) {
   if (io_write_buffer(B) != 0)
     set_status_message("Error: Could not save file %.20s", B->filename);
 
-  cursor_t *C = &g_window.buffer->cursor;
+  cursor_t *C = &B->cursor;
   if (C->x + C->coloff > B->lp->ds->len) {
     cursor_eol(B);
   }
+  g_mode = MODE_INSERT;
+  set_status_message("");
 }
 
 void buffer_free(buffer_t *B) {
