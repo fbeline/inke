@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "definitions.h"
 #include "ds.h"
 
 #define VERSION "0.0.1"

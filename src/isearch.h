@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "definitions.h"
 
 void isearch_start(buffer_t *B);
 void isearch(i32 opt);

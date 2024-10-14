@@ -2,7 +2,7 @@
 
 #include <unistd.h>
 
-#include "types.h"
+#include "definitions.h"
 
 #define IO_FILE_EXISTS(filename) (access(filename, F_OK) == 0)
 

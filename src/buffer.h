@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "definitions.h"
 
 void buffer_create(const char *filename);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "definitions.h"
 
 void cursor_init(cursor_t *C);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "definitions.h"
 
 void prompt_init(const char *msg);
 void prompt_handle_char(i32 ch);

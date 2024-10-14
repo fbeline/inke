@@ -11,7 +11,7 @@
 #include "ifunc.h"
 #include "isearch.h"
 #include "prompt.h"
-#include "types.h"
+#include "definitions.h"
 #include "utils.h"
 
 static keytab_t keytabs[] = {

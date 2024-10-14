@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ds.h"
-#include "types.h"
+#include "definitions.h"
 
 line_t *lalloc(usize capacity);
 

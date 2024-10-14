@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdio.h>
-#include "types.h"
+#include "definitions.h"
 
 /**
  * SWAP - swap values of @a and @b
