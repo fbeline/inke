@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   init(argv[1]);
 
   for(;;) {
-    if (!g_running) break;
+    if (!(g_flags & RUNNING)) break;
 
     term_render(g_window.buffer);
     input_process_keys(g_window.buffer);

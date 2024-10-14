@@ -5,7 +5,6 @@
 
 #define VERSION "0.0.1"
 
-extern bool g_running;
 extern u32 g_flags;
 extern u8 g_undo_state;
 extern cmd_func_t g_cmd_func;

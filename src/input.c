@@ -79,7 +79,7 @@ static void process_key(buffer_t *B, i32 ch) {
     return;
   }
 
-  if (g_flags != MINSERT) return;
+  if (!(g_flags & MINSERT)) return;
 
   if (ch == TAB_KEY) {
     cursor_insert_char(B, ' ');
@@ -170,26 +170,22 @@ void input_process_keys(buffer_t* B) {
   i32 ch = input_read_key();
 
   if (ch == (CONTROL | 'G')) {
-    if (g_flags == MSEARCH)
+    if (g_flags & MSEARCH)
       isearch_abort(B);
 
-    g_flags = MINSERT;
+    g_flags = (RUNNING | MINSERT);
     set_status_message("Quit");
     return;
   }
 
-  switch (g_flags) {
-    case MCMD_CHAR:
-      g_cmd_func(ch);
-      break;
-    case MSEARCH:
-    case MCMD:
-      prompt_handle_char(ch);
-      break;
-    default:
-      process_key(B, ch);
+  if (g_flags & MCMD_CHAR) {
+    g_cmd_func(ch);
+  } else if (g_flags & (MSEARCH | MCMD)) {
+    prompt_handle_char(ch);
+  } else {
+    process_key(B, ch);
   }
 
-  if (g_flags == MVISUAL)
+  if (g_flags & MVISUAL)
     mark_end(B);
 }

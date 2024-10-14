@@ -15,7 +15,8 @@ static void ifunc_nop(i32 ch) { }
 
 static void mode_clean(void) {
   set_status_message("");
-  g_flags = MINSERT;
+  g_flags &= ~(MCMD | MCMD_CHAR | MSEARCH | CONTROL_X);
+  g_flags |= MINSERT;
   g_cmd_func = ifunc_nop;
 }
 
@@ -23,13 +24,13 @@ static void save_and_exit(i32 ch) {
   switch (ch) {
     case 'y':
       mode_clean();
-      if (io_write_buffer(g_window.buffer) == 0) g_running = false;
+      if (io_write_buffer(g_window.buffer) == 0) g_flags &= ~(RUNNING);
       else set_status_message("Error: Could not save file %.20s",
                               g_window.buffer->filename);
 
       break;
     case 'n':
-      g_running = false;
+      g_flags &= ~(RUNNING);
       break;
     case 'c':
       mode_clean();
@@ -54,25 +55,27 @@ static void gotol(i32 ch) {
 }
 
 void set_ctrl_x(buffer_t *B) {
-  if (g_flags != MINSERT) return;
+  if (!(g_flags & MINSERT)) return;
 
   set_status_message("C-x");
-  g_flags = CONTROL_X;
+  g_flags &= ~MINSERT;
+  g_flags |= CONTROL_X;
 }
 
 void ifunc_exit(buffer_t *B) {
   if (B->dirty > 0) {
     set_status_message("Save file? (y/n or [c]ancel)");
-    g_flags = MCMD_CHAR;
+    g_flags |= MCMD_CHAR;
     g_cmd_func = save_and_exit;
   }
   else {
-    g_running = false;
+    g_flags &= ~RUNNING;
   }
 }
 
 void ifunc_find_file(buffer_t *B) {
-  g_flags = MCMD;
+  g_flags &= ~MINSERT;
+  g_flags |= MCMD;
   g_cmd_func = open_file;
 
   char cwd[NPATH];
@@ -85,6 +88,7 @@ void ifunc_find_file(buffer_t *B) {
 
 void ifunc_gotol(buffer_t *B) {
   prompt_init("goto line: ");
-  g_flags = MCMD;
+  g_flags &= ~MINSERT;
+  g_flags |= MCMD;
   g_cmd_func = gotol;
 }

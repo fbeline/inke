@@ -67,7 +67,6 @@ void undo(buffer_t *B) {
   if (u == NULL) return;
 
   cursor_set(B, &u->buffer);
-  g_flags = MINSERT;
 
   g_undo_state = UNDO_OFF;
   switch (u->type) {

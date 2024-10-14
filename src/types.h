@@ -28,8 +28,8 @@ typedef size_t usize;
 #define MSEARCH   0x04
 #define MCMD      0x08
 #define MCMD_CHAR 0x10
-#define MVISUAL   0x12
-#define CONTROL_X 0x14
+#define MVISUAL   0x20
+#define CONTROL_X 0x40
 
 #define NBUFNAME 16
 #define NPATH    256

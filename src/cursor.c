@@ -71,16 +71,17 @@ static void cursor_set_lp_as(buffer_t *B, line_t *lp, u32 x) {
 }
 
 void cursor_region_text(buffer_t *B) {
-  if (g_flags != MVISUAL) return;
+  if (!(g_flags & MVISUAL)) return;
 
   editor_text_between(&B->editor, mark_get(), g_clipbuf);
 
-  g_flags = MINSERT;
+  g_flags &= ~MVISUAL;
+  g_flags |= MINSERT;
   set_status_message("");
 }
 
 void cursor_region_kill(buffer_t *B) {
-  if (g_flags != MVISUAL) return;
+  if (!(g_flags & MVISUAL)) return;
 
   mark_t mark = mark_get();
   editor_kill_between(&B->editor, mark, g_clipbuf);
@@ -88,7 +89,8 @@ void cursor_region_kill(buffer_t *B) {
   cursor_set_lp_as(B, mark.start_lp, mark.start_offset);
   undo_push(CUT, B, g_clipbuf->buf);
 
-  g_flags = MINSERT;
+  g_flags &= ~MVISUAL;
+  g_flags |= MINSERT;
   set_status_message("");
 
   B->dirty++;
