@@ -4,8 +4,12 @@ feat:
   - search/replace
   - auto ident
   - ident line / region shortcut
+  - remove CMD_CHAR
+  - use undo state as a editor flag
 
 bugs:
+  - undo
+  - CTRL+C save all buffers option
   - screen resize first frame render
   - fix mouse click on tmux
   - region kill cursor re-position
