@@ -41,11 +41,11 @@ static u32 raw_y(cursor_t* C) {
   return C->y + C->rowoff;
 }
 
-void cursor_set(buffer_t *dest, buffer_t* src) {
-  dest->cursor = src->cursor;
-
+void cursor_set(buffer_t *dest, cursor_t* src) {
+  dest->cursor = *src;
   dest->lp = dest->editor.lines;
-  u32 max = raw_x(&dest->cursor);
+
+  u32 max = src->y + src->rowoff;
   for (u32 i = 0; i < max; i++) {
     dest->lp = dest->lp->next;
   }

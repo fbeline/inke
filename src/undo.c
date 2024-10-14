@@ -7,6 +7,14 @@
 #include "globals.h"
 #include "editor.h"
 
+typedef struct undo_s {
+  undo_type type;
+  cursor_t cursor;
+  char* strdata;
+
+  struct undo_s* next;
+} undo_t;
+
 static undo_t* undo_head = NULL;
 
 void undo_push(undo_type type, buffer_t *buffer, const char* data) {
@@ -14,7 +22,7 @@ void undo_push(undo_type type, buffer_t *buffer, const char* data) {
 
   undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
   undo->type = type;
-  undo->buffer = *buffer;
+  undo->cursor = buffer->cursor;
   undo->next = undo_head;
   undo->strdata = NULL;
   if (data != NULL) {
@@ -27,7 +35,7 @@ void undo_push(undo_type type, buffer_t *buffer, const char* data) {
   undo_head = undo;
 }
 
-undo_t* undo_pop(void) {
+static undo_t* undo_pop(void) {
   undo_t* head = undo_head;
   if (head == NULL) return NULL;
 
@@ -39,7 +47,7 @@ static undo_t *undo_peek(void) {
   return undo_head;
 }
 
-void undo_free(undo_t* undo) {
+static void undo_free(undo_t* undo) {
   if (undo == NULL) return;
   if (undo->strdata != NULL) free(undo->strdata);
 
@@ -66,7 +74,7 @@ void undo(buffer_t *B) {
   undo_t* u = undo_pop();
   if (u == NULL) return;
 
-  cursor_set(B, &u->buffer);
+  cursor_set(B, &u->cursor);
 
   g_undo_state = UNDO_OFF;
   switch (u->type) {

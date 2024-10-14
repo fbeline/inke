@@ -79,7 +79,7 @@ void isearch(i32 opt) {
 }
 
 void isearch_abort(buffer_t *B) {
-  cursor_set(B, &obuffer);
+  cursor_set(B, &obuffer.cursor);
   g_flags &= ~MSEARCH;
   g_flags |= MINSERT;
   set_status_message("");

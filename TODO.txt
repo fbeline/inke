@@ -8,7 +8,6 @@ feat:
   - use undo state as a editor flag
 
 bugs:
-  - undo
   - CTRL+C save all buffers option
   - screen resize first frame render
   - fix mouse click on tmux
