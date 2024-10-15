@@ -95,6 +95,7 @@ void buffer_save(buffer_t *B) {
 
   g_flags &= ~(MCMD | MCMD_CHAR | CONTROL_X);
   g_flags |= MINSERT;
+  B->dirty = 0;
   set_status_message("");
 }
 

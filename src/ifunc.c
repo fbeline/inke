@@ -24,13 +24,13 @@ static void save_and_exit(i32 ch) {
   switch (ch) {
     case 'y':
       mode_clean();
-      if (io_write_buffer(g_window.buffer) == 0) g_flags &= ~(RUNNING);
+      if (io_write_buffer(g_window.buffer) == 0) g_flags &= ~RUNNING;
       else set_status_message("Error: Could not save file %.20s",
                               g_window.buffer->filename);
 
       break;
     case 'n':
-      g_flags &= ~(RUNNING);
+      g_flags &= ~RUNNING;
       break;
     case 'c':
       mode_clean();
