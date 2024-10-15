@@ -18,7 +18,7 @@ typedef struct undo_s {
 static undo_t* undo_head = NULL;
 
 void undo_push(undo_type type, buffer_t *buffer, const char* data) {
-  if (g_undo_state == UNDO_OFF) return;
+  if (!(g_flags & UNDO)) return;
 
   undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
   undo->type = type;
@@ -76,7 +76,7 @@ void undo(buffer_t *B) {
 
   cursor_set(B, &u->cursor);
 
-  g_undo_state = UNDO_OFF;
+  g_flags &= ~UNDO;
   switch (u->type) {
     case ADD:
       cursor_remove_char(B);
@@ -104,7 +104,7 @@ void undo(buffer_t *B) {
   }
 
   undo_undo(B, u);
-  g_undo_state = UNDO_ON;
+  g_flags |= UNDO;
   undo_free(u);
 }
 

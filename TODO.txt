@@ -5,9 +5,9 @@ feat:
   - auto ident
   - ident line / region shortcut
   - remove CMD_CHAR
-  - use undo state as a editor flag
 
 bugs:
+  - undo does not work for multiple buffers
   - CTRL+C save all buffers option
   - screen resize first frame render
   - fix mouse click on tmux

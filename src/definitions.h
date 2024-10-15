@@ -29,7 +29,8 @@ typedef size_t usize;
 #define MCMD      0x08
 #define MCMD_CHAR 0x10
 #define MVISUAL   0x20
-#define CONTROL_X 0x40
+#define UNDO      0x40
+#define CONTROL_X 0x80
 
 #define NBUFNAME 16
 #define NPATH    256

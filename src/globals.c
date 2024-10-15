@@ -4,8 +4,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-u32 g_flags = (RUNNING | MINSERT);
-u8 g_undo_state = UNDO_ON;
+u32 g_flags = (RUNNING | UNDO | MINSERT);
 ds_t *g_clipbuf = NULL;
 cmd_func_t g_cmd_func = NULL;
 mark_t g_mark = {0};
@@ -16,12 +15,12 @@ static char message[256] = {0};
 
 void set_status_message(const char* msg, ...) {
   va_list args;
-	va_start(args, msg);
+  va_start(args, msg);
   vsnprintf(message, 256, msg, args);
-	va_end(args);
+  va_end(args);
 }
 
-char *get_status_message(void) {
+const char *get_status_message(void) {
   return message;
 }
 
@@ -77,5 +76,4 @@ mark_t mark_get(void) {
 
 void globals_init(void) {
   g_clipbuf = dsempty();
-  g_flags = (RUNNING | MINSERT);
 }
