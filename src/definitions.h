@@ -56,6 +56,11 @@ enum keys {
   DEL_KEY
 };
 
+typedef enum {
+  ADD, BACKSPACE, CUT, LINEUP, LINEBREAK, LINEDELETE,
+  DELETE_FORWARD
+} undo_type;
+
 typedef struct line_s {
   struct line_s *next;
   struct line_s *prev;
@@ -86,10 +91,21 @@ typedef struct cursor_s {
   u32 coloff, rowoff;
 } cursor_t;
 
+typedef struct undo_s {
+  undo_type type;
+  cursor_t cursor;
+  ds_t* strdata;
+
+  struct undo_s* next;
+} undo_t;
+
 typedef struct buffer_s {
   cursor_t cursor;
   editor_t editor;
+
   line_t *lp;
+  undo_t *up;
+
   u16 dirty;
   char name[NBUFNAME];
   char filename[NPATH];

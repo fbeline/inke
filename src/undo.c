@@ -4,17 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "definitions.h"
 #include "ds.h"
-#include "globals.h"
 #include "editor.h"
-
-typedef struct undo_s {
-  undo_type type;
-  cursor_t cursor;
-  ds_t* strdata;
-
-  struct undo_s* next;
-} undo_t;
+#include "globals.h"
 
 static undo_t* undo_head = NULL;
 
@@ -25,10 +18,7 @@ void undo_push(undo_type type, buffer_t *buffer, const char* data) {
   undo->type = type;
   undo->cursor = buffer->cursor;
   undo->next = undo_head;
-  undo->strdata = NULL;
-  if (data != NULL) {
-    undo->strdata = dsnew(data);
-  }
+  undo->strdata = dsnew(data);
 
   undo_head = undo;
 }

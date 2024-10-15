@@ -37,6 +37,8 @@ ds_t *dsnewlen(size_t len) {
 }
 
 ds_t *dsnew(const char *init) {
+  if (init == NULL) return NULL;
+
   ds_t *ds = dsnewlen(strlen(init));
   ds = dscat(ds, init);
 
