@@ -37,9 +37,8 @@ ds_t *dsnewlen(size_t len) {
 }
 
 ds_t *dsnew(const char *init) {
-  size_t len = strlen(init);
-  ds_t *ds = dsnewlen(len);
-  memcpy(ds->buf, init, len);
+  ds_t *ds = dsnewlen(strlen(init));
+  ds = dscat(ds, init);
 
   return ds;
 }
@@ -111,6 +110,8 @@ ds_t *dsrtrim(ds_t *ds) {
 }
 
 void dsfree(ds_t *ds) {
+  if (ds == NULL) return;
+
   free(ds->buf);
   free(ds);
 }

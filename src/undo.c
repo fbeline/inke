@@ -4,13 +4,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "ds.h"
 #include "globals.h"
 #include "editor.h"
 
 typedef struct undo_s {
   undo_type type;
   cursor_t cursor;
-  char* strdata;
+  ds_t* strdata;
 
   struct undo_s* next;
 } undo_t;
@@ -26,10 +27,7 @@ void undo_push(undo_type type, buffer_t *buffer, const char* data) {
   undo->next = undo_head;
   undo->strdata = NULL;
   if (data != NULL) {
-    usize size = strlen(data);
-    undo->strdata = malloc(size + 1);
-    memcpy(undo->strdata, data, size);
-    undo->strdata[size] = '\0';
+    undo->strdata = dsnew(data);
   }
 
   undo_head = undo;
@@ -49,15 +47,14 @@ static undo_t *undo_peek(void) {
 
 static void undo_free(undo_t* undo) {
   if (undo == NULL) return;
-  if (undo->strdata != NULL) free(undo->strdata);
-
+  dsfree(undo->strdata);
   free(undo);
 }
 
 static void undo_line_delete(buffer_t *B, undo_t *undo) {
   cursor_t *C = &B->cursor;
   usize y = C->y + C->rowoff;
-  B->lp = editor_insert_row_with_data_at(&B->editor, y, undo->strdata);
+  B->lp = editor_insert_row_with_data_at(&B->editor, y, undo->strdata->buf);
 
   if (y == 0) B->editor.lines = B->lp;
 }
@@ -82,7 +79,7 @@ void undo(buffer_t *B) {
       cursor_remove_char(B);
       break;
     case BACKSPACE:
-      cursor_insert_char(B, u->strdata[0]);
+      cursor_insert_char(B, u->strdata->buf[0]);
       break;
     case LINEUP:
       cursor_break_line(B);
@@ -94,10 +91,10 @@ void undo(buffer_t *B) {
       undo_line_delete(B, u);
       break;
     case DELETE_FORWARD:
-      cursor_insert_text(B, u->strdata);
+      cursor_insert_text(B, u->strdata->buf);
       break;
     case CUT:
-      cursor_insert_text(B, u->strdata);
+      cursor_insert_text(B, u->strdata->buf);
       break;
     default:
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", u->type);
