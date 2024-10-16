@@ -38,6 +38,8 @@ static keytab_t keytabs[] = {
 
   { MVISUAL, CONTROL | 'W', cursor_region_kill },
   { MVISUAL, META | 'W', cursor_region_text },
+  { MVISUAL, '>', cursor_move_region_forward },
+  { MVISUAL, '<', cursor_move_region_backward },
 
   { MINSERT, BACKSPACE_KEY, cursor_remove_char },
   { MINSERT, DEL_KEY, cursor_remove_char },
@@ -82,8 +84,8 @@ static void process_key(buffer_t *B, i32 ch) {
   if (!(g_flags & MINSERT)) return;
 
   if (ch == TAB_KEY) {
-    cursor_insert_char(B, ' ');
-    cursor_insert_char(B, ' ');
+    for (u8 i = 0; i < TAB_STOP; i++)
+      cursor_insert_char(B, ' ');
   } else if (ch >= 32 && ch <= 126) {
     cursor_insert_char(B, ch);
   }

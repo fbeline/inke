@@ -140,7 +140,7 @@ void editor_delete_char_at(line_t *lp, u32 x) {
 
   memmove(&lp->ds->buf[x],
           &lp->ds->buf[x+1],
-          lp->ds->len - x + 1);
+          lp->ds->len);
 
   lp->ds->len--;
 }

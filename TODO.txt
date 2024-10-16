@@ -3,10 +3,10 @@ feat:
   - filesystem navigation tree
   - search/replace
   - auto ident
-  - ident line / region shortcut
   - remove CMD_CHAR
 
 bugs:
+  - Draw region when out of screen
   - CTRL+C save all buffers option
   - screen resize first frame render
   - fix mouse click on tmux

@@ -32,6 +32,7 @@ typedef size_t usize;
 #define UNDO      0x40
 #define CONTROL_X 0x80
 
+#define TAB_STOP 2
 #define NBUFNAME 16
 #define NPATH    256
 #define NBINDS   64

@@ -399,6 +399,37 @@ void cursor_init(cursor_t *C) {
   C->y = 0;
 }
 
+void cursor_move_region_forward(buffer_t *B) {
+  mark_t mark = mark_get();
+  line_t *lp = mark.start_lp;
+
+  while(lp != NULL) {
+    for (u8 i = 0; i < TAB_STOP; i++) {
+      editor_insert_char_at(&B->editor, lp, 0, ' ');
+    }
+    lp = lp != mark.end_lp ? lp->next : NULL;
+  }
+}
+
+void cursor_move_region_backward(buffer_t *B) {
+  mark_t mark = mark_get();
+  line_t *lp = mark.start_lp;
+
+  while (lp != NULL) {
+    for (u8 i = 0; i < TAB_STOP; i++) {
+      if (lp->ds->buf[0] != ' ') break;
+
+      editor_delete_char_at(lp, 0);
+      if (lp == g_mark.start_lp) g_mark.start_offset--;
+      if (lp == g_mark.end_lp) g_mark.end_offset--;
+    }
+    lp = lp != mark.end_lp ? lp->next : NULL;
+  }
+
+  if (raw_x(&B->cursor) > B->lp->ds->len)
+    cursor_eol(B);
+}
+
 void cursor_free(cursor_t *C) {
   if (C == NULL) return;
 

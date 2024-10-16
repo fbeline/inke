@@ -32,6 +32,10 @@ void cursor_move_word_backward(buffer_t *B);
 
 void cursor_move_line_up(buffer_t *B);
 
+void cursor_move_region_forward(buffer_t *B);
+
+void cursor_move_region_backward(buffer_t *B);
+
 void cursor_remove_char(buffer_t *B);
 
 void cursor_insert_char(buffer_t *B, i32 c);
