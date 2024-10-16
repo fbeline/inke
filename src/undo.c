@@ -9,30 +9,28 @@
 #include "editor.h"
 #include "globals.h"
 
-static undo_t* undo_head = NULL;
-
 void undo_push(undo_type type, buffer_t *buffer, const char* data) {
   if (!(g_flags & UNDO)) return;
 
   undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
   undo->type = type;
   undo->cursor = buffer->cursor;
-  undo->next = undo_head;
+  undo->next = buffer->up;
   undo->strdata = dsnew(data);
 
-  undo_head = undo;
+  buffer->up = undo;
 }
 
-static undo_t* undo_pop(void) {
-  undo_t* head = undo_head;
+static undo_t* undo_pop(buffer_t *B) {
+  undo_t* head = B->up;
   if (head == NULL) return NULL;
 
-  undo_head = head->next;
+  B->up = head->next;
   return head;
 }
 
-static undo_t *undo_peek(void) {
-  return undo_head;
+static undo_t *undo_peek(buffer_t *B) {
+  return B->up;
 }
 
 static void undo_free(undo_t* undo) {
@@ -50,7 +48,7 @@ static void undo_line_delete(buffer_t *B, undo_t *undo) {
 }
 
 static void undo_undo(buffer_t *B, undo_t *u) {
-  undo_t *next = undo_peek();
+  undo_t *next = undo_peek(B);
   if (next == NULL || next->type != u->type)
     return;
 
@@ -58,7 +56,7 @@ static void undo_undo(buffer_t *B, undo_t *u) {
 }
 
 void undo(buffer_t *B) {
-  undo_t* u = undo_pop();
+  undo_t* u = undo_pop(B);
   if (u == NULL) return;
 
   cursor_set(B, &u->cursor);

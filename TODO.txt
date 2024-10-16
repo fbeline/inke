@@ -7,7 +7,6 @@ feat:
   - remove CMD_CHAR
 
 bugs:
-  - undo does not work for multiple buffers
   - CTRL+C save all buffers option
   - screen resize first frame render
   - fix mouse click on tmux
