@@ -4,7 +4,4 @@ feat:
   - search/replace
 
 bugs:
-  - Draw region when out of screen
-  - screen resize first frame render
   - fix mouse click on tmux
-  - region kill cursor re-position

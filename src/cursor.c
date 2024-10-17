@@ -86,7 +86,11 @@ void cursor_region_kill(buffer_t *B) {
   mark_t mark = mark_get();
   editor_kill_between(&B->editor, mark, g_clipbuf);
 
+  u32 rowoff = B->cursor.rowoff;
   cursor_set_lp_as(B, mark.start_lp, mark.start_offset);
+  B->cursor.rowoff = rowoff;
+  B->cursor.y -= rowoff;
+
   undo_push(CUT, B, g_clipbuf->buf);
 
   g_flags &= ~MVISUAL;
