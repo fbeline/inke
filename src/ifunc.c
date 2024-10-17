@@ -11,17 +11,18 @@
 #include "prompt.h"
 #include "utils.h"
 
-static void ifunc_nop(i32 ch) { }
+static void ifunc_nop(void) { }
 
 static void mode_clean(void) {
   set_status_message("");
-  g_flags &= ~(MCMD | MCMD_CHAR | MSEARCH | CONTROL_X);
+  g_flags &= ~(MCMD | MSEARCH | CONTROL_X);
   g_flags |= MINSERT;
   g_cmd_func = ifunc_nop;
 }
 
-static void save_and_exit(i32 ch) {
-  switch (ch) {
+static void save_and_exit(void) {
+  const char *answer = prompt_text();
+  switch (answer[0]) {
     case 'y':
       mode_clean();
       if (io_write_buffer(g_window.buffer) == 0) g_flags &= ~RUNNING;
@@ -38,14 +39,14 @@ static void save_and_exit(i32 ch) {
   }
 }
 
-static void open_file(i32 _ch) {
+static void open_file(void) {
   const char *filename = prompt_text();
   if (access(filename, F_OK) != 0) return;
   buffer_create(filename);
   mode_clean();
 }
 
-static void gotol(i32 ch) {
+static void gotol(void) {
   const char *snum = prompt_text();
   i32 line;
   if (sscanf(snum, "%d", &line) == 1) {
@@ -64,8 +65,9 @@ void set_ctrl_x(buffer_t *B) {
 
 void ifunc_exit(buffer_t *B) {
   if (B->dirty > 0) {
-    set_status_message("Save file? (y/n or [c]ancel)");
-    g_flags |= MCMD_CHAR;
+    prompt_init("Save file? (y/n or [c]ancel): ");
+    g_flags &= ~MINSERT;
+    g_flags |= MCMD;
     g_cmd_func = save_and_exit;
   }
   else {

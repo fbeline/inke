@@ -180,9 +180,7 @@ void input_process_keys(buffer_t* B) {
     return;
   }
 
-  if (g_flags & MCMD_CHAR) {
-    g_cmd_func(ch);
-  } else if (g_flags & (MSEARCH | MCMD)) {
+  if (g_flags & (MSEARCH | MCMD)) {
     prompt_handle_char(ch);
   } else {
     process_key(B, ch);

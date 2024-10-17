@@ -1,9 +1,7 @@
 feat:
   - cmd auto complete
-  - filesystem navigation tree
+  - filesystem navigation tree ??
   - search/replace
-  - auto ident
-  - remove CMD_CHAR
 
 bugs:
   - Draw region when out of screen

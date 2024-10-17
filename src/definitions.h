@@ -27,10 +27,9 @@ typedef size_t usize;
 #define MINSERT   0x02
 #define MSEARCH   0x04
 #define MCMD      0x08
-#define MCMD_CHAR 0x10
-#define MVISUAL   0x20
-#define UNDO      0x40
-#define CONTROL_X 0x80
+#define MVISUAL   0x10
+#define UNDO      0x20
+#define CONTROL_X 0x40
 
 #define TAB_STOP 2
 #define NBUFNAME 16
@@ -119,7 +118,7 @@ typedef struct window_s {
 } window_t;
 
 typedef void (*key_func_t)(buffer_t *B);
-typedef void (*cmd_func_t)(i32 ch);
+typedef void (*cmd_func_t)(void);
 
 typedef struct keytab {
   u32 flags;

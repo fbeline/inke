@@ -4,6 +4,7 @@
 
 #include "ds.h"
 #include "globals.h"
+#include "isearch.h"
 
 typedef struct prompt_s {
   u32 min_x;
@@ -116,7 +117,10 @@ const char *prompt_text(void) {
 void prompt_handle_char(i32 ch) {
   switch (ch) {
     case ENTER_KEY:
-      g_cmd_func(0);
+      if (g_flags & MSEARCH)
+        isearch(0);
+      else
+        g_cmd_func();
       break;
     case BACKSPACE_KEY:
       prompt_backspace();
@@ -129,10 +133,10 @@ void prompt_handle_char(i32 ch) {
       break;
     default:
       if (g_flags & MSEARCH && ch == (CONTROL | 'S')) {
-        g_cmd_func(1);
+        isearch(1);
       }
       else if (g_flags & MSEARCH && ch == (CONTROL | 'R')) {
-        g_cmd_func(-1);
+        isearch(-1);
       }
       else if (ch == (CONTROL | 'E')) {
         prompt_eol();

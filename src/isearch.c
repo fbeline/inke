@@ -92,6 +92,5 @@ void isearch_start(buffer_t *B) {
   prompt_init("I-Search: ");
   g_flags &= ~MINSERT;
   g_flags |= MSEARCH;
-  g_cmd_func = isearch;
   g_isearch = (isearch_t) {.lp = NULL, .qlen = 0, .x = 0};
 }
