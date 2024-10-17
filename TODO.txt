@@ -5,7 +5,6 @@ feat:
 
 bugs:
   - Draw region when out of screen
-  - CTRL+C save all buffers option
   - screen resize first frame render
   - fix mouse click on tmux
   - region kill cursor re-position

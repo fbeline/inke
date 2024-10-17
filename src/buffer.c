@@ -86,8 +86,12 @@ void buffer_prev(buffer_t *B) {
 }
 
 void buffer_save(buffer_t *B) {
-  if (io_write_buffer(B) != 0)
+  if (io_write_buffer(B) != 0) {
     set_status_message("Error: Could not save file %.20s", B->filename);
+    g_flags &= ~(MCMD | CONTROL_X);
+    g_flags |= MINSERT;
+    return;
+  }
 
   cursor_t *C = &B->cursor;
   if (C->x + C->coloff > B->lp->ds->len) {
@@ -98,6 +102,33 @@ void buffer_save(buffer_t *B) {
   g_flags |= MINSERT;
   B->dirty = 0;
   set_status_message("");
+}
+
+buffer_t *buffer_save_all(void) {
+  bufferl_t *bp = head;
+  do {
+    if (bp->buffer->dirty > 0) {
+      if (io_write_buffer(bp->buffer) != 0)
+        return bp->buffer;
+    }
+
+    bp->buffer->dirty = 0;
+    bp = bp->next;
+  } while (bp != head);
+
+  return NULL;
+}
+
+u16 buffer_dirty_count(void) {
+  bufferl_t *bp = head;
+  u16 n = 0;
+
+  do {
+    if (bp->buffer->dirty > 0) n++;
+    bp = bp->next;
+  } while(bp != head);
+
+  return n;
 }
 
 void buffer_free(buffer_t *B) {

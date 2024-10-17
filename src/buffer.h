@@ -12,4 +12,8 @@ void buffer_prev(buffer_t *B);
 
 void buffer_save(buffer_t *B);
 
+buffer_t *buffer_save_all(void);
+
+u16 buffer_dirty_count(void);
+
 void buffer_free(buffer_t *B);
