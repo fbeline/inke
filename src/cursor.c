@@ -420,8 +420,10 @@ void cursor_move_region_backward(buffer_t *B) {
       if (lp->ds->buf[0] != ' ') break;
 
       editor_delete_char_at(lp, 0);
-      if (lp == g_mark.start_lp) g_mark.start_offset--;
-      if (lp == g_mark.end_lp) g_mark.end_offset--;
+      if (lp == g_mark.start_lp && g_mark.start_offset > 0)
+        g_mark.start_offset--;
+      if (lp == g_mark.end_lp && g_mark.end_offset > 0)
+        g_mark.end_offset--;
     }
     lp = lp != mark.end_lp ? lp->next : NULL;
   }
