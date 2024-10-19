@@ -147,4 +147,7 @@ void buffer_free(buffer_t *B) {
 
   editor_free(&aux->buffer->editor);
   free(aux);
+
+  if (head == NULL)
+    g_flags &= ~RUNNING;
 }

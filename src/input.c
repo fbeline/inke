@@ -52,7 +52,7 @@ static keytab_t keytabs[] = {
   { MINSERT, CONTROL | 'Y', cursor_paste },
   { MINSERT, CONTROL | '/', cursor_undo },
 
-  { CONTROL_X, 'K', buffer_free },
+  { CONTROL_X, 'k', ifunc_kill_buffer },
   { CONTROL_X, CONTROL | 'F', ifunc_find_file },
   { CONTROL_X, CONTROL | 'S', buffer_save },
   { CONTROL_X, CONTROL | 'C', ifunc_exit },

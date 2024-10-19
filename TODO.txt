@@ -6,4 +6,7 @@ improvements:
   - better fs auto complete. (if exact match goes to next entry??)
 
 bugs:
+  - check if file is already open before open it again
+  - region kill cursor position
+  - region copy
   - fix mouse click on tmux

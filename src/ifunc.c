@@ -40,6 +40,17 @@ static void save_and_exit(void) {
   g_flags &= ~RUNNING;
 }
 
+static void kill_current_buffer(void) {
+  const char *answer = prompt_text();
+  buffer_t *B = buffer_get();
+
+  if (answer[0] == 'y')
+    buffer_save(B);
+
+  buffer_free(B);
+  mode_clean();
+}
+
 static void open_file(void) {
   const char *filename = prompt_text();
   if (access(filename, F_OK) != 0) return;
@@ -64,6 +75,20 @@ void set_ctrl_x(buffer_t *B) {
   g_flags |= CONTROL_X;
 }
 
+
+void ifunc_kill_buffer(buffer_t *B) {
+  if (!B->dirty) {
+    buffer_free(B);
+    return;
+  }
+
+  prompt_init("Save buffer? (y | n): ");
+  g_flags &= ~MINSERT;
+  g_flags |= MCMD;
+  g_cmd_func = kill_current_buffer;
+  g_cmd_complete_func = NULL;
+}
+
 void ifunc_exit(buffer_t *B) {
   u16 ndirty = buffer_dirty_count();
   switch (ndirty) {
@@ -71,10 +96,10 @@ void ifunc_exit(buffer_t *B) {
       g_flags &= ~RUNNING;
       return;
     case 1:
-      prompt_init("Save file? (y | n): ");
+      prompt_init("Save buffer? (y | n): ");
       break;
     default:
-      prompt_init("Save modified files? (Y[All] | y[Current] | n[discard]): ");
+      prompt_init("Save modified buffers? (Y[All] | y[Current] | n[discard]): ");
   }
 
   g_flags &= ~MINSERT;
