@@ -7,6 +7,7 @@
 
 extern u32 g_flags;
 extern cmd_func_t g_cmd_func;
+extern cmd_func_t g_cmd_complete_func;
 extern ds_t *g_clipbuf;
 extern mark_t g_mark;
 extern isearch_t g_isearch;

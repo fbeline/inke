@@ -1,5 +1,7 @@
 #include "prompt.h"
 
+#include <dirent.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "ds.h"
@@ -131,6 +133,15 @@ void prompt_handle_char(i32 ch) {
     case ARROW_RIGHT:
       prompt_right();
       break;
+    case TAB_KEY:
+      if (line.x == line.ds->len && g_cmd_complete_func != NULL) {
+        g_cmd_complete_func();
+      } else {
+        for (u8 i = 0; i < TAB_STOP; i++) {
+          dsichar(line.ds, line.x++, ' ');
+        }
+      }
+      break;
     default:
       if (g_flags & MSEARCH && ch == (CONTROL | 'S')) {
         isearch(1);
@@ -150,4 +161,50 @@ void prompt_handle_char(i32 ch) {
         prompt_insert(ch);
       }
   }
+}
+
+static i32 starts_with(const char *s, const char *prefix) {
+  usize prefixlen = strlen(prefix);
+  usize slen = strlen(s);
+  if (prefixlen > slen) return 0;
+
+  return strncmp(s, prefix, prefixlen) == 0;
+}
+
+void prompt_fs_completion(void) {
+  DIR *dir;
+  struct dirent *entry;
+  const char *last_slash;
+  char path[NPATH];
+  char val[NPATH];
+
+  const char *text = &line.ds->buf[line.min_x];
+  if ((last_slash = strrchr(text, '/')) == NULL) {
+    dscat(line.ds, "/");
+    line.x++;
+    return;
+  }
+  usize dirlen = last_slash - text + 1;
+  strncpy(path, text , dirlen);
+  strcpy(val, last_slash + 1);
+  path[dirlen] = '\0';
+  usize valuelen = strlen(val);
+
+  if (valuelen == 0 || (dir = opendir(path)) == NULL) return;
+
+  while ((entry = readdir(dir)) != NULL) {
+    if (starts_with(entry->d_name, val) == 0) continue;
+
+    dscat(line.ds, entry->d_name + valuelen);
+    line.x += strlen(entry->d_name) - valuelen;
+
+    if (entry->d_type == DT_DIR) {
+      dscat(line.ds, "/");
+      line.x++;
+    }
+
+    break;
+  }
+
+  closedir(dir);
 }

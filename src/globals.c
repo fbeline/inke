@@ -7,6 +7,7 @@
 u32 g_flags = (RUNNING | UNDO | MINSERT);
 ds_t *g_clipbuf = NULL;
 cmd_func_t g_cmd_func = NULL;
+cmd_func_t g_cmd_complete_func = NULL;
 mark_t g_mark = {0};
 isearch_t g_isearch = {0};
 window_t g_window = {0};

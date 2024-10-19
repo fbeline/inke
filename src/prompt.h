@@ -13,6 +13,7 @@ void prompt_right(void);
 void prompt_eol(void);
 void prompt_bol(void);
 void prompt_del_before(void);
+void prompt_fs_completion(void);
 u32 prompt_x(void);
 const char *prompt_text(void);
 const char *prompt_full_text(void);

@@ -1,7 +1,9 @@
 feat:
-  - cmd auto complete
   - filesystem navigation tree ??
   - search/replace
+
+improvements:
+  - better fs auto complete. (if exact match goes to next entry??)
 
 bugs:
   - fix mouse click on tmux

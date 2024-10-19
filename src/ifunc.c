@@ -1,6 +1,5 @@
 #include "ifunc.h"
 
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -9,17 +8,15 @@
 #include "cursor.h"
 #include "definitions.h"
 #include "globals.h"
-#include "io.h"
 #include "prompt.h"
 #include "utils.h"
-
-static void ifunc_nop(void) { }
 
 static void mode_clean(void) {
   set_status_message("");
   g_flags &= ~(MCMD | MSEARCH | CONTROL_X);
   g_flags |= MINSERT;
-  g_cmd_func = ifunc_nop;
+  g_cmd_func = NULL;
+  g_cmd_complete_func = NULL;
 }
 
 static void save_and_exit(void) {
@@ -83,12 +80,14 @@ void ifunc_exit(buffer_t *B) {
   g_flags &= ~MINSERT;
   g_flags |= MCMD;
   g_cmd_func = save_and_exit;
+  g_cmd_complete_func = NULL;
 }
 
 void ifunc_find_file(buffer_t *B) {
   g_flags &= ~MINSERT;
   g_flags |= MCMD;
   g_cmd_func = open_file;
+  g_cmd_complete_func = prompt_fs_completion;
 
   char cwd[NPATH];
   if (getcwd(cwd, sizeof(cwd)) == NULL) DIE("Error getcwd");
@@ -103,4 +102,5 @@ void ifunc_gotol(buffer_t *B) {
   g_flags &= ~MINSERT;
   g_flags |= MCMD;
   g_cmd_func = gotol;
+  g_cmd_complete_func = NULL;
 }
