@@ -11,7 +11,7 @@
 #include "prompt.h"
 #include "utils.h"
 
-static void mode_clean(void) {
+static void clean_flags(void) {
   set_status_message("");
   g_flags &= ~(MCMD | MSEARCH | CONTROL_X);
   g_flags |= MINSERT;
@@ -29,7 +29,7 @@ static void save_and_exit(void) {
     case 'Y':
       bp = buffer_save_all();
       if (bp != NULL) {
-        mode_clean();
+        clean_flags();
         set_status_message("Error: Could not save file %.20s", bp->filename);
         return;
       }
@@ -48,14 +48,14 @@ static void kill_current_buffer(void) {
     buffer_save(B);
 
   buffer_free(B);
-  mode_clean();
+  clean_flags();
 }
 
 static void open_file(void) {
   const char *filename = prompt_text();
   if (access(filename, F_OK) != 0) return;
   buffer_create(filename);
-  mode_clean();
+  clean_flags();
 }
 
 static void gotol(void) {
@@ -63,7 +63,7 @@ static void gotol(void) {
   i32 line;
   if (sscanf(snum, "%d", &line) == 1) {
     cursor_goto(g_window.buffer, 0, line);
-    mode_clean();
+    clean_flags();
   }
 }
 
@@ -79,6 +79,7 @@ void set_ctrl_x(buffer_t *B) {
 void ifunc_kill_buffer(buffer_t *B) {
   if (!B->dirty) {
     buffer_free(B);
+    clean_flags();
     return;
   }
 
