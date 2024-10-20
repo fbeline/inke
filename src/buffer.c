@@ -31,9 +31,25 @@ static void buffer_set_name(buffer_t *buffer, const char *filename) {
   buffer->name[len] = '\0';
 }
 
+static bool buffer_exists(const char *filename) {
+  if (head == NULL) return false;
+
+  bufferl_t *blp = head;
+  do {
+    if (strcmp(filename, blp->buffer->filename) == 0) {
+      head = blp;
+      g_window.buffer = head->buffer;
+      return true;
+    }
+    blp = blp->next;
+  } while(blp != head);
+
+  return false;
+}
+
 void buffer_create(const char *filename) {
   usize fnlen = strlen(filename);
-  if (fnlen >= NPATH) return;
+  if (fnlen >= NPATH || buffer_exists(filename)) return;
 
   bufferl_t *bufl;
   if ((bufl = malloc(sizeof(bufferl_t))) == NULL) DIE("OUT OF MEMMORY");
