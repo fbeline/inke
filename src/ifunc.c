@@ -24,9 +24,11 @@ static void save_and_exit(void) {
   const char *answer = prompt_text();
   switch (answer[0]) {
     case 'y':
+    case 'Y':
       buffer_save(buffer_get());
       break;
-    case 'Y':
+    case 'a':
+    case 'A':
       bp = buffer_save_all();
       if (bp != NULL) {
         clean_flags();
@@ -35,6 +37,7 @@ static void save_and_exit(void) {
       }
       break;
     case 'n':
+    case 'N':
       break;
   }
   g_flags &= ~RUNNING;
@@ -92,15 +95,13 @@ void ifunc_kill_buffer(buffer_t *B) {
 
 void ifunc_exit(buffer_t *B) {
   u16 ndirty = buffer_dirty_count();
-  switch (ndirty) {
-    case 0:
-      g_flags &= ~RUNNING;
-      return;
-    case 1:
-      prompt_init("Save buffer? (y | n): ");
-      break;
-    default:
-      prompt_init("Save modified buffers? (Y[All] | y[Current] | n[discard]): ");
+  if (ndirty == 0) {
+    g_flags &= ~RUNNING;
+    return;
+  } else if (ndirty == 1 && B->dirty > 0) {
+    prompt_init("Save buffer? [Y]YES [N]NO: ");
+  } else if (ndirty > 0) {
+    prompt_init("Save modified buffers? [Y]YES [A]YES TO ALL [N] NO: ");
   }
 
   g_flags &= ~MINSERT;
