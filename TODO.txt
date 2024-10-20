@@ -3,7 +3,7 @@ feat:
   - search/replace
 
 improvements:
+  - undo: avoid unnecessary malloc
   - better fs auto complete. (if exact match goes to next entry??)
 
 bugs:
-  - fix mouse click on tmux
