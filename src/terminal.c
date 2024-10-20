@@ -133,6 +133,8 @@ static void term_draw(term_t *T, buffer_t *B) {
   line_t *lp = B->editor.lines;
   cursor_t *C = &B->cursor;
 
+  vt_set_cursor_position(0, 0);
+
   for (usize i = 0; i < C->rowoff && lp->next != NULL; i++) {
     if (g_flags == MVISUAL && g_mark.start_lp == lp)
       vt_reverse_video();
@@ -181,7 +183,6 @@ void term_init(void) {
 void term_render(buffer_t *B) {
   g_window.ncol = T.cols;
   g_window.nrow = T.rows - 1;
-  vt_set_cursor_position(0, 0);
   vt_hide_cursor();
 
   term_draw(&T, B);

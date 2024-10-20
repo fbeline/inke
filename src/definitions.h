@@ -30,6 +30,7 @@ typedef size_t usize;
 #define MVISUAL   0x10
 #define UNDO      0x20
 #define CONTROL_X 0x40
+#define CURSORVIS 0x80
 
 #define TAB_STOP 2
 #define NBUFNAME 16

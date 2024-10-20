@@ -1,5 +1,6 @@
 #include "ds.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #define BLOCK_SIZE 16
@@ -13,8 +14,10 @@ static size_t dscalcalloc(size_t len) {
 
 ds_t *dsrealloc(ds_t *ds, size_t len) {
   ds->alloc = dscalcalloc(len);
-  if ((ds->buf = realloc(ds->buf, ds->alloc)) == NULL)
+  if ((ds->buf = realloc(ds->buf, ds->alloc)) == NULL) {
+    printf("Failed to realloc ds: len=%zu, alloc=%zu\n", len, ds->alloc);
     exit(1);
+  }
 
   return ds;
 }

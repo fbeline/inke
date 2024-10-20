@@ -6,9 +6,7 @@ improvements:
   - better fs auto complete. (if exact match goes to next entry??)
 
 bugs:
-  - unsigned overflow on remove char
   - always use fullpath to avoid buffer duplication
-  - corner case on ds realloc
   - region kill cursor position
   - region copy
   - fix mouse click on tmux

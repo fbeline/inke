@@ -94,4 +94,5 @@ void vt_reverse_video(void) {
 void vt_init(void) {
   sbuffer = dsempty();
   vt_clear_screen();
+  vt_set_cursor_position(0, 0);
 }
