@@ -34,7 +34,7 @@ typedef size_t usize;
 
 #define TAB_STOP 2
 #define NBUFNAME 16
-#define NPATH    256
+#define NPATH    4096
 #define NBINDS   64
 #define CLIPBUF (1 << 16)  // 64 KB (2^16 bytes)
 #define CMDBUFSIZE 512

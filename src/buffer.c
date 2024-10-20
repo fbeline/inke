@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "cursor.h"
 #include "editor.h"
@@ -49,10 +50,16 @@ static bool buffer_exists(const char *filename) {
 
 void buffer_create(const char *filename) {
   char absolute_path[NPATH];
+  struct stat file_info;
 
-  if (strlen(filename) >= NPATH) return;
-  if (realpath(filename, absolute_path) == NULL) {
-    set_status_message("Error openning file path %s", filename);
+  if (realpath(filename, absolute_path) == NULL ||
+    stat(absolute_path, &file_info) != 0 || !S_ISREG(file_info.st_mode)) {
+
+    if (buffer_get() != NULL)
+      set_status_message("Error openning file path %s", filename);
+    else
+      DIE("Error openning file path %s", filename);
+
     return;
   }
 
