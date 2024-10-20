@@ -439,3 +439,21 @@ void cursor_free(cursor_t *C) {
 
   free(C);
 }
+
+void cursor_move_paragraph_forward(buffer_t *B) {
+  if (raw_y(&B->cursor) == B->editor.nlines) return;
+
+  cursor_bol(B);
+  do {
+    cursor_down(B);
+  } while(B->lp->ds->len > 0 && raw_y(&B->cursor) < B->editor.nlines - 1);
+}
+
+void cursor_move_paragraph_backward(buffer_t *B) {
+  if (raw_y(&B->cursor) == 0) return;
+
+  cursor_bol(B);
+  do {
+    cursor_up(B);
+  } while(B->lp->ds->len > 0 && raw_y(&B->cursor) > 0);
+}

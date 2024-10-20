@@ -28,6 +28,8 @@ static keytab_t keytabs[] = {
   { (MINSERT | MVISUAL), META | '^', cursor_move_line_up },
   { (MINSERT | MVISUAL), META | '>', cursor_eof },
   { (MINSERT | MVISUAL), META | '<', cursor_bof },
+  { (MINSERT | MVISUAL), META | '}', cursor_move_paragraph_forward },
+  { (MINSERT | MVISUAL), META | '{', cursor_move_paragraph_backward },
   { (MINSERT | MVISUAL), CONTROL | ' ', mark_start },
   { (MINSERT | MVISUAL), CONTROL | 'N', cursor_down },
   { (MINSERT | MVISUAL), CONTROL | 'P', cursor_up },

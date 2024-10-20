@@ -26,6 +26,10 @@ void cursor_page_up(buffer_t *B);
 
 void cursor_page_down(buffer_t *B);
 
+void cursor_move_paragraph_forward(buffer_t *B);
+
+void cursor_move_paragraph_backward(buffer_t *B);
+
 void cursor_move_word_forward(buffer_t *B);
 
 void cursor_move_word_backward(buffer_t *B);
