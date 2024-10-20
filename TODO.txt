@@ -8,5 +8,4 @@ improvements:
 bugs:
   - always use fullpath to avoid buffer duplication
   - region kill cursor position
-  - region copy
   - fix mouse click on tmux

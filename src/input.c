@@ -37,7 +37,7 @@ static keytab_t keytabs[] = {
   { (MINSERT | MVISUAL), CONTROL | 'F', cursor_right },
 
   { MVISUAL, CONTROL | 'W', cursor_region_kill },
-  { MVISUAL, META | 'W', cursor_region_text },
+  { MVISUAL, META | 'w', cursor_region_text },
   { MVISUAL, '>', cursor_move_region_forward },
   { MVISUAL, '<', cursor_move_region_backward },
 
