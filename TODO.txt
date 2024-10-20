@@ -1,4 +1,5 @@
 feat:
+  - C-l recenter cursor position to the middle of the screen
   - filesystem navigation tree ??
   - search/replace
 

@@ -18,6 +18,8 @@ static keytab_t keytabs[] = {
   { (MINSERT | MVISUAL), HOME_KEY, cursor_bol },
   { (MINSERT | MVISUAL), END_KEY, cursor_eol },
   { (MINSERT | MVISUAL), PAGE_DOWN, cursor_page_down },
+  { (MINSERT | MVISUAL), META | 'v', cursor_page_down },
+  { (MINSERT | MVISUAL), CONTROL | 'V', cursor_page_up },
   { (MINSERT | MVISUAL), PAGE_UP, cursor_page_up },
   { (MINSERT | MVISUAL), ARROW_LEFT, cursor_left },
   { (MINSERT | MVISUAL), ARROW_RIGHT, cursor_right },
