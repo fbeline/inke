@@ -48,19 +48,25 @@ static bool buffer_exists(const char *filename) {
 }
 
 void buffer_create(const char *filename) {
-  usize fnlen = strlen(filename);
-  if (fnlen >= NPATH || buffer_exists(filename)) return;
+  char absolute_path[NPATH];
+
+  if (strlen(filename) >= NPATH) return;
+  if (realpath(filename, absolute_path) == NULL) {
+    set_status_message("Error openning file path %s", filename);
+    return;
+  }
+
+  if (buffer_exists(absolute_path)) return;
 
   bufferl_t *bufl;
   if ((bufl = malloc(sizeof(bufferl_t))) == NULL) DIE("OUT OF MEMMORY");
   if ((bufl->buffer = malloc(sizeof(buffer_t))) == NULL) DIE("OUT OF MEMMORY");
 
-  editor_init(&bufl->buffer->editor, filename);
+  editor_init(&bufl->buffer->editor, absolute_path);
   cursor_init(&bufl->buffer->cursor);
-  buffer_set_name(bufl->buffer, filename);
+  buffer_set_name(bufl->buffer, absolute_path);
 
-  memcpy(bufl->buffer->filename, filename, fnlen);
-  bufl->buffer->filename[fnlen] = '\0';
+  memcpy(bufl->buffer->filename, absolute_path, NPATH);
 
   bufl->buffer->lp = bufl->buffer->editor.lines;
   bufl->buffer->dirty = 0;
