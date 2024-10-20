@@ -74,6 +74,11 @@ typedef struct editor_s {
   line_t *lines;
 } editor_t;
 
+typedef struct cursor_s {
+  u32 x, y;
+  u32 coloff, rowoff;
+} cursor_t;
+
 typedef struct isearch_s {
   line_t *lp;
   usize qlen;
@@ -83,14 +88,11 @@ typedef struct isearch_s {
 typedef struct mark_s {
   line_t *start_lp;
   line_t *end_lp;
+  cursor_t start_cursor;
+  cursor_t end_cursor;
   u32 start_offset;
   u32 end_offset;
 } mark_t;
-
-typedef struct cursor_s {
-  u32 x, y;
-  u32 coloff, rowoff;
-} cursor_t;
 
 typedef struct undo_s {
   undo_type type;

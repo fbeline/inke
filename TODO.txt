@@ -6,5 +6,4 @@ improvements:
   - better fs auto complete. (if exact match goes to next entry??)
 
 bugs:
-  - region kill cursor position
   - fix mouse click on tmux
