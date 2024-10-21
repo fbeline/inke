@@ -12,6 +12,15 @@
 void undo_push(undo_type type, buffer_t *buffer, const char* data) {
   if (!(g_flags & UNDO)) return;
 
+  if (type == BACKSPACE &&
+    buffer->up != NULL && buffer->up->type == type
+    && buffer->cursor.x + buffer->cursor.coloff + 1 ==
+    buffer->up->cursor.x + buffer->up->cursor.coloff) {
+    dsichar(buffer->up->strdata, 0, data[0]);
+    buffer->up->cursor = buffer->cursor;
+    return;
+  }
+
   undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
   undo->type = type;
   undo->cursor = buffer->cursor;
@@ -67,7 +76,7 @@ void undo(buffer_t *B) {
       cursor_remove_char(B);
       break;
     case BACKSPACE:
-      cursor_insert_char(B, u->strdata->buf[0]);
+      cursor_insert_text(B, u->strdata->buf);
       break;
     case LINEUP:
       cursor_break_line(B);
