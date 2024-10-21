@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-u32 g_flags = (RUNNING | UNDO | MINSERT);
+u32 g_flags = (RUNNING | UNDO | MINSERT | CURSORVIS);
 ds_t *g_clipbuf = NULL;
 cmd_func_t g_cmd_func = NULL;
 cmd_func_t g_cmd_complete_func = NULL;

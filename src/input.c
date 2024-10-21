@@ -180,7 +180,7 @@ void input_process_keys(buffer_t* B) {
     if (g_flags & MSEARCH)
       isearch_abort(B);
 
-    g_flags = (RUNNING | UNDO | MINSERT);
+    g_flags = (RUNNING | UNDO | MINSERT | CURSORVIS);
     set_status_message("Quit");
     return;
   }

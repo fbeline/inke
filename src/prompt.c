@@ -67,6 +67,7 @@ void prompt_init(const char *msg) {
 
   line.x = line.ds->len;
   line.min_x = line.x;
+  g_flags |= CURSORVIS;
 }
 
 prompt_t *prompt(void) {

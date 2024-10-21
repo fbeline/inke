@@ -14,7 +14,7 @@
 static void clean_flags(void) {
   set_status_message("");
   g_flags &= ~(MCMD | MSEARCH | CONTROL_X);
-  g_flags |= MINSERT;
+  g_flags |= (MINSERT | CURSORVIS);
   g_cmd_func = NULL;
   g_cmd_complete_func = NULL;
 }
@@ -74,10 +74,9 @@ void set_ctrl_x(buffer_t *B) {
   if (!(g_flags & MINSERT)) return;
 
   set_status_message("C-x");
-  g_flags &= ~MINSERT;
+  g_flags &= ~(MINSERT | CURSORVIS);
   g_flags |= CONTROL_X;
 }
-
 
 void ifunc_kill_buffer(buffer_t *B) {
   if (!B->dirty) {
@@ -86,7 +85,7 @@ void ifunc_kill_buffer(buffer_t *B) {
     return;
   }
 
-  prompt_init("Save buffer? (y | n): ");
+  prompt_init("Save buffer? [Y]YES [N]NO: ");
   g_flags &= ~MINSERT;
   g_flags |= MCMD;
   g_cmd_func = kill_current_buffer;
@@ -101,7 +100,7 @@ void ifunc_exit(buffer_t *B) {
   } else if (ndirty == 1 && B->dirty > 0) {
     prompt_init("Save buffer? [Y]YES [N]NO: ");
   } else if (ndirty > 0) {
-    prompt_init("Save modified buffers? [Y]YES [A]YES TO ALL [N] NO: ");
+    prompt_init("Save modified buffers? [Y]YES [A]YES TO ALL [N]NO: ");
   }
 
   g_flags &= ~MINSERT;

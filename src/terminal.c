@@ -192,7 +192,7 @@ void term_render(buffer_t *B) {
   else
     vt_set_cursor_position(B->cursor.y + 1, B->cursor.x + 1);
 
-  if (g_flags & (MINSERT | MVISUAL))
+  if (g_flags & CURSORVIS)
     vt_show_cursor();
 
   vt_flush();
