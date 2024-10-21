@@ -67,3 +67,5 @@ void cursor_undo(buffer_t *B);
 void cursor_goto(buffer_t *B, u32 x, u32 y);
 
 void cursor_free(cursor_t *C);
+
+void cursor_recenter(buffer_t *B);

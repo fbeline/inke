@@ -457,3 +457,16 @@ void cursor_move_paragraph_backward(buffer_t *B) {
     cursor_up(B);
   } while(B->lp->ds->len > 0 && raw_y(&B->cursor) > 0);
 }
+
+void cursor_recenter(buffer_t *B) {
+  i64 y = (i64)raw_y(&B->cursor);
+  i64 target_y = g_window.nrow / 2;
+
+  if (y <= target_y || B->cursor.y == target_y) return;
+
+  i64 offset = target_y - B->cursor.y;
+  if (offset <= B->cursor.rowoff) {
+    B->cursor.rowoff -= offset;
+    B->cursor.y = target_y;
+  }
+}

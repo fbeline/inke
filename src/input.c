@@ -51,6 +51,7 @@ static keytab_t keytabs[] = {
   { MINSERT, META | 'g', ifunc_gotol },
   { MINSERT, CONTROL | 'H', cursor_remove_char },
   { MINSERT, CONTROL | 'K', cursor_delete_forward },
+  { MINSERT, CONTROL | 'L', cursor_recenter },
   { MINSERT, CONTROL | 'S', isearch_start },
   { MINSERT, CONTROL | 'X', set_ctrl_x },
   { MINSERT, CONTROL | 'Y', cursor_paste },
