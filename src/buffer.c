@@ -118,7 +118,7 @@ void buffer_save(buffer_t *B) {
   if (io_write_buffer(B) != 0) {
     set_status_message("Error: Could not save file %.20s", B->filename);
     g_flags &= ~(MCMD | CONTROL_X);
-    g_flags |= MINSERT;
+    g_flags |= MINSERT | CURSORVIS;
     return;
   }
 
@@ -128,7 +128,7 @@ void buffer_save(buffer_t *B) {
   }
 
   g_flags &= ~(MCMD | CONTROL_X);
-  g_flags |= MINSERT;
+  g_flags |= MINSERT | CURSORVIS;
   B->dirty = 0;
   set_status_message("");
 }
