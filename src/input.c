@@ -80,19 +80,22 @@ static key_func_t get_kfp(i32 c) {
 }
 
 static void process_key(buffer_t *B, i32 ch) {
+  if (g_flags & MINSERT) {
+    if (ch == TAB_KEY) {
+      for (u8 i = 0; i < TAB_STOP; i++)
+        cursor_insert_char(B, ' ');
+      return;
+    }
+    if (ch >= 32 && ch <= 126) {
+      cursor_insert_char(B, ch);
+      return;
+    }
+  }
+
   key_func_t kfp;
   if ((kfp = get_kfp(ch)) != NULL) {
     kfp(B);
     return;
-  }
-
-  if (!(g_flags & MINSERT)) return;
-
-  if (ch == TAB_KEY) {
-    for (u8 i = 0; i < TAB_STOP; i++)
-      cursor_insert_char(B, ' ');
-  } else if (ch >= 32 && ch <= 126) {
-    cursor_insert_char(B, ch);
   }
 }
 
