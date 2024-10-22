@@ -102,7 +102,7 @@ void buffer_next(buffer_t *B) {
   head = head->next;
   g_window.buffer = head->buffer;
   g_flags &= ~(MCMD | CONTROL_X);
-  g_flags |= MINSERT;
+  g_flags |= MINSERT | CURSORVIS;
   set_status_message("");
 }
 
@@ -110,7 +110,7 @@ void buffer_prev(buffer_t *B) {
   head = head->prev;
   g_window.buffer = head->buffer;
   g_flags &= ~(MCMD | CONTROL_X);
-  g_flags |= MINSERT;
+  g_flags |= MINSERT | CURSORVIS;
   set_status_message("");
 }
 
