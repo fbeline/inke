@@ -33,11 +33,11 @@ static bool word_backward_stop(const char *line, u32 i) {
   return is_word_char(line[i]) && !is_word_char(line[i-1]);
 }
 
-static u32 raw_x(cursor_t* C) {
+u32 raw_x(cursor_t* C) {
   return C->x + C->coloff;
 }
 
-static u32 raw_y(cursor_t* C) {
+u32 raw_y(cursor_t* C) {
   return C->y + C->rowoff;
 }
 

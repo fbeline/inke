@@ -94,8 +94,9 @@ typedef struct mark_s {
 typedef struct undo_s {
   undo_type type;
   cursor_t cursor;
-  ds_t* strdata;
+  u32 n;
 
+  ds_t* strdata;
   struct undo_s* next;
 } undo_t;
 

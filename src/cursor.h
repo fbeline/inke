@@ -4,6 +4,10 @@
 
 void cursor_init(cursor_t *C);
 
+u32 raw_x(cursor_t *C);
+
+u32 raw_y(cursor_t *C);
+
 void cursor_set(buffer_t *dest, cursor_t *src);
 
 void cursor_update_window_size(buffer_t *B, u16 rows, u16 cols);

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "cursor.h"
 #include "definitions.h"
 #include "ds.h"
 #include "editor.h"
@@ -12,11 +13,23 @@
 void undo_push(undo_type type, buffer_t *buffer, const char* data) {
   if (!(g_flags & UNDO)) return;
 
+  undo_t *head = buffer->up;
   if (type == BACKSPACE &&
-    buffer->up != NULL && buffer->up->type == type
-    && buffer->cursor.x + buffer->cursor.coloff + 1 ==
-    buffer->up->cursor.x + buffer->up->cursor.coloff) {
-    dsichar(buffer->up->strdata, 0, data[0]);
+      head != NULL && head->type == type &&
+      raw_y(&buffer->cursor) == raw_y(&head->cursor) &&
+      raw_x(&buffer->cursor) + 1 == raw_x(&head->cursor)
+  ) {
+    dsichar(head->strdata, 0, data[0]);
+    buffer->up->cursor = buffer->cursor;
+    return;
+  }
+
+  if (type == ADD &&
+      head != NULL && head->type == type &&
+      raw_y(&buffer->cursor) == raw_y(&head->cursor) &&
+      raw_x(&buffer->cursor) == raw_x(&head->cursor) + 1
+  ) {
+    buffer->up->n++;
     buffer->up->cursor = buffer->cursor;
     return;
   }
@@ -24,8 +37,9 @@ void undo_push(undo_type type, buffer_t *buffer, const char* data) {
   undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
   undo->type = type;
   undo->cursor = buffer->cursor;
-  undo->next = buffer->up;
+  undo->next = head;
   undo->strdata = dsnew(data);
+  undo->n = 1;
 
   buffer->up = undo;
 }
@@ -56,14 +70,6 @@ static void undo_line_delete(buffer_t *B, undo_t *undo) {
   if (y == 0) B->editor.lines = B->lp;
 }
 
-static void undo_undo(buffer_t *B, undo_t *u) {
-  undo_t *next = undo_peek(B);
-  if (next == NULL || next->type != u->type)
-    return;
-
-  undo(B);
-}
-
 void undo(buffer_t *B) {
   undo_t* u = undo_pop(B);
   if (u == NULL) return;
@@ -73,7 +79,9 @@ void undo(buffer_t *B) {
   g_flags &= ~UNDO;
   switch (u->type) {
     case ADD:
-      cursor_remove_char(B);
+      for (u32 i = 0; i < u->n; i++) {
+        cursor_remove_char(B);
+      }
       break;
     case BACKSPACE:
       cursor_insert_text(B, u->strdata->buf);
@@ -97,7 +105,6 @@ void undo(buffer_t *B) {
       printf("UNDO TYPE NOT IMPLEMENTED %d\n", u->type);
   }
 
-  undo_undo(B, u);
   g_flags |= UNDO;
   undo_free(u);
 }
