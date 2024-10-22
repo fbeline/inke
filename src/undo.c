@@ -56,7 +56,7 @@ static undo_t *undo_peek(buffer_t *B) {
   return B->up;
 }
 
-static void undo_free(undo_t* undo) {
+void undo_free(undo_t *undo) {
   if (undo == NULL) return;
   dsfree(undo->strdata);
   free(undo);

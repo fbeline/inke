@@ -8,6 +8,7 @@
 #include "editor.h"
 #include "globals.h"
 #include "io.h"
+#include "undo.h"
 #include "utils.h"
 
 typedef struct bufferl_s {
@@ -173,6 +174,13 @@ void buffer_free(buffer_t *B) {
   head = head->next;
 
   g_window.buffer = head->buffer;
+
+  undo_t *up = aux->buffer->up;
+  while(up != NULL) {
+    undo_t *u = up;
+    up = up->next;
+    undo_free(u);
+  }
 
   editor_free(&aux->buffer->editor);
   free(aux);
