@@ -16,11 +16,12 @@ static void replace(void) {
   if (answer[0] == '!') {
     buffer_t *bp = buffer_get();
     line_t *lp = bp->lp;
-
+    u32 counter = 0;
     while(lp != NULL) {
-      dsreplace(lp->ds, g_replace.query, g_replace.with);
+      counter += dsreplace_all(lp->ds, g_replace.query, g_replace.with);
       lp = lp->next;
     }
+    set_status_message("Replaced %d occurrences", counter);
   }
 
   g_flags &= ~MCMD;

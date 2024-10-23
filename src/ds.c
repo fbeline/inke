@@ -114,25 +114,34 @@ ds_t *dsrtrim(ds_t *ds) {
   return ds;
 }
 
-ds_t *dsreplace(ds_t *ds, const char *query, const char *str) {
+unsigned int dsreplace_first(ds_t *ds, const char *query, const char *str) {
+  char *match = strstr(ds->buf, query);
+  if (match == NULL) return 0;
+
   size_t qlen = strlen(query);
   size_t slen = strlen(str);
+  size_t newlen = ds->len + slen - qlen;
 
-  char *match = strstr(ds->buf, query);
-  while (match != NULL) {
-    ds->len = ds->len + slen - qlen;
-    if (ds->len >= ds->alloc) {
-      ds = dsrealloc(ds, ds->len);
-      match = strstr(ds->buf, query);
-    }
-
-    memmove(match + slen, match + qlen, strlen(match + qlen) + 1);
-    memmove(match, str, slen);
-
+  if (newlen >= ds->alloc) {
+    ds = dsrealloc(ds, newlen);
     match = strstr(ds->buf, query);
   }
 
-  return ds;
+  memmove(match + slen, match + qlen, strlen(match + qlen) + 1);
+  memmove(match, str, slen);
+
+  ds->len = newlen;
+
+  return 1;
+}
+
+unsigned int dsreplace_all(ds_t *ds, const char *query, const char *str) {
+  unsigned int counter = 0;
+  while(dsreplace_first(ds, query, str) == 1) {
+    counter++;
+  }
+
+  return counter;
 }
 
 void dsfree(ds_t *ds) {
