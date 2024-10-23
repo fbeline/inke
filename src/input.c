@@ -9,6 +9,7 @@
 #include "cursor.h"
 #include "globals.h"
 #include "ifunc.h"
+#include "ireplace.h"
 #include "isearch.h"
 #include "prompt.h"
 #include "definitions.h"
@@ -49,7 +50,7 @@ static keytab_t keytabs[] = {
   { MINSERT, DEL_KEY, cursor_remove_char },
   { MINSERT, ENTER_KEY, cursor_break_line },
   { MINSERT, META | 'g', ifunc_gotol },
-  { MINSERT, META | '%', ifunc_replace },
+  { MINSERT, META | '%', ireplace_start },
   { MINSERT, CONTROL | 'H', cursor_remove_char },
   { MINSERT, CONTROL | 'K', cursor_delete_forward },
   { MINSERT, CONTROL | 'L', cursor_recenter },
