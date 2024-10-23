@@ -4,14 +4,25 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "buffer.h"
+#include "ds.h"
 #include "globals.h"
 #include "prompt.h"
 
 static void replace(void) {
-  // const char *answer = prompt_text();
+  const char *answer = prompt_text();
   // TODO: IMPL REPLACE RESPONSE
-  // !     : replace all
   // ENTER : replace current goes to next
+  if (answer[0] == '!') {
+    buffer_t *bp = buffer_get();
+    line_t *lp = bp->lp;
+
+    while(lp != NULL) {
+      dsreplace(lp->ds, g_replace.query, g_replace.with);
+      lp = lp->next;
+    }
+  }
+
   g_flags &= ~MCMD;
   g_flags |= MINSERT;
 }
