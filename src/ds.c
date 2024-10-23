@@ -114,6 +114,27 @@ ds_t *dsrtrim(ds_t *ds) {
   return ds;
 }
 
+ds_t *dsreplace(ds_t *ds, const char *query, const char *str) {
+  size_t qlen = strlen(query);
+  size_t slen = strlen(str);
+
+  char *match = strstr(ds->buf, query);
+  while (match != NULL) {
+    ds->len = ds->len + slen - qlen;
+    if (ds->len >= ds->alloc) {
+      ds = dsrealloc(ds, ds->len);
+      match = strstr(ds->buf, query);
+    }
+
+    memmove(match + slen, match + qlen, strlen(match + qlen) + 1);
+    memmove(match, str, slen);
+
+    match = strstr(ds->buf, query);
+  }
+
+  return ds;
+}
+
 void dsfree(ds_t *ds) {
   if (ds == NULL) return;
 

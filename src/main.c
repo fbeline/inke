@@ -9,6 +9,7 @@
 #include "cursor.h"
 #include "input.h"
 #include "terminal.h"
+#include "ds.h"
 
 static void handle_sigwinch(int unused __attribute__((unused))) {
   u16 rows, cols;
