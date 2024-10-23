@@ -9,10 +9,17 @@
 #include "globals.h"
 #include "prompt.h"
 
+static void ireplace_awns(void);
+static void replace(void);
+
 static void replace(void) {
   const char *answer = prompt_text();
-  // TODO: IMPL REPLACE RESPONSE
-  // ENTER : replace current goes to next
+
+  if (strlen(answer) == 0) {
+    // TODO: replace occurence
+    ireplace_awns();
+    return;
+  }
   if (answer[0] == '!') {
     buffer_t *bp = buffer_get();
     line_t *lp = bp->lp;
@@ -23,14 +30,14 @@ static void replace(void) {
     }
     set_status_message("Replaced %d occurrences", counter);
   }
-
   g_flags &= ~MCMD;
   g_flags |= MINSERT;
 }
 
 static void ireplace_awns(void) {
-  const char *with = prompt_text();
-  g_replace.with = strdup(with);
+  if (g_replace.with == NULL) {
+    g_replace.with = strdup(prompt_text());
+  }
 
   char prompt[256];
   snprintf(prompt,
@@ -53,9 +60,12 @@ static void ireplace_with(void) {
 }
 
 static void ireplace_init(void) {
-  g_replace.n = 0;
   if (g_replace.query != NULL) free(g_replace.query);
   if (g_replace.with != NULL) free(g_replace.with);
+
+  g_replace.n = 0;
+  g_replace.query = NULL;
+  g_replace.with = NULL;
 }
 
 void ireplace_start(buffer_t *B) {
