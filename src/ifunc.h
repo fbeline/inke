@@ -10,4 +10,6 @@ void ifunc_kill_buffer(buffer_t *B);
 
 void ifunc_gotol(buffer_t *B);
 
+void ifunc_replace(buffer_t *B);
+
 void set_ctrl_x(buffer_t *B);

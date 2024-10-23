@@ -2,6 +2,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "buffer.h"
@@ -128,5 +129,44 @@ void ifunc_gotol(buffer_t *B) {
   g_flags &= ~MINSERT;
   g_flags |= MCMD;
   g_cmd_func = gotol;
+  g_cmd_complete_func = NULL;
+}
+
+static void replace(void) {
+  // const char *answer = prompt_text();
+  // TODO: IMPL REPLACE RESPONSE
+  // !     : replace all
+  // ENTER : replace current goes to next
+  clean_flags();
+}
+
+static void ifunc_replace_awns(void) {
+  const char *with = prompt_text();
+  g_replace.with = strdup(with);
+  prompt_init("Query replacing: %s with %s. [!]ALL : ");
+  g_cmd_func = replace;
+
+  // TODO: find and highligh the first occurence
+}
+
+static void ifunc_replace_with(void) {
+  const char *query = prompt_text();
+  g_replace.query = strdup(query);
+  prompt_init("Query replace with: ");
+  g_cmd_func = ifunc_replace_awns;
+}
+
+static void replace_init(void) {
+  g_replace.n = 0;
+  if (g_replace.query != NULL) free(g_replace.query);
+  if (g_replace.with != NULL) free(g_replace.with);
+}
+
+void ifunc_replace(buffer_t *B) {
+  replace_init();
+  prompt_init("Query replace: ");
+  g_flags &= ~MINSERT;
+  g_flags |= MCMD;
+  g_cmd_func = ifunc_replace_with;
   g_cmd_complete_func = NULL;
 }

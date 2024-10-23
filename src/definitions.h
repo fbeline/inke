@@ -126,3 +126,9 @@ typedef struct keytab {
   i32 code;
   key_func_t fp;
 } keytab_t;
+
+typedef struct replace_s {
+  char *query;
+  char *with;
+  usize n;
+} replace_t;

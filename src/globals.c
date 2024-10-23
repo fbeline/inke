@@ -10,6 +10,7 @@ cmd_func_t g_cmd_func = NULL;
 cmd_func_t g_cmd_complete_func = NULL;
 mark_t g_mark = {0};
 isearch_t g_isearch = {0};
+replace_t g_replace = {0};
 window_t g_window = {0};
 
 static char message[256] = {0};
