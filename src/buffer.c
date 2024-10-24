@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 
 #include "cursor.h"
+#include "ed_stack.h"
 #include "editor.h"
 #include "globals.h"
 #include "io.h"
@@ -78,7 +79,7 @@ void buffer_create(const char *filename) {
 
   bufl->buffer->lp = bufl->buffer->editor.lines;
   bufl->buffer->dirty = 0;
-  bufl->buffer->up = NULL;
+  bufl->buffer->undo_stack = NULL;
 
   if (head == NULL) {
     bufl->next = bufl;
@@ -175,11 +176,10 @@ void buffer_free(buffer_t *B) {
 
   g_window.buffer = head->buffer;
 
-  undo_t *up = aux->buffer->up;
-  while(up != NULL) {
-    undo_t *u = up;
-    up = up->next;
-    undo_free(u);
+  struct ed_stack *top = ed_stack_pop(&aux->buffer->undo_stack);
+  while(top != NULL) {
+    undo_free((undo_t*)top);
+    top = ed_stack_pop(&aux->buffer->undo_stack);
   }
 
   editor_free(&aux->buffer->editor);

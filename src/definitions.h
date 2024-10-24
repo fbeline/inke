@@ -91,13 +91,16 @@ typedef struct mark_s {
   u32 end_offset;
 } mark_t;
 
+struct ed_stack;
+
 typedef struct undo_s {
+  struct undo_s* next;
+  ds_t* strdata;
+
   undo_type type;
   cursor_t cursor;
   u32 n;
 
-  ds_t* strdata;
-  struct undo_s* next;
 } undo_t;
 
 typedef struct buffer_s {
@@ -105,7 +108,7 @@ typedef struct buffer_s {
   editor_t editor;
 
   line_t *lp;
-  undo_t *up;
+  struct ed_stack *undo_stack;
 
   u16 dirty;
   char name[NBUFNAME];

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "utils.h"
-#include "cursor.h"
+#include "definitions.h"
 
 void undo_push(undo_type type, buffer_t *buffer, const char* data);
 

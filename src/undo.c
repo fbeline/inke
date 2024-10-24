@@ -5,22 +5,22 @@
 #include <stdio.h>
 
 #include "cursor.h"
-#include "definitions.h"
 #include "ds.h"
 #include "editor.h"
+#include "ed_stack.h"
 #include "globals.h"
 
 void undo_push(undo_type type, buffer_t *buffer, const char* data) {
   if (!(g_flags & UNDO)) return;
 
-  undo_t *head = buffer->up;
+  undo_t *head = (undo_t*)ed_stack_peek(&buffer->undo_stack);
   if (type == BACKSPACE &&
       head != NULL && head->type == type &&
       raw_y(&buffer->cursor) == raw_y(&head->cursor) &&
       raw_x(&buffer->cursor) + 1 == raw_x(&head->cursor)
   ) {
     dsichar(head->strdata, 0, data[0]);
-    buffer->up->cursor = buffer->cursor;
+    head->cursor = buffer->cursor;
     return;
   }
 
@@ -29,31 +29,27 @@ void undo_push(undo_type type, buffer_t *buffer, const char* data) {
       raw_y(&buffer->cursor) == raw_y(&head->cursor) &&
       raw_x(&buffer->cursor) == raw_x(&head->cursor) + 1
   ) {
-    buffer->up->n++;
-    buffer->up->cursor = buffer->cursor;
+    head->n++;
+    head->cursor = buffer->cursor;
     return;
   }
 
   undo_t* undo = (undo_t*)malloc(sizeof(undo_t));
+  undo->next = NULL;
   undo->type = type;
   undo->cursor = buffer->cursor;
-  undo->next = head;
   undo->strdata = dsnew(data);
   undo->n = 1;
 
-  buffer->up = undo;
+  ed_stack_push(&buffer->undo_stack, (struct ed_stack*)undo);
 }
 
 static undo_t* undo_pop(buffer_t *B) {
-  undo_t* head = B->up;
-  if (head == NULL) return NULL;
-
-  B->up = head->next;
-  return head;
+  return (undo_t*) ed_stack_pop(&B->undo_stack);
 }
 
 static undo_t *undo_peek(buffer_t *B) {
-  return B->up;
+  return (undo_t*) ed_stack_peek(&B->undo_stack);
 }
 
 void undo_free(undo_t *undo) {
