@@ -10,7 +10,7 @@ void buffer_next(buffer_t *B);
 
 void buffer_prev(buffer_t *B);
 
-void buffer_save(buffer_t *B);
+i32 buffer_save(buffer_t *B);
 
 buffer_t *buffer_save_all(void);
 

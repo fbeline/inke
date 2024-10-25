@@ -20,20 +20,27 @@ static void clean_flags(void) {
   g_cmd_complete_func = NULL;
 }
 
+static void buffer_saving_error(buffer_t *bp) {
+  clean_flags();
+  set_status_message("Error: Could not save file %.20s", bp->filename);
+}
+
 static void save_and_exit(void) {
   buffer_t *bp = NULL;
   const char *answer = prompt_text();
   switch (answer[0]) {
     case 'y':
     case 'Y':
-      buffer_save(buffer_get());
+      if (buffer_save(buffer_get()) != 0) {
+        buffer_saving_error(buffer_get());
+        return;
+      }
       break;
     case 'a':
     case 'A':
       bp = buffer_save_all();
       if (bp != NULL) {
-        clean_flags();
-        set_status_message("Error: Could not save file %.20s", bp->filename);
+        buffer_saving_error(bp);
         return;
       }
       break;
@@ -48,8 +55,10 @@ static void kill_current_buffer(void) {
   const char *answer = prompt_text();
   buffer_t *B = buffer_get();
 
-  if (answer[0] == 'y')
-    buffer_save(B);
+  if (answer[0] == 'y' && buffer_save(B) != 0) {
+    buffer_saving_error(B);
+    return;
+  }
 
   buffer_free(B);
   clean_flags();
@@ -91,6 +100,12 @@ void ifunc_kill_buffer(buffer_t *B) {
   g_flags |= MCMD;
   g_cmd_func = kill_current_buffer;
   g_cmd_complete_func = NULL;
+}
+
+void ifunc_save_buffer(buffer_t *B) {
+  if (buffer_save(B) != 0) {
+    buffer_saving_error(buffer_get());
+  }
 }
 
 void ifunc_exit(buffer_t *B) {

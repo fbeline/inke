@@ -101,12 +101,10 @@ void buffer_prev(buffer_t *B) {
   set_status_message("");
 }
 
-void buffer_save(buffer_t *B) {
-  if (io_write_buffer(B) != 0) {
-    set_status_message("Error: Could not save file %.20s", B->filename);
-    g_flags &= ~(MCMD | CONTROL_X);
-    g_flags |= MINSERT | CURSORVIS;
-    return;
+i32 buffer_save(buffer_t *B) {
+  size_t bytes = 0;
+  if (io_write_buffer(B, &bytes) != 0) {
+    return -1;
   }
 
   cursor_t *C = &B->cursor;
@@ -117,14 +115,21 @@ void buffer_save(buffer_t *B) {
   g_flags &= ~(MCMD | CONTROL_X);
   g_flags |= MINSERT | CURSORVIS;
   B->dirty = 0;
-  set_status_message("");
+
+  set_status_message("\"%s\" [unix] %dL, %zuB written",
+                     B->filename,
+                     B->editor.nlines,
+                     bytes);
+
+  return 0;
 }
 
 buffer_t *buffer_save_all(void) {
   buffer_t *bp = (buffer_t*)buffers;
+  size_t bytes = 0;
   do {
     if (bp->dirty > 0) {
-      if (io_write_buffer(bp) != 0)
+      if (io_write_buffer(bp, &bytes) != 0)
         return bp;
     }
 

@@ -1,8 +1,15 @@
 feat:
-  - filesystem navigation tree ??
   - search/replace
+  - vt100 text color functions
+  - args --version
+  - auto completion
+  - syntax highligh
+  - filesystem navigation tree
 
 improvements:
-  - better fs auto complete. (if exact match goes to next entry??)
+  - better fs auto complete. (ignore case)
+  - DIE function return error in red
 
 bugs:
+  - issue when marking region that contains tab
+  - replace all (coner cases)

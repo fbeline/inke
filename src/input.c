@@ -61,7 +61,7 @@ static keytab_t keytabs[] = {
 
   { CONTROL_X, 'k', ifunc_kill_buffer },
   { CONTROL_X, CONTROL | 'F', ifunc_find_file },
-  { CONTROL_X, CONTROL | 'S', buffer_save },
+  { CONTROL_X, CONTROL | 'S', ifunc_save_buffer },
   { CONTROL_X, CONTROL | 'C', ifunc_exit },
   { CONTROL_X, CONTROL | ARROW_RIGHT, buffer_next },
   { CONTROL_X, CONTROL | ARROW_LEFT, buffer_prev },
