@@ -52,6 +52,24 @@ struct ed_list {
 };
 
 /**
+ * @brief Checks if the list is empty.
+ *
+ * This function determines whether a doubly indirect pointer to a linked list
+ * structure (`ed_list`) is empty. It achieves this by performing a null check
+ * on both the pointer to the list (`list`) and the first element of the list
+ * (`*list`). If either of these is `NULL`, the list is considered empty.
+ *
+ * @param list Pointer to a pointer to the head of the list.
+ * @return An integer value indicating whether the list is empty:
+ *         - Returns `1` (true) if the list is empty (either `list` or `*list`
+ *           is `NULL`).
+ *         - Returns `0` (false) if the list is not empty.
+ */
+static inline int ed_list_empty(struct ed_list **list) {
+  return list == NULL || *list == NULL;
+}
+
+/**
  * @brief Calculates the length of the list.
  *
  * This function traverses the list starting from the head and counts
@@ -62,7 +80,7 @@ struct ed_list {
  *         is empty or NULL.
  */
 static inline size_t ed_list_len(struct ed_list **list) {
-  if (list == NULL || *list == NULL) return 0;
+  if (ed_list_empty(list)) return 0;
 
   size_t len = 0;
   struct ed_list *head = *list;
@@ -90,19 +108,20 @@ static inline int ed_list_append(struct ed_list **list, struct ed_list *elem) {
   if (elem == NULL || elem->next != NULL || elem->prev != NULL)
     return -1;
 
-  if (*list == NULL) {
+  if (ed_list_empty(list)) {
     *list = elem;
     elem->next = elem;
     elem->prev = elem;
     return 0;
   }
 
-  struct ed_list *aux = (*list)->prev;
-  elem->prev = aux;
-  elem->next = *list;
+  struct ed_list *head = *list;
+  struct ed_list *tail = (*list)->prev;
+  elem->prev = tail;
+  elem->next = head;
 
-  (*list)->prev = elem;
-  aux->next = elem;
+  head->prev = elem;
+  tail->next = elem;
 
   return 0;
 }

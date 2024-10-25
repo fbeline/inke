@@ -54,7 +54,7 @@ void buffer_create(const char *filename) {
     if (buffer_get() != NULL)
       set_status_message("Error openning file path %s", filename);
     else
-      DIE("Error openning file path %s", filename);
+      DIE("Error openning file: %s", filename);
 
     return;
   }
@@ -84,20 +84,18 @@ void buffer_create(const char *filename) {
 }
 
 buffer_t *buffer_get(void) {
-  return (buffer_t*)buffers;
+  return g_window.buffer;
 }
 
 void buffer_next(buffer_t *B) {
-  buffers = buffers->next;
-  g_window.buffer = (buffer_t*)buffers;
+  g_window.buffer = B->next;
   g_flags &= ~(MCMD | CONTROL_X);
   g_flags |= MINSERT | CURSORVIS;
   set_status_message("");
 }
 
 void buffer_prev(buffer_t *B) {
-  buffers = buffers->prev;
-  g_window.buffer = (buffer_t*)buffers;
+  g_window.buffer = B->prev;
   g_flags &= ~(MCMD | CONTROL_X);
   g_flags |= MINSERT | CURSORVIS;
   set_status_message("");
