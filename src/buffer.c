@@ -6,20 +6,14 @@
 
 #include "cursor.h"
 #include "ed_stack.h"
+#include "ed_list.h"
 #include "editor.h"
 #include "globals.h"
 #include "io.h"
 #include "undo.h"
 #include "utils.h"
 
-typedef struct bufferl_s {
-  struct bufferl_s *next;
-  struct bufferl_s *prev;
-
-  buffer_t *buffer;
-} bufferl_t;
-
-static bufferl_t *head = NULL;
+static struct ed_list *buffers = NULL;
 
 static void buffer_set_name(buffer_t *buffer, const char *filename) {
   usize len = 0;
@@ -35,17 +29,17 @@ static void buffer_set_name(buffer_t *buffer, const char *filename) {
 }
 
 static bool buffer_exists(const char *filename) {
-  if (head == NULL) return false;
+  if (buffers == NULL) return false;
 
-  bufferl_t *blp = head;
+  buffer_t *bp = (buffer_t*)buffers;
   do {
-    if (strcmp(filename, blp->buffer->filename) == 0) {
-      head = blp;
-      g_window.buffer = head->buffer;
+    if (strcmp(filename, bp->filename) == 0) {
+      buffers = (struct ed_list*)bp;
+      g_window.buffer = bp;
       return true;
     }
-    blp = blp->next;
-  } while(blp != head);
+    bp = bp->next;
+  } while(bp != NULL && bp != (buffer_t*)buffers);
 
   return false;
 }
@@ -67,50 +61,43 @@ void buffer_create(const char *filename) {
 
   if (buffer_exists(absolute_path)) return;
 
-  bufferl_t *bufl;
-  if ((bufl = malloc(sizeof(bufferl_t))) == NULL) DIE("OUT OF MEMMORY");
-  if ((bufl->buffer = malloc(sizeof(buffer_t))) == NULL) DIE("OUT OF MEMMORY");
+  buffer_t *bp;
+  if ((bp = malloc(sizeof(buffer_t))) == NULL)
+    DIE("OUT OF MEMMORY");
 
-  editor_init(&bufl->buffer->editor, absolute_path);
-  cursor_init(&bufl->buffer->cursor);
-  buffer_set_name(bufl->buffer, absolute_path);
+  editor_init(&bp->editor, absolute_path);
+  cursor_init(&bp->cursor);
+  buffer_set_name(bp, absolute_path);
 
-  memcpy(bufl->buffer->filename, absolute_path, NPATH);
+  memcpy(bp->filename, absolute_path, NPATH);
 
-  bufl->buffer->lp = bufl->buffer->editor.lines;
-  bufl->buffer->dirty = 0;
-  bufl->buffer->undo_stack = NULL;
+  bp->lp = bp->editor.lines;
+  bp->dirty = 0;
+  bp->next = NULL;
+  bp->prev = NULL;
+  bp->undo_stack = NULL;
 
-  if (head == NULL) {
-    bufl->next = bufl;
-    bufl->prev = bufl;
-    head = bufl;
-  } else {
-    bufl->prev = head->prev;
-    bufl->prev->next = bufl;
-    bufl->next = head;
-    head->prev = bufl;
-    head = bufl;
-  }
+  if (ed_list_append(&buffers, (struct ed_list*) bp) != 0)
+    DIE("BUFFER APPEND ERROR");
 
-  g_window.buffer = head->buffer;
+  g_window.buffer = bp;
 }
 
 buffer_t *buffer_get(void) {
-  return head->buffer;
+  return (buffer_t*)buffers;
 }
 
 void buffer_next(buffer_t *B) {
-  head = head->next;
-  g_window.buffer = head->buffer;
+  buffers = buffers->next;
+  g_window.buffer = (buffer_t*)buffers;
   g_flags &= ~(MCMD | CONTROL_X);
   g_flags |= MINSERT | CURSORVIS;
   set_status_message("");
 }
 
 void buffer_prev(buffer_t *B) {
-  head = head->prev;
-  g_window.buffer = head->buffer;
+  buffers = buffers->prev;
+  g_window.buffer = (buffer_t*)buffers;
   g_flags &= ~(MCMD | CONTROL_X);
   g_flags |= MINSERT | CURSORVIS;
   set_status_message("");
@@ -136,55 +123,47 @@ void buffer_save(buffer_t *B) {
 }
 
 buffer_t *buffer_save_all(void) {
-  bufferl_t *bp = head;
+  buffer_t *bp = (buffer_t*)buffers;
   do {
-    if (bp->buffer->dirty > 0) {
-      if (io_write_buffer(bp->buffer) != 0)
-        return bp->buffer;
+    if (bp->dirty > 0) {
+      if (io_write_buffer(bp) != 0)
+        return bp;
     }
 
-    bp->buffer->dirty = 0;
+    bp->dirty = 0;
     bp = bp->next;
-  } while (bp != head);
+  } while (bp != (buffer_t*)buffers);
 
   return NULL;
 }
 
 u16 buffer_dirty_count(void) {
-  bufferl_t *bp = head;
+  buffer_t *bp = (buffer_t*)buffers;
   u16 n = 0;
 
   do {
-    if (bp->buffer->dirty > 0) n++;
+    if (bp->dirty > 0) n++;
     bp = bp->next;
-  } while(bp != head);
+  } while(bp != (buffer_t*)buffers);
 
   return n;
 }
 
 void buffer_free(buffer_t *B) {
-  bufferl_t *aux = head;
-
-  if (head == head->next && head == head->prev) {
+  if (ed_list_len(&buffers) == 1) {
     exit(0);
   }
 
-  head->next->prev = head->prev;
-  head->prev->next = head->next;
-  aux = head;
-  head = head->next;
+  ed_list_remove(&buffers, (struct ed_list*)B);
 
-  g_window.buffer = head->buffer;
-
-  struct ed_stack *top = ed_stack_pop(&aux->buffer->undo_stack);
+  struct ed_stack *top = ed_stack_pop(&B->undo_stack);
   while(top != NULL) {
     undo_free((undo_t*)top);
-    top = ed_stack_pop(&aux->buffer->undo_stack);
+    top = ed_stack_pop(&B->undo_stack);
   }
 
-  editor_free(&aux->buffer->editor);
-  free(aux);
+  editor_free(&B->editor);
+  free(B);
 
-  if (head == NULL)
-    g_flags &= ~RUNNING;
+  g_window.buffer = (buffer_t*)buffers;
 }

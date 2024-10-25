@@ -92,6 +92,7 @@ typedef struct mark_s {
 } mark_t;
 
 struct ed_stack;
+struct ed_list;
 
 typedef struct undo_s {
   struct undo_s* next;
@@ -104,6 +105,9 @@ typedef struct undo_s {
 } undo_t;
 
 typedef struct buffer_s {
+  struct buffer_s *prev;
+  struct buffer_s *next;
+
   cursor_t cursor;
   editor_t editor;
 
