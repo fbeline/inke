@@ -11,6 +11,7 @@
 
 #define PUTSIZE 512
 
+static char fmtstr[PUTSIZE];
 static ds_t *sbuffer;
 
 void vt_flush(void) {
@@ -22,12 +23,12 @@ void vt_flush(void) {
 }
 
 void vt_fputs(const char *str, ...) {
-  char fmtstr[PUTSIZE];
   va_list args;
   va_start(args, str);
   vsnprintf(fmtstr, PUTSIZE, str, args);
   va_end(args);
   dscat(sbuffer, fmtstr);
+  fmtstr[0] = '\0';
 }
 
 void vt_puts_color(const char *str, u16 color) {
