@@ -115,7 +115,7 @@ ds_t *dsrtrim(ds_t *ds) {
 }
 
 int dsreplace_first(ds_t *ds, const char *query, const char *str, size_t offset) {
-  char *match = strstr(ds->buf, query);
+  char *match = strstr(ds->buf + offset, query);
   if (match == NULL) return 0;
 
   size_t qlen = strlen(query);
@@ -124,7 +124,7 @@ int dsreplace_first(ds_t *ds, const char *query, const char *str, size_t offset)
 
   if (newlen >= ds->alloc) {
     ds = dsrealloc(ds, newlen);
-    match = strstr(ds->buf, query);
+    match = strstr(ds->buf + offset, query);
   }
 
   memmove(match + slen, match + qlen, strlen(match + qlen) + 1);
