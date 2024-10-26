@@ -13,16 +13,23 @@
 static void ireplace_awns(void);
 static void replace(void);
 
+static void clean_flags(void) {
+  g_flags &= ~(MCMD | MSEARCH | MREPLACE);
+  g_flags |= (MINSERT | CURSORVIS);
+}
+
 static void replace(void) {
   const char *answer = prompt_text();
+  buffer_t *bp = buffer_get();
 
   if (strlen(answer) == 0) {
-    // TODO: replace occurence
+    u32 offset = bp->cursor.x + bp->cursor.coloff;
+    dsreplace_first(bp->lp->ds, g_replace.query, g_replace.with, offset);
     ireplace_awns();
+    bp->dirty++;
     return;
   }
   if (answer[0] == '!') {
-    buffer_t *bp = buffer_get();
     line_t *lp = bp->lp;
     u32 counter = 0;
     while(lp != NULL) {
@@ -30,17 +37,16 @@ static void replace(void) {
       lp = lp->next;
     }
     set_status_message("Replaced %d occurrences", counter);
+    bp->dirty += counter;
   }
-  g_flags &= ~(MCMD | MSEARCH);
-  g_flags |= MINSERT;
+  clean_flags();
 }
 
 static void ireplace_not_found(void) {
-  g_flags &= ~(MCMD | MSEARCH);
-  g_flags |= MINSERT;
   char message[256];
   snprintf(message, 256, "0 occurrences of %s", g_replace.query);
   set_status_message(message);
+  clean_flags();
 }
 
 static void ireplace_awns(void) {
@@ -88,7 +94,7 @@ void ireplace_start(buffer_t *B) {
   ireplace_init();
   prompt_init("Query replace: ");
   g_flags &= ~MINSERT;
-  g_flags |= MCMD;
+  g_flags |= (MCMD | MREPLACE);
   g_cmd_func = ireplace_with;
   g_cmd_complete_func = NULL;
 }

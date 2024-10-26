@@ -114,7 +114,7 @@ ds_t *dsrtrim(ds_t *ds) {
   return ds;
 }
 
-unsigned int dsreplace_first(ds_t *ds, const char *query, const char *str) {
+int dsreplace_first(ds_t *ds, const char *query, const char *str, size_t offset) {
   char *match = strstr(ds->buf, query);
   if (match == NULL) return 0;
 
@@ -135,9 +135,9 @@ unsigned int dsreplace_first(ds_t *ds, const char *query, const char *str) {
   return 1;
 }
 
-unsigned int dsreplace_all(ds_t *ds, const char *query, const char *str) {
+int dsreplace_all(ds_t *ds, const char *query, const char *str) {
   unsigned int counter = 0;
-  while(dsreplace_first(ds, query, str) == 1) {
+  while(dsreplace_first(ds, query, str, 0) == 1) {
     counter++;
   }
 

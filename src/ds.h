@@ -18,6 +18,6 @@ ds_t *dssplice(ds_t *ds, size_t idx, const char *t);
 ds_t *dsichar(ds_t *ds, size_t idx, const char ch);
 ds_t *dsrtrim(ds_t *ds);
 ds_t *dsrealloc(ds_t *ds, size_t len);
-unsigned int dsreplace_all(ds_t *ds, const char *query, const char *str);
-unsigned int dsreplace_first(ds_t *ds, const char *query, const char *str);
+int dsreplace_first(ds_t *ds, const char *query, const char *str, size_t offset);
+int dsreplace_all(ds_t *ds, const char *query, const char *str);
 void dsfree(ds_t *ds);

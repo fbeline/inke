@@ -1,5 +1,4 @@
 feat:
-  - search/replace
   - auto completion
   - syntax highligh
   - filesystem navigation tree

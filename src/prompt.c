@@ -120,7 +120,7 @@ const char *prompt_text(void) {
 void prompt_handle_char(i32 ch) {
   switch (ch) {
     case ENTER_KEY:
-      if (g_flags & MSEARCH)
+      if ((g_flags & (MSEARCH | MREPLACE)) == MSEARCH)
         isearch(0);
       else
         g_cmd_func();

@@ -14,7 +14,7 @@
 
 static void clean_flags(void) {
   set_status_message("");
-  g_flags &= ~(MCMD | MSEARCH | CONTROL_X);
+  g_flags &= ~(MCMD | MSEARCH | MREPLACE | CONTROL_X);
   g_flags |= (MINSERT | CURSORVIS);
   g_cmd_func = NULL;
   g_cmd_complete_func = NULL;

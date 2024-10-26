@@ -23,14 +23,15 @@ typedef size_t usize;
 #define CONTROL   0x10000000
 #define META      0x20000000
 
-#define RUNNING   0x01
-#define MINSERT   0x02
-#define MSEARCH   0x04
-#define MCMD      0x08
-#define MVISUAL   0x10
-#define UNDO      0x20
-#define CONTROL_X 0x40
-#define CURSORVIS 0x80
+#define RUNNING   0x001
+#define MINSERT   0x002
+#define MSEARCH   0x004
+#define MCMD      0x008
+#define MVISUAL   0x010
+#define UNDO      0x020
+#define CONTROL_X 0x040
+#define CURSORVIS 0x080
+#define MREPLACE  0x100
 
 #define TAB_STOP 2
 #define NBUFNAME 16
