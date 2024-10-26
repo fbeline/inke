@@ -1,15 +1,14 @@
 feat:
   - search/replace
-  - vt100 text color functions
   - args --version
   - auto completion
   - syntax highligh
   - filesystem navigation tree
 
 improvements:
-  - better fs auto complete. (ignore case)
+  - analyze vt sbuffer to improve rendering performance
   - DIE function return error in red
+  - better fs auto complete. (ignore case)
 
 bugs:
-  - issue when marking region that contains tab
   - replace all (coner cases)

@@ -30,11 +30,15 @@ void vt_fputs(const char *str, ...) {
   dscat(sbuffer, fmtstr);
 }
 
+void vt_puts_color(const char *str, u16 color) {
+  vt_fputs("\033[%dm%s\033[39m", color, str);
+}
+
 void vt_nputs(const char *str, usize n) {
   if (n <= 0) return;
   for (usize i = 0; i < n; i++) {
     if (str[i] == '\t') {
-      dscat(sbuffer, "\033[37;44m\u2192\033[0m");
+      vt_puts_color("\u2192", C_BLUE);
       continue;
     }
 
