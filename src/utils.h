@@ -39,6 +39,8 @@
 
 #define DIE(msg, ...) \
     do { \
+        fprintf(stderr, "\033[31m"); \
         fprintf(stderr, (msg), ##__VA_ARGS__); \
+        fprintf(stderr, "\033[39m\n"); \
         exit(1); \
     } while (0)

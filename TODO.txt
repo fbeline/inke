@@ -6,7 +6,6 @@ feat:
 
 improvements:
   - analyze vt sbuffer to improve rendering performance
-  - DIE function return error in red
   - better fs auto complete. (ignore case)
 
 bugs:
