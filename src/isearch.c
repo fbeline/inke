@@ -64,16 +64,16 @@ static void isearch_return(buffer_t *B) {
 }
 
 void isearch(i32 opt) {
-  const char *cmd = prompt_text();
+  const char *query = g_flags & MREPLACE ? g_replace.query : prompt_text();
   switch (opt) {
     case -1:
-      isearch_search(g_window.buffer, cmd, SEARCH_BACKWARD);
+      isearch_search(g_window.buffer, query, SEARCH_BACKWARD);
       break;
     case 0:
       isearch_return(g_window.buffer);
       break;
     case 1:
-      isearch_search(g_window.buffer, cmd, SEARCH_FORWARD);
+      isearch_search(g_window.buffer, query, SEARCH_FORWARD);
       break;
   }
 }
