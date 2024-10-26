@@ -11,7 +11,7 @@
 
 static buffer_t obuffer;
 
-static void isearch_search(buffer_t *B, const char *query, u8 dir) {
+void isearch_search(buffer_t *B, const char *query, u8 dir) {
   cursor_t *C = &B->cursor;
   line_t *l = B->lp;
   u32 offset = C->x + C->coloff;

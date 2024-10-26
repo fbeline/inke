@@ -7,6 +7,7 @@
 #include "buffer.h"
 #include "ds.h"
 #include "globals.h"
+#include "isearch.h"
 #include "prompt.h"
 
 static void ireplace_awns(void);
@@ -30,13 +31,30 @@ static void replace(void) {
     }
     set_status_message("Replaced %d occurrences", counter);
   }
-  g_flags &= ~MCMD;
+  g_flags &= ~(MCMD | MSEARCH);
   g_flags |= MINSERT;
+}
+
+static void ireplace_not_found(void) {
+  g_flags &= ~(MCMD | MSEARCH);
+  g_flags |= MINSERT;
+  char message[256];
+  snprintf(message, 256, "0 occurrences of %s", g_replace.query);
+  set_status_message(message);
 }
 
 static void ireplace_awns(void) {
   if (g_replace.with == NULL) {
     g_replace.with = strdup(prompt_text());
+  }
+
+  g_flags |= MSEARCH;
+  g_isearch = (isearch_t) {.lp = NULL, .qlen = 0, .x = 0};
+  isearch_search(buffer_get(), g_replace.query, 1);
+
+  if (g_isearch.lp == NULL) {
+    ireplace_not_found();
+    return;
   }
 
   char prompt[256];
@@ -48,8 +66,6 @@ static void ireplace_awns(void) {
 
   prompt_init(prompt);
   g_cmd_func = replace;
-
-  // TODO: find and highligh the first occurence
 }
 
 static void ireplace_with(void) {
