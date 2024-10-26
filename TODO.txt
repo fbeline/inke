@@ -1,6 +1,5 @@
 feat:
   - search/replace
-  - args --version
   - auto completion
   - syntax highligh
   - filesystem navigation tree

@@ -30,7 +30,12 @@ static void init(const char* filename) {
 int main(int argc, char **argv) {
   if (argc < 2 || strlen(argv[1]) == 0) {
     printf("usage: inke [file path]\n");
-    exit(1);
+    return 0;
+  }
+
+  if (strcmp(argv[1], "--version") == 0) {
+    printf("inke version: 0.0.1\n");
+    return 0;
   }
 
   init(argv[1]);
