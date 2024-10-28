@@ -1,11 +1,11 @@
 feat:
+  - open buffers on top of editor as tabs
   - auto completion
   - syntax highligh
   - filesystem navigation tree
 
 improvements:
   - analyze vt sbuffer to improve rendering performance
-  - better fs auto complete. (ignore case)
 
 bugs:
   - replace all (coner cases)

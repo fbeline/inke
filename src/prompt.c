@@ -1,5 +1,6 @@
 #include "prompt.h"
 
+#include <ctype.h>
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
@@ -167,9 +168,15 @@ void prompt_handle_char(i32 ch) {
 static i32 starts_with(const char *s, const char *prefix) {
   usize prefixlen = strlen(prefix);
   usize slen = strlen(s);
-  if (prefixlen > slen) return 0;
+  if (prefixlen > slen) return -1;
 
-  return strncmp(s, prefix, prefixlen) == 0;
+  for (usize i = 0; i < prefixlen; i++) {
+    if (tolower(prefix[i]) != tolower(s[i])) {
+      return -1;
+    }
+  }
+
+  return 0;
 }
 
 void prompt_fs_completion(void) {
@@ -194,9 +201,11 @@ void prompt_fs_completion(void) {
   if (valuelen == 0 || (dir = opendir(path)) == NULL) return;
 
   while ((entry = readdir(dir)) != NULL) {
-    if (starts_with(entry->d_name, val) == 0) continue;
+    if (starts_with(entry->d_name, val) == -1) continue;
 
-    dscat(line.ds, entry->d_name + valuelen);
+    line.ds->len -= strlen(val);
+    line.ds->buf[line.ds->len] = '\0';
+    dscat(line.ds, entry->d_name);
     line.x += strlen(entry->d_name) - valuelen;
 
     if (entry->d_type == DT_DIR) {
